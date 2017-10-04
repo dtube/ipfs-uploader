@@ -50,10 +50,10 @@ namespace IpfsUploader.Controllers
                 info.CreateNoWindow = true;
                 using(Process process = Process.Start(info))
                 {
-                    bool success = process.WaitForExit(60 * 60 * 1000); // 1h pour envoyer à ipfs
+                    bool success = process.WaitForExit(1 * 60 * 1000); // 1 minute pour envoyer à ipfs
                     if(!success)
                     {
-                        return BadRequest(new { errorMessage = "Le fichier n'a pas pu etre envoyé à ipfs en moins de 1 heure." });
+                        return BadRequest(new { errorMessage = "Le fichier n'a pas pu etre envoyé à ipfs en moins de 1 minute." });
                     }
 
                     if(process.ExitCode != 0)
