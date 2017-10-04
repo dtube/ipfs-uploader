@@ -14,11 +14,10 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace IpfsUploader.Controllers
 {
-    //[Route("api/[controller]")]
     [Route("uploadVideo")]
     public class VideoController : Controller
     {
-        private static string _tempDirectoryPath = Path.GetTempPath(); // Voir sous linux si approprié
+        private static string _tempDirectoryPath = Path.GetTempPath();
 
         [HttpPost]
         [DisableFormValueModelBinding]
@@ -27,7 +26,7 @@ namespace IpfsUploader.Controllers
         {
             // Copy file to temp location
             string randomTempFileName = Path.GetRandomFileName();
-            string tempFileFullPath = Path.Combine(_tempDirectoryPath, randomTempFileName); // Voir sous linux si chemin bien avec des / et non des \
+            string tempFileFullPath = Path.Combine(_tempDirectoryPath, randomTempFileName);
 
             try
             {
