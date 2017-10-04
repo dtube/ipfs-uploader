@@ -45,7 +45,7 @@ namespace IpfsUploader.Controllers
             try
             {            
                 // Send to ipfs and return hash from ipfs
-                var info = new ProcessStartInfo("ipfs.exe", "--local add " + tempFileFullPath);
+                var info = new ProcessStartInfo("ipfs", "--local add " + tempFileFullPath);
                 info.RedirectStandardOutput = true;
                 info.CreateNoWindow = true;
                 using(Process process = Process.Start(info))
@@ -66,8 +66,6 @@ namespace IpfsUploader.Controllers
                     return Ok(new 
                         { 
                             success = true,
-                            randomTempFileName = randomTempFileName,
-                            uploadName = randomTempFileName,
                             hash = hash 
                         });
                 }
