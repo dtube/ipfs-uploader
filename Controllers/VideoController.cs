@@ -20,13 +20,70 @@ namespace IpfsUploader.Controllers
     public class VideoController : Controller
     {
         private static string _tempDirectoryPath = Path.GetTempPath();
-        private static ConcurrentDictionary<string,string> ipfsProgresses = new ConcurrentDictionary<string,string>();
 
-        private string sourceFileFullPath;
-        private string sourceHash;
-        private bool triggerSourceProgressEvent;
-        private string hashOutput;
-        private DateTime? lastTimeProgressSaved;
+        private static ConcurrentQueue<SourceVideoFile> queueSourceFile = new ConcurrentQueue<SourceVideoFile>();
+        private static ConcurrentDictionary<Guid,string> ipfsProgresses = new ConcurrentDictionary<Guid,string>();
+
+        private static Task daemon = null;
+
+        static VideoController()
+        {
+            daemon = Task.Run(() =>
+                {
+                    SourceVideoFile sourceVideoFile;
+                    while(true)
+                    {
+                        if(!queueSourceFile.TryDequeue(out sourceVideoFile))
+                        {
+                            System.Threading.Thread.Sleep(1000);
+                            continue;
+                        }
+
+                        try
+                        {
+                            IpfsAdd(sourceVideoFile);
+                            UpdateSourceFileProgress("100.00%");
+
+                            //encoding 1024
+                            //ipfs add 1024
+                            //encoding 720
+                            //ipfs add 720
+                            //encoding 480
+                            //ipfs add 480
+                            //steem update
+                        }
+                        catch(Exception e)
+                        {
+                            //log exception
+                        }
+                        finally
+                        {
+                            SafeCleanSourceFile(sourceVideoFile.SourceFileFullPath);
+                            //supprimer le suivi après 10s
+                            Task taskClean = Task.Run(() => {
+                                Guid token = sourceVideoFile.Token;
+                                System.Threading.Thread.Sleep(20000);
+                                string thisProgress;
+                                ipfsProgresses.TryRemove(token, out thisProgress);
+                            });
+                            System.Threading.Thread.Sleep(1000);
+                        }
+                    }
+                });
+        }
+
+        private static SourceVideoFile currentSourceVideoFile;
+
+        private class SourceVideoFile
+        {
+            public string SourceFileFullPath { get; set; }
+
+            public string SourceHash { get; set; }
+
+            public Guid Token { get; set; }
+
+            public DateTime? LastTimeProgressSaved { get; set; }
+        }
 
 
         [HttpPost]
@@ -34,70 +91,40 @@ namespace IpfsUploader.Controllers
         [DisableRequestSizeLimit]
         public async Task<IActionResult> Post()
         {
+            var sourceVideoFile = new SourceVideoFile();
             // Copy file to temp location
-            sourceFileFullPath = Path.Combine(_tempDirectoryPath, Path.GetRandomFileName());
+            sourceVideoFile.SourceFileFullPath = Path.Combine(_tempDirectoryPath, Path.GetRandomFileName());
 
             try
             {
                 // Récupération du fichier
                 FormValueProvider formModel;
-                using (var stream = System.IO.File.Create(sourceFileFullPath))
+                using (var stream = System.IO.File.Create(sourceVideoFile.SourceFileFullPath))
                 {
                     formModel = await Request.StreamFile(stream);
                 }
    
-                // Ipfs add only hash
-                IpfsGetHash(sourceFileFullPath);
-                sourceHash = hashOutput;
+                Guid token = Guid.NewGuid();
+                sourceVideoFile.Token = token;
 
-                ipfsProgresses.TryAdd(sourceHash, "0.00%");
-                Task task = Task.Run(() =>
-                {
-                    try
-                    {
-                        triggerSourceProgressEvent = true;
-                        IpfsAdd(sourceFileFullPath);
-                        UpdateSourceFileProgress("100.00%");
-                        triggerSourceProgressEvent = false;
+                ipfsProgresses.TryAdd(token, "0.00%");
+                queueSourceFile.Enqueue(sourceVideoFile);
 
-                        //encoding 1024
-                        //ipfs add 1024
-                        //encoding 720
-                        //ipfs add 720
-                        //encoding 480
-                        //ipfs add 480
-                        //steem update
-                    }
-                    catch(Exception e)
-                    {
-                        //log exception
-                    }
-                    finally
-                    {
-                        SafeCleanSourceFile(sourceFileFullPath);
-                    }                    
-
-                    //supprimer le suivi après 10s
-                    System.Threading.Thread.Sleep(10000);
-                    string thisProgress;
-                    ipfsProgresses.TryRemove(sourceHash, out thisProgress);
-                });
-
-                // Retourner le hash
+                // Retourner le guid
                 return Ok(new 
                     { 
                         success = true,
-                        hash = sourceHash
+                        token = token
                     });
             }
             catch(Exception ex)
             {
-                SafeCleanSourceFile(sourceFileFullPath);
+                SafeCleanSourceFile(sourceVideoFile.SourceFileFullPath);
                 return BadRequest(new { errorMessage = ex.Message });
             }
         }
 
-        private void SafeCleanSourceFile(string sourceFileFullPath)
+        private static void SafeCleanSourceFile(string sourceFileFullPath)
         {
                 try
                 {
@@ -109,36 +136,25 @@ namespace IpfsUploader.Controllers
         }
 
         [HttpGet]
-        public ActionResult GetState(string sourceHash)
+        public ActionResult GetState(Guid token)
         {
             string output;
-            if(!ipfsProgresses.TryGetValue(sourceHash, out output))
+            if(!ipfsProgresses.TryGetValue(token, out output))
             {
-                return BadRequest(new { errorMessage = "hash not exist"});
+                return BadRequest(new { errorMessage = "token not exist"});
             }
 
             return Json(new { output });
         }
 
-        private void IpfsGetHash(string sourceFileFullPath)
+        private static void IpfsAdd(SourceVideoFile sourceVideoFile)
         {
-            IpfsCmd(sourceFileFullPath, true);
-        }
+            currentSourceVideoFile = sourceVideoFile;
 
-        private void IpfsAdd(string sourceFileFullPath)
-        {
-            IpfsCmd(sourceFileFullPath, false);
-        }
-
-        private void IpfsCmd(string sourceFileFullPath, bool onlyHash)
-        {
             // Send to ipfs and return hash from ipfs
             var processStartInfo = new ProcessStartInfo();
             processStartInfo.FileName = "ipfs";
-            processStartInfo.Arguments = "--local add " + sourceFileFullPath;
-            if(onlyHash)
-                processStartInfo.Arguments += " --only-hash";
-
+            processStartInfo.Arguments = "--local add " + sourceVideoFile.SourceFileFullPath;
             processStartInfo.RedirectStandardOutput = true;
             processStartInfo.RedirectStandardError = true;
             processStartInfo.CreateNoWindow = true;
@@ -146,8 +162,8 @@ namespace IpfsUploader.Controllers
             using(Process process = new Process())
             {
                 process.StartInfo = processStartInfo;
-                hashOutput = null;
-                lastTimeProgressSaved = null;
+                sourceVideoFile.SourceHash = null;
+                sourceVideoFile.LastTimeProgressSaved = null;
                 process.OutputDataReceived += new DataReceivedEventHandler(IpfsOutputDataReceived);
                 process.ErrorDataReceived += new DataReceivedEventHandler(IpfsOutputDataReceived);
 
@@ -156,8 +172,6 @@ namespace IpfsUploader.Controllers
                 process.BeginOutputReadLine();
                 process.BeginErrorReadLine();
                 int timeout = 60 * 60 * 1000; //1h
-                if(onlyHash)
-                    timeout = 1 * 60 * 1000; //1 minute
 
                 bool success = process.WaitForExit(timeout);
                 if(!success)
@@ -172,7 +186,7 @@ namespace IpfsUploader.Controllers
             }
         }
 
-        private void IpfsOutputDataReceived(object sender, DataReceivedEventArgs e)
+        private static void IpfsOutputDataReceived(object sender, DataReceivedEventArgs e)
         {
             string output = e.Data;
             if(string.IsNullOrWhiteSpace(output))
@@ -180,31 +194,28 @@ namespace IpfsUploader.Controllers
 
             if(output.StartsWith("added "))
             {
-                hashOutput = output.Split(' ')[1];
+                currentSourceVideoFile.SourceHash = output.Split(' ')[1];
             }
             else
-            {
-                if(triggerSourceProgressEvent)
-                {                
-                    if(lastTimeProgressSaved != null && (DateTime.Now - lastTimeProgressSaved.Value).TotalMilliseconds < 500)
-                        return;
+            {              
+                if(currentSourceVideoFile.LastTimeProgressSaved != null && (DateTime.Now - currentSourceVideoFile.LastTimeProgressSaved.Value).TotalMilliseconds < 500)
+                    return;
 
-                    //Console.WriteLine(sourceHash + " : " + output);
+                Console.WriteLine(currentSourceVideoFile.SourceFileFullPath + " : " + output);
 
-                    string newProgress = output.Substring(output.IndexOf('%') - 6, 7).Trim();
-                    lastTimeProgressSaved = DateTime.Now;
+                string newProgress = output.Substring(output.IndexOf('%') - 6, 7).Trim();
+                currentSourceVideoFile.LastTimeProgressSaved = DateTime.Now;
 
-                    UpdateSourceFileProgress(newProgress);
-                }
+                UpdateSourceFileProgress(newProgress);
             }
         }
 
-        private void UpdateSourceFileProgress(string newProgress)
+        private static void UpdateSourceFileProgress(string newProgress)
         {
             // mettre à jour la progression
             string currentProgress;
-            ipfsProgresses.TryGetValue(sourceHash, out currentProgress);
-            ipfsProgresses.TryUpdate(sourceHash, newProgress, currentProgress);
+            ipfsProgresses.TryGetValue(currentSourceVideoFile.Token, out currentProgress);
+            ipfsProgresses.TryUpdate(currentSourceVideoFile.Token, newProgress, currentProgress);
         }
     }
 }
