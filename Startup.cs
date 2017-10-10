@@ -27,10 +27,6 @@ namespace IpfsUploader
         {
             services.AddCors();
             services.AddMvc();
-            /*services.Configure<FormOptions>(x => {
-                //x.ValueLengthLimit = int.MaxValue;
-                x.MultipartBodyLengthLimit = int.MaxValue;
-            });*/
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
