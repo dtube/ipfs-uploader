@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using IpfsUploader.Attributes;
 using IpfsUploader.Helper;
+using IpfsUploader.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -22,69 +23,62 @@ namespace IpfsUploader.Controllers
         private static string _tempDirectoryPath = Path.GetTempPath();
 
         private static ConcurrentQueue<SourceVideoFile> queueSourceFile = new ConcurrentQueue<SourceVideoFile>();
-        private static ConcurrentDictionary<Guid,string> ipfsProgresses = new ConcurrentDictionary<Guid,string>();
+        private static ConcurrentDictionary<Guid, SourceVideoFile> ipfsProgresses = new ConcurrentDictionary<Guid, SourceVideoFile>();
+
+        private static int totalTaskAdded = 0;
+        private static int nbTaskDone = 0;
 
         private static Task daemon = null;
 
         static VideoController()
         {
             daemon = Task.Run(() =>
+            {
+                SourceVideoFile sourceVideoFile;
+                while(true)
                 {
-                    SourceVideoFile sourceVideoFile;
-                    while(true)
+                    if(!queueSourceFile.TryDequeue(out sourceVideoFile))
                     {
-                        if(!queueSourceFile.TryDequeue(out sourceVideoFile))
-                        {
-                            System.Threading.Thread.Sleep(1000);
-                            continue;
-                        }
-
-                        try
-                        {
-                            IpfsAdd(sourceVideoFile);
-                            UpdateSourceFileProgress("100.00%");
-
-                            //encoding 1024
-                            //ipfs add 1024
-                            //encoding 720
-                            //ipfs add 720
-                            //encoding 480
-                            //ipfs add 480
-                            //steem update
-                        }
-                        catch(Exception e)
-                        {
-                            //log exception
-                        }
-                        finally
-                        {
-                            SafeCleanSourceFile(sourceVideoFile.SourceFileFullPath);
-                            //supprimer le suivi après 10s
-                            Task taskClean = Task.Run(() => {
-                                Guid token = sourceVideoFile.Token;
-                                System.Threading.Thread.Sleep(20000);
-                                string thisProgress;
-                                ipfsProgresses.TryRemove(token, out thisProgress);
-                            });
-                            System.Threading.Thread.Sleep(1000);
-                        }
+                        System.Threading.Thread.Sleep(1000);
+                        continue;
                     }
-                });
+
+                    try
+                    {
+                        IpfsAdd(sourceVideoFile);
+                        UpdateSourceFileProgress("100.00%");
+
+                        //encoding 1024
+                        //ipfs add 1024
+                        //encoding 720
+                        //ipfs add 720
+                        //encoding 480
+                        //ipfs add 480
+                        //steem update
+                    }
+                    catch(Exception e)
+                    {
+                        //log exception
+                    }
+                    finally
+                    {
+                        nbTaskDone++;
+                        SafeCleanSourceFile(sourceVideoFile.SourceFileFullPath);
+                        //supprimer le suivi après 10s
+                        Task taskClean = Task.Run(() =>
+                        {
+                            Guid token = sourceVideoFile.Token;
+                            System.Threading.Thread.Sleep(20000);
+                            SourceVideoFile thisSourceVideoFile;
+                            ipfsProgresses.TryRemove(token, out thisSourceVideoFile);
+                        });
+                        System.Threading.Thread.Sleep(1000);
+                    }
+                }
+            });
         }
 
         private static SourceVideoFile currentSourceVideoFile;
-
-        private class SourceVideoFile
-        {
-            public string SourceFileFullPath { get; set; }
-
-            public string SourceHash { get; set; }
-
-            public Guid Token { get; set; }
-
-            public DateTime? LastTimeProgressSaved { get; set; }
-        }
-
 
         [HttpPost]
         [DisableFormValueModelBinding]
@@ -99,23 +93,26 @@ namespace IpfsUploader.Controllers
             {
                 // Récupération du fichier
                 FormValueProvider formModel;
-                using (var stream = System.IO.File.Create(sourceVideoFile.SourceFileFullPath))
+                using(var stream = System.IO.File.Create(sourceVideoFile.SourceFileFullPath))
                 {
                     formModel = await Request.StreamFile(stream);
                 }
-   
-                Guid token = Guid.NewGuid();
-                sourceVideoFile.Token = token;
 
-                ipfsProgresses.TryAdd(token, "0.00%");
+                Guid token = Guid.NewGuid();
+                totalTaskAdded++;
+                sourceVideoFile.Token = token;
+                sourceVideoFile.Progress = "0.00%";
+                sourceVideoFile.Number = totalTaskAdded;
+
+                ipfsProgresses.TryAdd(token, sourceVideoFile);
                 queueSourceFile.Enqueue(sourceVideoFile);
 
                 // Retourner le guid
-                return Ok(new 
-                    { 
-                        success = true,
-                        token = token
-                    });
+                return Ok(new
+                {
+                    success = true,
+                    token = token
+                });
             }
             catch(Exception ex)
             {
@@ -124,27 +121,33 @@ namespace IpfsUploader.Controllers
             }
         }
 
-        private static void SafeCleanSourceFile(string sourceFileFullPath)
-        {
-                try
-                {
-                    // suppression du fichier temporaire, ne pas jeter d'exception en cas d'erreur
-                    if(System.IO.File.Exists(sourceFileFullPath))
-                        System.IO.File.Delete(sourceFileFullPath);
-                }
-                catch {}
-        }
-
         [HttpGet]
-        public ActionResult GetState(Guid token)
+        [Route("/getProgress/{token}")]
+        public ActionResult GetProgress(Guid token)
         {
-            string output;
-            if(!ipfsProgresses.TryGetValue(token, out output))
+            SourceVideoFile sourceVideoFile;
+            if(!ipfsProgresses.TryGetValue(token, out sourceVideoFile))
             {
-                return BadRequest(new { errorMessage = "token not exist"});
+                return BadRequest(new { errorMessage = "token not exist" });
             }
 
-            return Json(new { output });
+            return Json(new
+            {
+                sourceProgress = sourceVideoFile.Progress,
+                sourceHash = sourceVideoFile.SourceHash,
+                nbPositionLeft = sourceVideoFile.Number - nbTaskDone - 1
+            });
+        }
+
+        private static void SafeCleanSourceFile(string sourceFileFullPath)
+        {
+            try
+            {
+                // suppression du fichier temporaire, ne pas jeter d'exception en cas d'erreur
+                if(System.IO.File.Exists(sourceFileFullPath))
+                    System.IO.File.Delete(sourceFileFullPath);
+            }
+            catch {}
         }
 
         private static void IpfsAdd(SourceVideoFile sourceVideoFile)
@@ -176,12 +179,12 @@ namespace IpfsUploader.Controllers
                 bool success = process.WaitForExit(timeout);
                 if(!success)
                 {
-                    throw new InvalidOperationException("Le fichier n'a pas pu etre envoyé à ipfs en moins de 1 heure.");
+                    throw new InvalidOperationException("Le fichier n'a pas pu être envoyé à ipfs en moins de 1 heure.");
                 }
 
                 if(process.ExitCode != 0)
                 {
-                    throw new InvalidOperationException("Le fichier n'a pas pu etre envoyé à ipfs, erreur " + process.ExitCode + "." );
+                    throw new InvalidOperationException("Le fichier n'a pas pu être envoyé à ipfs, erreur " + process.ExitCode + ".");
                 }
             }
         }
@@ -197,7 +200,7 @@ namespace IpfsUploader.Controllers
                 currentSourceVideoFile.SourceHash = output.Split(' ')[1];
             }
             else
-            {              
+            {
                 if(currentSourceVideoFile.LastTimeProgressSaved != null && (DateTime.Now - currentSourceVideoFile.LastTimeProgressSaved.Value).TotalMilliseconds < 500)
                     return;
 
@@ -213,9 +216,9 @@ namespace IpfsUploader.Controllers
         private static void UpdateSourceFileProgress(string newProgress)
         {
             // mettre à jour la progression
-            string currentProgress;
-            ipfsProgresses.TryGetValue(currentSourceVideoFile.Token, out currentProgress);
-            ipfsProgresses.TryUpdate(currentSourceVideoFile.Token, newProgress, currentProgress);
+            SourceVideoFile sourceVideoFile;
+            ipfsProgresses.TryGetValue(currentSourceVideoFile.Token, out sourceVideoFile);
+            sourceVideoFile.Progress = newProgress;
         }
     }
 }
