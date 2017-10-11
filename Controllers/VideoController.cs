@@ -64,11 +64,11 @@ namespace IpfsUploader.Controllers
                     {
                         nbTaskDone++;
                         SafeCleanSourceFile(sourceVideoFile.SourceFileFullPath);
-                        //supprimer le suivi après 10s
+                        //supprimer le suivi après 1h
                         Task taskClean = Task.Run(() =>
                         {
                             Guid token = sourceVideoFile.Token;
-                            System.Threading.Thread.Sleep(20000);
+                            System.Threading.Thread.Sleep(60 * 60 * 1000); // 1h
                             SourceVideoFile thisSourceVideoFile;
                             ipfsProgresses.TryRemove(token, out thisSourceVideoFile);
                         });
@@ -136,7 +136,8 @@ namespace IpfsUploader.Controllers
                 sourceProgress = sourceVideoFile.Progress,
                 sourceHash = sourceVideoFile.SourceHash,
                 nbPositionLeft = sourceVideoFile.Number - nbTaskDone - 1,
-                errorMessage = sourceVideoFile.ErrorMessage
+                errorMessage = sourceVideoFile.ErrorMessage,
+                lastTimeIpfs = sourceVideoFile.LastTimeProgressSaved
             });
         }
 
