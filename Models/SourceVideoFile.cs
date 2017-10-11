@@ -15,6 +15,8 @@ namespace IpfsUploader.Models
 
         public string Progress { get; set; }
 
+        public string ErrorMessage { get; set; }
+
         public Guid Token { get; set; }
 
         public DateTime? LastTimeProgressSaved { get; set; }

@@ -46,7 +46,7 @@ namespace IpfsUploader.Controllers
                     try
                     {
                         IpfsAdd(sourceVideoFile);
-                        UpdateSourceFileProgress("100.00%");
+                        sourceVideoFile.Progress = "100.00%";
 
                         //encoding 1024
                         //ipfs add 1024
@@ -58,7 +58,7 @@ namespace IpfsUploader.Controllers
                     }
                     catch(Exception e)
                     {
-                        //log exception
+                        sourceVideoFile.ErrorMessage = e.Message;
                     }
                     finally
                     {
@@ -135,7 +135,8 @@ namespace IpfsUploader.Controllers
             {
                 sourceProgress = sourceVideoFile.Progress,
                 sourceHash = sourceVideoFile.SourceHash,
-                nbPositionLeft = sourceVideoFile.Number - nbTaskDone - 1
+                nbPositionLeft = sourceVideoFile.Number - nbTaskDone - 1,
+                errorMessage = sourceVideoFile.ErrorMessage
             });
         }
 
@@ -204,21 +205,13 @@ namespace IpfsUploader.Controllers
                 if(currentSourceVideoFile.LastTimeProgressSaved != null && (DateTime.Now - currentSourceVideoFile.LastTimeProgressSaved.Value).TotalMilliseconds < 500)
                     return;
 
-                Console.WriteLine(currentSourceVideoFile.SourceFileFullPath + " : " + output);
+                Debug.WriteLine(currentSourceVideoFile.SourceFileFullPath + " : " + output);
 
                 string newProgress = output.Substring(output.IndexOf('%') - 6, 7).Trim();
                 currentSourceVideoFile.LastTimeProgressSaved = DateTime.Now;
 
-                UpdateSourceFileProgress(newProgress);
+                currentSourceVideoFile.Progress = newProgress;
             }
-        }
-
-        private static void UpdateSourceFileProgress(string newProgress)
-        {
-            // mettre à jour la progression
-            SourceVideoFile sourceVideoFile;
-            ipfsProgresses.TryGetValue(currentSourceVideoFile.Token, out sourceVideoFile);
-            sourceVideoFile.Progress = newProgress;
         }
     }
 }
