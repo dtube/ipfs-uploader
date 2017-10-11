@@ -159,7 +159,7 @@ namespace IpfsUploader.Controllers
             // Send to ipfs and return hash from ipfs
             var processStartInfo = new ProcessStartInfo();
             processStartInfo.FileName = "ipfs";
-            processStartInfo.Arguments = "--local add " + sourceVideoFile.SourceFileFullPath;
+            processStartInfo.Arguments = $"add {sourceVideoFile.SourceFileFullPath}";
             processStartInfo.RedirectStandardOutput = true;
             processStartInfo.RedirectStandardError = true;
             processStartInfo.CreateNoWindow = true;
@@ -186,7 +186,7 @@ namespace IpfsUploader.Controllers
 
                 if(process.ExitCode != 0)
                 {
-                    throw new InvalidOperationException("Le fichier n'a pas pu être envoyé à ipfs, erreur " + process.ExitCode + ".");
+                    throw new InvalidOperationException($"Le fichier n'a pas pu être envoyé à ipfs, erreur {process.ExitCode}.");
                 }
             }
         }
@@ -203,9 +203,11 @@ namespace IpfsUploader.Controllers
             }
             else
             {
-                if(currentSourceVideoFile.LastTimeProgressSaved != null && (DateTime.Now - currentSourceVideoFile.LastTimeProgressSaved.Value).TotalMilliseconds < 500)
+                if(currentSourceVideoFile.LastTimeProgressSaved != null 
+                    && (DateTime.Now - currentSourceVideoFile.LastTimeProgressSaved.Value).TotalMilliseconds < 500)
                     return;
 
+                //toutes les 500ms
                 Debug.WriteLine(currentSourceVideoFile.SourceFileFullPath + " : " + output);
 
                 string newProgress = output.Substring(output.IndexOf('%') - 6, 7).Trim();
