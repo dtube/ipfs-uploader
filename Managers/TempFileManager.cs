@@ -11,13 +11,13 @@ namespace IpfsUploader.Managers
             return Path.Combine(_tempDirectoryPath, Path.GetRandomFileName());
         }
 
-        public static void SafeDeleteTempFile(string sourceFilePath)
+        public static void SafeDeleteTempFile(string filePath)
         {
             try
             {
                 // suppression du fichier temporaire, ne pas jeter d'exception en cas d'erreur
-                if(System.IO.File.Exists(sourceFilePath))
-                    System.IO.File.Delete(sourceFilePath);
+                if(File.Exists(filePath))
+                    File.Delete(filePath);
             }
             catch {}
         }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using IpfsUploader.Managers;
 using IpfsUploader.Models;
@@ -15,7 +16,9 @@ namespace IpfsUploader.Daemons
 
         private static Task daemon = null;
 
-        public static int NbAddSourceDone { get; set; }
+        public static int CurrentPositionInQueue { get; set; }
+
+        public static int TotalAddToQueue { get; set; }
 
         public static void Start()
         {
@@ -23,7 +26,7 @@ namespace IpfsUploader.Daemons
             {
                 while(true)
                 {
-                    System.Threading.Thread.Sleep(1000);
+                    Thread.Sleep(1000);
 
                     FileItem fileItem;
 
@@ -32,33 +35,32 @@ namespace IpfsUploader.Daemons
                         continue;
                     }
 
-                    IpfsAddManager.Add(fileItem);
+                    CurrentPositionInQueue++;
 
-                    if(fileItem.VideoFormat != VideoFormat.Source)
+                    // Ipfs add file
+                    IpfsManager.Add(fileItem);
+                    
+                    if(fileItem.VideoSize != VideoSize.Source)
                     {
                         TempFileManager.SafeDeleteTempFile(fileItem.FilePath);
                         continue;
                     }
                     
-                    NbAddSourceDone++;
-
                     VideoFile videoFile = fileItem.VideoFile;
 
                     if(videoFile.EncodedFileItems.Any())
                     {
                         foreach (FileItem file in videoFile.EncodedFileItems)
                         {   
-                            //FFmpegDaemon.Queue(file);
+                            EncodeDaemon.Queue(file);
                         }
-
-                        //SteemDaemon.Queue(videoFile);
                     }
 
-                    //supprimer le suivi ipfs add progress après 1h
+                    //supprimer le suivi ipfs add progress après 1j
                     Task taskClean = Task.Run(() =>
                     {
-                        Guid token = fileItem.IpfsAddProgressToken;
-                        System.Threading.Thread.Sleep(60 * 60 * 1000); // 1h
+                        Guid token = fileItem.IpfsProgressToken;
+                        Thread.Sleep(24 * 60 * 60 * 1000); // 1j
                         FileItem thisFileItem;
                         sourceProgresses.TryRemove(token, out thisFileItem);
                     });                                   
@@ -71,14 +73,14 @@ namespace IpfsUploader.Daemons
         /// </summary>
         /// <param name="sourceFilePath"></param>
         /// <returns></returns>
-        public static Guid QueueSourceFile(string sourceFilePath, params VideoFormat[] videoFormats)
+        public static Guid QueueSourceFile(string sourceFilePath, params VideoSize[] videoSizes)
         {
-            var videoFile = new VideoFile(sourceFilePath, videoFormats);
+            var videoFile = new VideoFile(sourceFilePath, videoSizes);
 
-            sourceProgresses.TryAdd(videoFile.SourceFileItem.IpfsAddProgressToken, videoFile.SourceFileItem);
+            sourceProgresses.TryAdd(videoFile.SourceFileItem.IpfsProgressToken, videoFile.SourceFileItem);
             Queue(videoFile.SourceFileItem);
 
-            return videoFile.SourceFileItem.IpfsAddProgressToken;
+            return videoFile.SourceFileItem.IpfsProgressToken;
         }
 
         /// <summary>
@@ -94,9 +96,11 @@ namespace IpfsUploader.Daemons
         private static void Queue(FileItem fileItem)
         {
             queueFileItems.Enqueue(fileItem);
+            TotalAddToQueue++;
+            fileItem.IpfsPositionInQueue = TotalAddToQueue;
         }
 
-        public static FileItem GetFileItem(Guid sourceToken)
+        public static VideoFile GetVideoFile(Guid sourceToken)
         {
             FileItem fileItem;
             if(!sourceProgresses.TryGetValue(sourceToken, out fileItem))
@@ -104,7 +108,16 @@ namespace IpfsUploader.Daemons
                 return null;
             }
 
-            return fileItem;
+            return fileItem.VideoFile;
+        }
+
+        public static VideoFile GetVideoFile(string sourceHash)
+        {
+            FileItem fileItem =  sourceProgresses.Values
+                .OrderByDescending(s => s.IpfsLastTimeProgressChanged)
+                .FirstOrDefault(s => s.IpfsHash == sourceHash);
+            
+            return fileItem != null ? fileItem.VideoFile : null;
         }
     }
 }

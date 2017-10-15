@@ -5,7 +5,7 @@ using IpfsUploader.Models;
 
 namespace IpfsUploader.Managers
 {
-    public static class IpfsAddManager
+    public static class IpfsManager
     {
         private static FileItem currentFileItem;
 
@@ -17,39 +17,41 @@ namespace IpfsUploader.Managers
 
                 currentFileItem.IpfsHash = null;
 
-                if(currentFileItem.VideoFormat == VideoFormat.Source)
-                    currentFileItem.IpfsAddProgress = "0.00%";
+                if(currentFileItem.VideoSize == VideoSize.Source)
+                    currentFileItem.IpfsProgress = "0.00%";
 
                 // Send to ipfs and return hash from ipfs
                 var processStartInfo = new ProcessStartInfo();
-                processStartInfo.FileName = "ipfs";
+                processStartInfo.FileName = "ipfs";                
                 processStartInfo.Arguments = $"add {currentFileItem.FilePath}";
+                
                 processStartInfo.RedirectStandardOutput = true;
-                if(currentFileItem.VideoFormat == VideoFormat.Source)
+                if(currentFileItem.VideoSize == VideoSize.Source)
                     processStartInfo.RedirectStandardError = true;
+
                 processStartInfo.CreateNoWindow = true;
                 processStartInfo.WindowStyle = ProcessWindowStyle.Hidden;
                 
-                using(Process process = new Process())
+                using(var process = new Process())
                 {
                     process.StartInfo = processStartInfo;
 
-                    process.OutputDataReceived += new DataReceivedEventHandler(IpfsOutputDataReceived);
-                    if(currentFileItem.VideoFormat == VideoFormat.Source)
-                        process.ErrorDataReceived += new DataReceivedEventHandler(IpfsErrorDataReceived);
+                    process.OutputDataReceived += new DataReceivedEventHandler(OutputDataReceived);
+                    if(currentFileItem.VideoSize == VideoSize.Source)
+                        process.ErrorDataReceived += new DataReceivedEventHandler(ErrorDataReceived);
 
                     process.Start();
 
                     process.BeginOutputReadLine();
-                    if(currentFileItem.VideoFormat == VideoFormat.Source)
+                    if(currentFileItem.VideoSize == VideoSize.Source)
                         process.BeginErrorReadLine();
 
-                    int timeout = 60 * 60 * 1000; //1h
+                    int timeout = 5 * 60 * 60 * 1000; //5h
 
                     bool success = process.WaitForExit(timeout);
                     if(!success)
                     {
-                        throw new InvalidOperationException("Le fichier n'a pas pu être envoyé à ipfs en moins de 1 heure.");
+                        throw new InvalidOperationException("Le fichier n'a pas pu être envoyé à ipfs en moins de 5 heures.");
                     }
 
                     if(process.ExitCode != 0)
@@ -58,23 +60,22 @@ namespace IpfsUploader.Managers
                     }
                 }
 
-                if(currentFileItem.VideoFormat == VideoFormat.Source)
-                    currentFileItem.IpfsAddProgress = "100.00%";
+                if(currentFileItem.VideoSize == VideoSize.Source)
+                    currentFileItem.IpfsProgress = "100.00%";
             }
             catch(Exception ex)
             {
-                currentFileItem.IpfsAddErrorMessage = ex.Message;
+                currentFileItem.IpfsErrorMessage = ex.Message;
             }
         }
 
-        private static void IpfsErrorDataReceived(object sender, DataReceivedEventArgs e)
+        private static void ErrorDataReceived(object sender, DataReceivedEventArgs e)
         {
             string output = e.Data;
             if(string.IsNullOrWhiteSpace(output))
                 return;
 
-            if(currentFileItem.IpfsAddLastTimeProgressChanged != null 
-                && (DateTime.UtcNow - currentFileItem.IpfsAddLastTimeProgressChanged.Value).TotalMilliseconds < 500)
+            if(currentFileItem.IpfsLastTimeProgressChanged.HasValue && (DateTime.UtcNow - currentFileItem.IpfsLastTimeProgressChanged.Value).TotalMilliseconds < 500)
                 return;
 
             Debug.WriteLine(Path.GetFileName(currentFileItem.FilePath) + " : " + output);
@@ -82,14 +83,16 @@ namespace IpfsUploader.Managers
             //toutes les 500ms
             string newProgress = output.Substring(output.IndexOf('%') - 6, 7).Trim();
 
-            currentFileItem.IpfsAddProgress = newProgress;
+            currentFileItem.IpfsProgress = newProgress;
         }
 
-        private static void IpfsOutputDataReceived(object sender, DataReceivedEventArgs e)
+        private static void OutputDataReceived(object sender, DataReceivedEventArgs e)
         {
             string output = e.Data;
             if(string.IsNullOrWhiteSpace(output))
                 return;
+
+            Debug.WriteLine(Path.GetFileName(currentFileItem.FilePath) + " : " + output);
 
             if(output.StartsWith("added "))
             {

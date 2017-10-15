@@ -4,19 +4,30 @@ namespace IpfsUploader.Models
 {
     public class FileItem
     {
-        public FileItem(string sourceFilePath, VideoFile videoFile)
-        {
-            FilePath = sourceFilePath;
-            IpfsAddProgressToken = Guid.NewGuid();
-            VideoFile = videoFile;            
-            VideoFormat = VideoFormat.Source;
-        }
-
-        public FileItem(VideoFile videoFile, VideoFormat videoFormat)
+        private FileItem(VideoFile videoFile)
         {
             VideoFile = videoFile;
-            VideoFormat = videoFormat;
+            IpfsProgress = "waiting...";
+            IpfsLastTimeProgressChanged = null;
         }
+
+        public FileItem(VideoFile videoFile, string sourceFilePath) : this(videoFile)
+        {
+            FilePath = sourceFilePath;
+            IpfsProgressToken = Guid.NewGuid();
+    
+            VideoSize = VideoSize.Source;
+            EncodeProgress = "not available";
+            EncodeLastTimeProgressChanged = null;
+        }
+
+        public FileItem(VideoFile videoFile, VideoSize videoSize) : this(videoFile)
+        {
+            VideoSize = videoSize;
+            EncodeProgress = "waiting...";
+            EncodeLastTimeProgressChanged = null;
+        }
+
 
         public string FilePath { get; set; }
 
@@ -24,43 +35,66 @@ namespace IpfsUploader.Models
 
         public bool WorkInProgress()
         {
-            if(!string.IsNullOrWhiteSpace(IpfsAddErrorMessage))
+            if(!string.IsNullOrWhiteSpace(IpfsErrorMessage))
                 return false;
-            if(!string.IsNullOrWhiteSpace(FFmpegErrorMessage))
+            if(!string.IsNullOrWhiteSpace(EncodeErrorMessage))
                 return false;
 
             return string.IsNullOrWhiteSpace(IpfsHash);
         }
 
 
-        public Guid IpfsAddProgressToken { get; private set; }
+        public int IpfsPositionInQueue { get; set; }
+
+        public Guid IpfsProgressToken { get; private set; }
 
         public string IpfsHash { get; set; }
 
-        private string _ipfsAddProgress;
+        private string _ipfsProgress;
 
-        public string IpfsAddProgress
+        public string IpfsProgress
         {
             get
             {
-                return _ipfsAddProgress;
+                return _ipfsProgress;
             }
 
             set
             {
-                _ipfsAddProgress = value;
-                IpfsAddLastTimeProgressChanged = DateTime.UtcNow;
+                _ipfsProgress = value;
+                IpfsLastTimeProgressChanged = DateTime.UtcNow;
             }
         }
 
-        public DateTime? IpfsAddLastTimeProgressChanged { get; private set; }
+        public DateTime? IpfsLastTimeProgressChanged { get; private set; }
 
-        public string IpfsAddErrorMessage { get; set; }
+        public string IpfsErrorMessage { get; set; }
 
 
 
-        public VideoFormat VideoFormat { get; private set; }
 
-        public string FFmpegErrorMessage { get; set; }
+        public VideoSize VideoSize { get; private set; }
+
+        public int EncodePositionInQueue { get; set; }
+
+        private string _encodeProgress;
+
+        public string EncodeProgress
+        {
+            get
+            {
+                return _encodeProgress;
+            }
+
+            set
+            {
+                _encodeProgress = value;
+                EncodeLastTimeProgressChanged = DateTime.UtcNow;
+            }
+        }
+
+        public DateTime? EncodeLastTimeProgressChanged { get; private set; }
+
+        public string EncodeErrorMessage { get; set; }
     }
 }

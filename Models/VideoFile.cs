@@ -6,23 +6,16 @@ namespace IpfsUploader.Models
 {
     public class VideoFile
     {
-        public static int NbTotalInstance { get; private set; }
-
-        public VideoFile (string sourceFilePath, params VideoFormat[] videoFormats)
+        public VideoFile (string sourceFilePath, params VideoSize[] videoSizes)
         {
-            SourceFileItem = new FileItem(sourceFilePath, this);
+            SourceFileItem = new FileItem(this, sourceFilePath);
 
             EncodedFileItems = new List<FileItem>();
-            foreach (VideoFormat videoFormat in videoFormats)
+            foreach (VideoSize videoSize in videoSizes)
             {   
-                EncodedFileItems.Add(new FileItem(this, videoFormat));
+                EncodedFileItems.Add(new FileItem(this, videoSize));
             }
-
-            NbTotalInstance++;
-            NumInstance = NbTotalInstance;
         }
-
-        public int NumInstance { get; private set; }
 
         public FileItem SourceFileItem { get; private set; }
 
