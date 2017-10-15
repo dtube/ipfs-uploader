@@ -23,7 +23,7 @@ namespace IpfsUploader.Models
 
         public bool WorkInProgress()
         {
-            return EncodedFileItems.Any(f => f.WorkInProgress());
+            return SourceFileItem.WorkInProgress() || EncodedFileItems.Any(f => f.WorkInProgress());
         }
     }
 }

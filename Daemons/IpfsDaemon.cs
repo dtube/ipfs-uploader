@@ -39,31 +39,29 @@ namespace IpfsUploader.Daemons
 
                     // Ipfs add file
                     IpfsManager.Add(fileItem);
-                    
-                    if(fileItem.VideoSize != VideoSize.Source)
+
+                    // si tout terminer, supprimer fichier source
+                    if(!fileItem.VideoFile.WorkInProgress())
                     {
+                        TempFileManager.SafeDeleteTempFile(fileItem.VideoFile.SourceFileItem.FilePath);
+                    }
+
+                    if(fileItem.VideoSize == VideoSize.Source)
+                    {
+                        // Supprimer le suivi ipfs add progress après 1j
+                        Task taskClean = Task.Run(() =>
+                        {
+                            Guid token = fileItem.IpfsProgressToken;
+                            Thread.Sleep(24 * 60 * 60 * 1000); // 1j
+                            FileItem thisFileItem;
+                            sourceProgresses.TryRemove(token, out thisFileItem);
+                        });
+                    }
+                    else
+                    {
+                        // Supprimer video encodé
                         TempFileManager.SafeDeleteTempFile(fileItem.FilePath);
-                        continue;
-                    }
-                    
-                    VideoFile videoFile = fileItem.VideoFile;
-
-                    if(videoFile.EncodedFileItems.Any())
-                    {
-                        foreach (FileItem file in videoFile.EncodedFileItems)
-                        {   
-                            EncodeDaemon.Queue(file);
-                        }
-                    }
-
-                    //supprimer le suivi ipfs add progress après 1j
-                    Task taskClean = Task.Run(() =>
-                    {
-                        Guid token = fileItem.IpfsProgressToken;
-                        Thread.Sleep(24 * 60 * 60 * 1000); // 1j
-                        FileItem thisFileItem;
-                        sourceProgresses.TryRemove(token, out thisFileItem);
-                    });                                   
+                    }                                 
                 }
             });
         }
@@ -73,14 +71,14 @@ namespace IpfsUploader.Daemons
         /// </summary>
         /// <param name="sourceFilePath"></param>
         /// <returns></returns>
-        public static Guid QueueSourceFile(string sourceFilePath, params VideoSize[] videoSizes)
+        public static FileItem QueueSourceFile(string sourceFilePath, params VideoSize[] videoSizes)
         {
             var videoFile = new VideoFile(sourceFilePath, videoSizes);
 
             sourceProgresses.TryAdd(videoFile.SourceFileItem.IpfsProgressToken, videoFile.SourceFileItem);
             Queue(videoFile.SourceFileItem);
 
-            return videoFile.SourceFileItem.IpfsProgressToken;
+            return videoFile.SourceFileItem;
         }
 
         /// <summary>

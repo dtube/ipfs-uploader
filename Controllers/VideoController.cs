@@ -41,13 +41,22 @@ namespace IpfsUploader.Controllers
 
                 //todo récupération format video demandé 720, 480, ...
 
-                Guid sourceToken = IpfsDaemon.QueueSourceFile(sourceFilePath, VideoSize.F720p);//, VideoSize.F480p);
+                FileItem fileItem = IpfsDaemon.QueueSourceFile(sourceFilePath, VideoSize.F720p);//, VideoSize.F480p);
+
+                VideoFile videoFile = fileItem.VideoFile;
+                if(videoFile.EncodedFileItems.Any())
+                {
+                    foreach (FileItem file in videoFile.EncodedFileItems)
+                    {   
+                        EncodeDaemon.Queue(file);
+                    }
+                }
 
                 // Retourner le guid
                 return Ok(new
                 {
                     success = true,
-                    token = sourceToken
+                    token = fileItem.IpfsProgressToken
                 });
             }
             catch(Exception ex)
