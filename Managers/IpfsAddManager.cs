@@ -16,9 +16,7 @@ namespace IpfsUploader.Managers
                 currentFileItem = fileItem;
 
                 currentFileItem.IpfsHash = null;
-
-                if(currentFileItem.VideoSize == VideoSize.Source)
-                    currentFileItem.IpfsProgress = "0.00%";
+                currentFileItem.IpfsProgress = "0.00%";
 
                 // Send to ipfs and return hash from ipfs
                 var processStartInfo = new ProcessStartInfo();
@@ -26,8 +24,7 @@ namespace IpfsUploader.Managers
                 processStartInfo.Arguments = $"add {currentFileItem.FilePath}";
                 
                 processStartInfo.RedirectStandardOutput = true;
-                if(currentFileItem.VideoSize == VideoSize.Source)
-                    processStartInfo.RedirectStandardError = true;
+                processStartInfo.RedirectStandardError = true;
 
                 processStartInfo.CreateNoWindow = true;
                 processStartInfo.WindowStyle = ProcessWindowStyle.Hidden;
@@ -37,14 +34,12 @@ namespace IpfsUploader.Managers
                     process.StartInfo = processStartInfo;
 
                     process.OutputDataReceived += new DataReceivedEventHandler(OutputDataReceived);
-                    if(currentFileItem.VideoSize == VideoSize.Source)
-                        process.ErrorDataReceived += new DataReceivedEventHandler(ErrorDataReceived);
+                    process.ErrorDataReceived += new DataReceivedEventHandler(ErrorDataReceived);
 
                     process.Start();
 
                     process.BeginOutputReadLine();
-                    if(currentFileItem.VideoSize == VideoSize.Source)
-                        process.BeginErrorReadLine();
+                    process.BeginErrorReadLine();
 
                     int timeout = 5 * 60 * 60 * 1000; //5h
 
@@ -60,8 +55,7 @@ namespace IpfsUploader.Managers
                     }
                 }
 
-                if(currentFileItem.VideoSize == VideoSize.Source)
-                    currentFileItem.IpfsProgress = "100.00%";
+                currentFileItem.IpfsProgress = "100.00%";
             }
             catch(Exception ex)
             {
