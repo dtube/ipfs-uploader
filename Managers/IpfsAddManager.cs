@@ -91,6 +91,8 @@ namespace IpfsUploader.Managers
             if(output.StartsWith("added "))
             {
                 currentFileItem.IpfsHash = output.Split(' ')[1];
+                
+                File.AppendAllLines(Path.Combine(Directory.GetCurrentDirectory(), "logs", "ipfsHash.log"), new[]{ DateTime.UtcNow.ToString("o") + " " + currentFileItem.IpfsHash });
             }
         }
     }
