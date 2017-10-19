@@ -25,7 +25,7 @@ namespace IpfsUploader.Controllers
         [DisableFormValueModelBinding]
         [DisableRequestSizeLimit]
         [Route("/upload")]
-        public async Task<IActionResult> Upload()
+        public async Task<IActionResult> Upload(string videoEncodingFormats)
         {
             // Copy file to temp location
             string sourceFilePath = TempFileManager.GetNewTempFilePath();
@@ -39,9 +39,20 @@ namespace IpfsUploader.Controllers
                     formModel = await Request.StreamFile(stream);
                 }
 
-                //todo récupération format video demandé 720, 480, ...
-
-                FileItem fileItem = IpfsDaemon.QueueSourceFile(sourceFilePath, VideoSize.F720p);//, VideoSize.F480p);
+                // Récupération formats videos demandés 720p, 480p, ...
+                var formats = videoEncodingFormats
+                    .Split(',')
+                    .Select(v => 
+                    {
+                        switch(v)
+                        {
+                            case "720p": return VideoSize.F720p;
+                            case "480p": return VideoSize.F480p;
+                            default: return VideoSize.F720p;
+                        }
+                    })
+                    .ToArray();
+                FileItem fileItem = IpfsDaemon.QueueSourceFile(sourceFilePath, formats);
 
                 VideoFile videoFile = fileItem.VideoFile;
                 if(videoFile.EncodedFileItems.Any())
