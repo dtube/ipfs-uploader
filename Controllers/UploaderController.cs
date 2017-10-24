@@ -12,10 +12,10 @@ using System.Linq;
 
 namespace IpfsUploader.Controllers
 {
-    [Route("video")]
-    public class VideoController : Controller
+    [Route("uploader")]
+    public class UploaderController : Controller
     {    
-        static VideoController()
+        static UploaderController()
         {
             IpfsDaemon.Start();
             EncodeDaemon.Start();
@@ -39,36 +39,42 @@ namespace IpfsUploader.Controllers
                     formModel = await Request.StreamFile(stream);
                 }
 
-                // Récupération formats videos demandés 720p, 480p, ...
-                var formats = videoEncodingFormats
-                    .Split(',')
-                    .Select(v => 
-                    {
-                        switch(v)
-                        {
-                            case "720p": return VideoSize.F720p;
-                            case "480p": return VideoSize.F480p;
-                            default: return VideoSize.F720p;
-                        }
-                    })
-                    .ToArray();
-                FileItem fileItem = IpfsDaemon.QueueSourceFile(sourceFilePath, formats);
-
-                VideoFile videoFile = fileItem.VideoFile;
-                if(videoFile.EncodedFileItems.Any())
+                // todo détecter type de fichier
+                // si fichier entrant est vidéo
+                if(true)
                 {
-                    foreach (FileItem file in videoFile.EncodedFileItems)
+                    var formats = videoEncodingFormats
+                            .Split(',')
+                            .Select(v => 
+                            {
+                                switch(v)
+                                {
+                                    case "720p": return VideoSize.F720p;
+                                    case "480p": return VideoSize.F480p;
+                                    default: return VideoSize.F720p;
+                                }
+                            })
+                            .ToArray();
+
+                    var fileContainer = new FileContainer(sourceFilePath, formats);
+
+                    IpfsDaemon.QueueSourceFile(fileContainer);
+
+                    // si encoding est demandé
+                    foreach (FileItem file in fileContainer.EncodedFileItems)
                     {   
                         EncodeDaemon.Queue(file);
-                    }
+                    }                
+
+                    // Retourner le guid
+                    return Ok(new
+                    {
+                        success = true,
+                        token = fileContainer.SourceFileItem.IpfsProgressToken
+                    });
                 }
 
-                // Retourner le guid
-                return Ok(new
-                {
-                    success = true,
-                    token = fileItem.IpfsProgressToken
-                });
+                return BadRequest(new { errorMessage = "format de fichier non géré." });
             }
             catch(Exception ex)
             {
@@ -79,41 +85,43 @@ namespace IpfsUploader.Controllers
 
         [HttpGet]
         [Route("/getProgressByToken/{token}")]
-        public ActionResult GetIpfsProgress(Guid token)
+        public ActionResult GetProgressByToken(Guid token)
         {
-            VideoFile videoFile = IpfsDaemon.GetVideoFile(token);
-            if(videoFile == null)
+            FileContainer fileContainer = IpfsDaemon.GetFileContainer(token);
+            if(fileContainer == null)
             {
                 return BadRequest(new { errorMessage = "token not exist" });
             }
 
-            return GetResult(videoFile);
+            return GetResult(fileContainer);
         }
 
         [HttpGet]
         [Route("/getProgressByHash/{sourceHash}")]
-        public ActionResult GetEncodedVideosProgress(string sourceHash)
+        public ActionResult GetProgressByHash(string sourceHash)
         {
-            VideoFile videoFile = IpfsDaemon.GetVideoFile(sourceHash);
-            if(videoFile == null)
+            FileContainer fileContainer = IpfsDaemon.GetFileContainer(sourceHash);
+            if(fileContainer == null)
             {
                 return BadRequest(new { errorMessage = "hash not exist" });
             }
 
-            return GetResult(videoFile);
+            return GetResult(fileContainer);
         }
 
-        private JsonResult GetResult(VideoFile videoFile)
+        private JsonResult GetResult(FileContainer fileContainer)
         {
+
+            // todo si est de type video ?
             return Json(new
             {
-                ipfsProgress = videoFile.SourceFileItem.IpfsProgress,
-                ipfsHash = videoFile.SourceFileItem.IpfsHash,
-                ipfsLastTimeProgress = videoFile.SourceFileItem.IpfsLastTimeProgressChanged,
-                ipfsErrorMessage = videoFile.SourceFileItem.IpfsErrorMessage,
-                ipfsPositionLeft = videoFile.SourceFileItem.IpfsPositionInQueue - IpfsDaemon.CurrentPositionInQueue,
+                ipfsProgress = fileContainer.SourceFileItem.IpfsProgress,
+                ipfsHash = fileContainer.SourceFileItem.IpfsHash,
+                ipfsLastTimeProgress = fileContainer.SourceFileItem.IpfsLastTimeProgressChanged,
+                ipfsErrorMessage = fileContainer.SourceFileItem.IpfsErrorMessage,
+                ipfsPositionLeft = fileContainer.SourceFileItem.IpfsPositionInQueue - IpfsDaemon.CurrentPositionInQueue,
 
-                EncodedVideos = videoFile.EncodedFileItems.Select(e => 
+                EncodedVideos = fileContainer.EncodedFileItems.Select(e => 
                     new 
                     {
                         encodeProgress = e.EncodeProgress,

@@ -40,13 +40,13 @@ namespace IpfsUploader.Daemons
                     // Ipfs add file
                     IpfsManager.Add(fileItem);
 
-                    // si tout terminer, supprimer fichier source
-                    if(!fileItem.VideoFile.WorkInProgress())
+                    // si tout est terminé, supprimer le fichier source
+                    if(!fileItem.FileContainer.WorkInProgress())
                     {
-                        TempFileManager.SafeDeleteTempFile(fileItem.VideoFile.SourceFileItem.FilePath);
+                        TempFileManager.SafeDeleteTempFile(fileItem.FileContainer.SourceFileItem.FilePath);
                     }
 
-                    if(fileItem.VideoSize == VideoSize.Source)
+                    if(fileItem.IsSource)
                     {
                         // Supprimer le suivi ipfs add progress après 1j
                         Task taskClean = Task.Run(() =>
@@ -59,7 +59,7 @@ namespace IpfsUploader.Daemons
                     }
                     else
                     {
-                        // Supprimer video encodé
+                        // Supprimer du fichier attaché
                         TempFileManager.SafeDeleteTempFile(fileItem.FilePath);
                     }                                 
                 }
@@ -67,28 +67,24 @@ namespace IpfsUploader.Daemons
         }
 
         /// <summary>
-        /// Nouvelle video source à ajouter
+        /// Nouveau fichier source à ajouter
         /// </summary>
-        /// <param name="sourceFilePath"></param>
+        /// <param name="fileContainer"></param>
         /// <returns></returns>
-        public static FileItem QueueSourceFile(string sourceFilePath, params VideoSize[] videoSizes)
+        public static void QueueSourceFile(FileContainer fileContainer)
         {
-            var videoFile = new VideoFile(sourceFilePath, videoSizes);
-
-            sourceProgresses.TryAdd(videoFile.SourceFileItem.IpfsProgressToken, videoFile.SourceFileItem);
-            Queue(videoFile.SourceFileItem);
-
-            return videoFile.SourceFileItem;
+            sourceProgresses.TryAdd(fileContainer.SourceFileItem.IpfsProgressToken, fileContainer.SourceFileItem);
+            Queue(fileContainer.SourceFileItem);
         }
 
         /// <summary>
-        /// Video encodée à ajouter
+        /// Fichier à ajouter
         /// </summary>
-        /// <param name="encodedFileItem"></param>
+        /// <param name="attachedFileItem"></param>
         /// <returns></returns>
-        public static void QueueEncodedFile(FileItem encodedFileItem)
+        public static void QueueAttachedFile(FileItem attachedFileItem)
         {
-            Queue(encodedFileItem);
+            Queue(attachedFileItem);
         }
 
         private static void Queue(FileItem fileItem)
@@ -98,7 +94,7 @@ namespace IpfsUploader.Daemons
             fileItem.IpfsPositionInQueue = TotalAddToQueue;
         }
 
-        public static VideoFile GetVideoFile(Guid sourceToken)
+        public static FileContainer GetFileContainer(Guid sourceToken)
         {
             FileItem fileItem;
             if(!sourceProgresses.TryGetValue(sourceToken, out fileItem))
@@ -106,16 +102,16 @@ namespace IpfsUploader.Daemons
                 return null;
             }
 
-            return fileItem.VideoFile;
+            return fileItem.FileContainer;
         }
 
-        public static VideoFile GetVideoFile(string sourceHash)
+        public static FileContainer GetFileContainer(string sourceHash)
         {
             FileItem fileItem =  sourceProgresses.Values
                 .OrderByDescending(s => s.IpfsLastTimeProgressChanged)
                 .FirstOrDefault(s => s.IpfsHash == sourceHash);
             
-            return fileItem != null ? fileItem.VideoFile : null;
+            return fileItem != null ? fileItem.FileContainer : null;
         }
     }
 }

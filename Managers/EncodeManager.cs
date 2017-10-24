@@ -20,7 +20,7 @@ namespace IpfsUploader.Managers
                 currentFileItem.EncodeProgress = "0.00%";
                 totalDurationInSeconds = null;
 
-                string sourceFilePath = currentFileItem.VideoFile.SourceFileItem.FilePath;
+                string sourceFilePath = currentFileItem.FileContainer.SourceFileItem.FilePath;
                 newEncodedFilePath = TempFileManager.GetNewTempFilePath();
                 newEncodedFilePath = Path.ChangeExtension(newEncodedFilePath, ".mp4");
                 VideoSize videoSize = currentFileItem.VideoSize;
@@ -38,6 +38,7 @@ namespace IpfsUploader.Managers
                 else
                     size = size = "720x480";
 
+                //todo améliorer argument format audio ...
                 processStartInfo.Arguments = $"-i {sourceFilePath} -s {size} {newEncodedFilePath}";
 
                 processStartInfo.RedirectStandardError = true;
@@ -107,7 +108,7 @@ namespace IpfsUploader.Managers
                 return;
 
             //toutes les 500ms
-            Debug.WriteLine(Path.GetFileName(currentFileItem.VideoFile.SourceFileItem.FilePath) + " : " + output);
+            Debug.WriteLine(Path.GetFileName(currentFileItem.FileContainer.SourceFileItem.FilePath) + " : " + output);
 
             // Get 00:01:42 in " time=00:01:42.08 "
             int durationDone = GetDurationInSeconds(output.Substring(output.LastIndexOf(" time=") + " time=".Length, 8));

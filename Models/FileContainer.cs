@@ -4,9 +4,9 @@ using System.Linq;
 
 namespace IpfsUploader.Models
 {
-    public class VideoFile
+    public class FileContainer
     {
-        public VideoFile (string sourceFilePath, params VideoSize[] videoSizes)
+        public FileContainer (string sourceFilePath, params VideoSize[] videoSizes)
         {
             SourceFileItem = new FileItem(this, sourceFilePath);
 

@@ -36,7 +36,7 @@ namespace IpfsUploader.Daemons
                     bool success = EncodeManager.Encode(fileItem);
                     
                     if(success)
-                        IpfsDaemon.QueueEncodedFile(fileItem);
+                        IpfsDaemon.QueueAttachedFile(fileItem);
                 }
             });
         }

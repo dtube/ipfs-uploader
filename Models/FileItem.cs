@@ -4,34 +4,36 @@ namespace IpfsUploader.Models
 {
     public class FileItem
     {
-        private FileItem(VideoFile videoFile)
-        {
-            VideoFile = videoFile;
-            IpfsProgress = "waiting...";
-            IpfsLastTimeProgressChanged = null;
-        }
-
-        public FileItem(VideoFile videoFile, string sourceFilePath) : this(videoFile)
+        public FileItem(FileContainer fileContainer, string sourceFilePath) : this(fileContainer, true)
         {
             FilePath = sourceFilePath;
             IpfsProgressToken = Guid.NewGuid();
-    
+
             VideoSize = VideoSize.Source;
             EncodeProgress = "not available";
             EncodeLastTimeProgressChanged = null;
         }
 
-        public FileItem(VideoFile videoFile, VideoSize videoSize) : this(videoFile)
+        public FileItem(FileContainer fileContainer, VideoSize videoSize) : this(fileContainer, false)
         {
             VideoSize = videoSize;
             EncodeProgress = "waiting...";
             EncodeLastTimeProgressChanged = null;
         }
 
+        private FileItem(FileContainer fileContainer, bool isSource)
+        {
+            IsSource = isSource;
+            FileContainer = fileContainer;
+            IpfsProgress = "waiting...";
+            IpfsLastTimeProgressChanged = null;
+        }
+
+        public bool IsSource { get; }
 
         public string FilePath { get; set; }
 
-        public VideoFile VideoFile { get; private set; }
+        public FileContainer FileContainer { get; private set; }
 
         public bool WorkInProgress()
         {
