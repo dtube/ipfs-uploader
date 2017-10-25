@@ -1,13 +1,13 @@
 using System;
 using System.Threading.Tasks;
-using IpfsUploader.Managers;
-using IpfsUploader.Attributes;
-using IpfsUploader.Helper;
+using Uploader.Managers;
+using Uploader.Attributes;
+using Uploader.Helper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System.IO;
 
-namespace IpfsUploader.Controllers
+namespace Uploader.Controllers
 {
     [Route("uploader")]
     public class UploaderController : Controller

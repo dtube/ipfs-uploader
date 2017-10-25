@@ -3,9 +3,9 @@ using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using IpfsUploader.Models;
+using Uploader.Models;
 
-namespace IpfsUploader.Managers
+namespace Uploader.Managers
 {
     public static class ProgressManager
     {

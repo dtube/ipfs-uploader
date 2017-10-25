@@ -1,6 +1,6 @@
 using System.IO;
 
-namespace IpfsUploader.Managers
+namespace Uploader.Managers
 {
     public static class TempFileManager
     {

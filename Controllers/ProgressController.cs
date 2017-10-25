@@ -1,16 +1,16 @@
 using System;
 using System.Threading.Tasks;
-using IpfsUploader.Managers;
-using IpfsUploader.Attributes;
-using IpfsUploader.Helper;
-using IpfsUploader.Models;
+using Uploader.Managers;
+using Uploader.Attributes;
+using Uploader.Helper;
+using Uploader.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using IpfsUploader.Daemons;
+using Uploader.Daemons;
 using System.IO;
 using System.Linq;
 
-namespace IpfsUploader.Controllers
+namespace Uploader.Controllers
 {
     [Route("progress")]
     public class ProgressController : Controller

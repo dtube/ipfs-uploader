@@ -1,8 +1,8 @@
 using System;
-using IpfsUploader.Daemons;
-using IpfsUploader.Models;
+using Uploader.Daemons;
+using Uploader.Models;
 
-namespace IpfsUploader.Managers
+namespace Uploader.Managers
 {
     public static class ImageManager
     {

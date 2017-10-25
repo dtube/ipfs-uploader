@@ -1,6 +1,6 @@
 using System;
 
-namespace IpfsUploader.Models
+namespace Uploader.Models
 {
     public class FileItem
     {

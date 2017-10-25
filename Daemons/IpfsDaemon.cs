@@ -2,10 +2,10 @@ using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using IpfsUploader.Managers;
-using IpfsUploader.Models;
+using Uploader.Managers;
+using Uploader.Models;
 
-namespace IpfsUploader.Daemons
+namespace Uploader.Daemons
 {
     public static class IpfsDaemon
     {

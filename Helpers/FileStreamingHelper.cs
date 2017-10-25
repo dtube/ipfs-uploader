@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Net.Http.Headers;
 
-namespace IpfsUploader.Helper
+namespace Uploader.Helper
 {
     public static class FileStreamingHelper
     {

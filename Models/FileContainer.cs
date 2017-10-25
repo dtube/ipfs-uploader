@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using IpfsUploader.Managers;
+using Uploader.Managers;
 
-namespace IpfsUploader.Models
+namespace Uploader.Models
 {
     public class FileContainer
     {

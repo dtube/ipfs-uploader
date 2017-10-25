@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 
-namespace IpfsUploader.Managers
+namespace Uploader.Managers
 {
     public class SpriteManager
     {

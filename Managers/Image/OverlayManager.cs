@@ -2,7 +2,7 @@ using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 
-namespace IpfsUploader.Managers
+namespace Uploader.Managers
 {
     public class OverlayManager
     {

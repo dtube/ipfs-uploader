@@ -2,9 +2,9 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using IpfsUploader.Models;
+using Uploader.Models;
 
-namespace IpfsUploader.Managers
+namespace Uploader.Managers
 {
     public static class EncodeManager
     {

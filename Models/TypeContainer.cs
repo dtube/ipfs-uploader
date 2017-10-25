@@ -1,5 +1,5 @@
 
-namespace IpfsUploader.Models
+namespace Uploader.Models
 {
     public enum TypeContainer
     {

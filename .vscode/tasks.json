@@ -7,7 +7,7 @@
         {
             "taskName": "build",
             "args": [
-                "${workspaceRoot}/IpfsUploader.csproj"
+                "${workspaceRoot}/Uploader.csproj"
             ],
             "isBuildCommand": true,
             "problemMatcher": "$msCompile"

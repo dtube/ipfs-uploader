@@ -3,7 +3,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
-namespace IpfsUploader.Attributes
+namespace Uploader.Attributes
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
     public class DisableFormValueModelBindingAttribute : Attribute, IResourceFilter

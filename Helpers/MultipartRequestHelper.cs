@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Microsoft.Net.Http.Headers;
 
-namespace IpfsUploader.Helper
+namespace Uploader.Helper
 {
     public static class MultipartRequestHelper
     {
