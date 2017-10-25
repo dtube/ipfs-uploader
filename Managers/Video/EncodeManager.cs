@@ -67,9 +67,6 @@ namespace Uploader.Managers
                 }
                 else
                 {
-                    // todo calculer ratio
-                    // si ratio > 16/9 => vidéo horizontale : garder largeur mais réduire hauteur
-                    // sinon vidéo vertical : garder hauteur mais réduire largeur
                     string size;
                     if(videoSize == VideoSize.F720p)
                         size = "1280x720";
@@ -78,7 +75,6 @@ namespace Uploader.Managers
                     else
                         throw new InvalidOperationException("le format doit etre défini");
 
-                    //processStartInfo.Arguments = $"-i {sourceFilePath} {size} {newEncodedFilePath}";
                     processStartInfo.Arguments = $"-y -i {sourceFilePath} -crf 20 -vcodec libx264 -r 24 -s {size} -acodec aac -ar 44100 -ab 128k -ac 2 {newEncodedFilePath}";
                 }
 

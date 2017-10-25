@@ -31,18 +31,18 @@ namespace Uploader.Managers
 
             IpfsDaemon.Queue(fileContainer.SourceFileItem);
 
-            // si encoding est demandé
-            foreach (FileItem file in fileContainer.EncodedFileItems)
-            {   
-                EncodeDaemon.Queue(file);
-            }
-
             // si sprite demandé
             if(sprite??false)
             {
                 fileContainer.SetSpriteVideo();
                 // get images from video
                 EncodeDaemon.Queue(fileContainer.SpriteVideoFileItem);
+            }
+
+            // si encoding est demandé
+            foreach (FileItem file in fileContainer.EncodedFileItems)
+            {   
+                EncodeDaemon.Queue(file);
             }
 
             return fileContainer.ProgressToken;
