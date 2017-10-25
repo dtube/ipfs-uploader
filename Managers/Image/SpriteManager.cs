@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.IO;
+using System.Linq;
 
 namespace Uploader.Managers
 {
@@ -19,10 +22,15 @@ namespace Uploader.Managers
 
                 foreach (string imagePath in filesToCombine)
                 {
-                    //create a Bitmap from the file and add it to the list
-                    var image = Image.FromFile(imagePath);
+                    // create a Bitmap from the file and add it to the list
+                    Image imageSource = Image.FromFile(imagePath);
 
-                    //update the size of the final bitmap
+                    // calculer largeur suivant le ratio de l'image pour garder 118 en hauteur
+                    int largeur = imageSource.Width * 118 / imageSource.Height;
+                    Image image = ResizeImage(imageSource, largeur, 118);
+                    imageSource.Dispose();
+
+                    // update the size of the final bitmap
                     height += image.Height;
                     width = image.Width > width ? image.Width : width;
 
@@ -59,6 +67,41 @@ namespace Uploader.Managers
                     image.Dispose();
                 }
             }
+        }
+
+        public static Bitmap ResizeImage(Image image, int width, int height)
+        {
+            var destRect = new Rectangle(0, 0, width, height);
+            var destImage = new Bitmap(width, height);
+
+            destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
+
+            using (var graphics = Graphics.FromImage(destImage))
+            {
+                graphics.CompositingMode = CompositingMode.SourceCopy;
+                graphics.CompositingQuality = CompositingQuality.HighQuality;
+                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                graphics.SmoothingMode = SmoothingMode.HighQuality;
+                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+                using (var wrapMode = new ImageAttributes())
+                {
+                    wrapMode.SetWrapMode(WrapMode.TileFlipXY);
+                    graphics.DrawImage(image, destRect, 0, 0, image.Width,image.Height, GraphicsUnit.Pixel, wrapMode);
+                }
+            }
+
+            return destImage;
+        }
+
+        public static string GetPattern(string filePath)
+        {
+            return Path.GetFileNameWithoutExtension(filePath) + "-%03d.jpeg";
+        }
+
+        public static string[] GetListImageFrom(string filePath)
+        {
+            return Directory.EnumerateFiles(Path.GetDirectoryName(filePath), Path.GetFileNameWithoutExtension(filePath) + "*.jpeg").ToArray();
         }
     }
 }

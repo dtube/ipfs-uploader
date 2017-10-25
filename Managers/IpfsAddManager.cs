@@ -25,6 +25,7 @@ namespace Uploader.Managers
                 
                 processStartInfo.RedirectStandardOutput = true;
                 processStartInfo.RedirectStandardError = true;
+                processStartInfo.WorkingDirectory = TempFileManager.GetTempDirectory();
 
                 processStartInfo.UseShellExecute = false;
                 processStartInfo.ErrorDialog = false;

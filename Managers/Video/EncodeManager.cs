@@ -30,28 +30,60 @@ namespace Uploader.Managers
                 var processStartInfo = new ProcessStartInfo();
                 processStartInfo.FileName = "ffmpeg";
 
-                string size;
-                if(videoSize == VideoSize.F720p)
-                    size = "1280x720";
-                else if(videoSize == VideoSize.F480p)
-                    size = "720x480";
-                else
-                    size = size = "720x480";
+                // global options
+                // -y loglevel error    : overwrite outputfile
 
-                // -y loglevel error    :
-                // -i {sourceFilePath}  : fichier entrant
-                // -crf 20              : 
-                // -acodec aac          : 
+                // input File options
+
+                // input File
+                // -i {sourceFilePath}  : chemin fichier entrant
+
+                // output File options
+                // -b:v 64k -bufsize 64k: video bitrate of the output file to 64 kbit/s
+                // -crf 20              : ??
+                // -vcodec libx264      : choix codec video libx264 (ou -c:v libx264 ou -codec:v libx264)
+                // -r 24                : frame rate 24fps
+                // -s {size}            : taille de la video sortante
+                // -f image2            : format vidéo sortant
+
+                // -acodec aac          : choix codec audio aac (ou -c:a aac ou -codec:a aac)
                 // -ar 44100            : 
                 // -ab 128k             : 
-                // -ac 2                : 
-                // -vcodec libx264      : 
-                // -r 24                : 
-                // -s {size}            : taille de la video sortante
-                processStartInfo.Arguments = $"-i {sourceFilePath} -s {size} {newEncodedFilePath}";
-                //processStartInfo.Arguments = $"-y loglevel error -i {sourceFilePath} -crf 20 -acodec aac -ar 44100 -ab 128k -ac 2 -vcodec libx264 -r 24 -s {size} {newEncodedFilePath}";
+                // -ac 2                : number of audio channel
+
+                // output File
+                // {newEncodedFilePath} : chemin fichier sortant (foo-%03d.jpeg)
+
+                if(fileItem.ModeSprite)
+                {
+                    // todo calculer nb image/s
+                    // si < 100s de vidéo -> 1 image/s
+                    // sinon (nb secondes de la vidéo / 100) image/s
+                    int frameRate = 1;
+
+                    // extract x image/s de la video
+                    string pattern = SpriteManager.GetPattern(newEncodedFilePath);
+                    processStartInfo.Arguments = $"-y -i {sourceFilePath} -r {frameRate} -f image2 {pattern}";
+                }
+                else
+                {
+                    // todo calculer ratio
+                    // si ratio > 16/9 => vidéo horizontale : garder largeur mais réduire hauteur
+                    // sinon vidéo vertical : garder hauteur mais réduire largeur
+                    string size;
+                    if(videoSize == VideoSize.F720p)
+                        size = "1280x720";
+                    else if(videoSize == VideoSize.F480p)
+                        size = "720x480";
+                    else
+                        throw new InvalidOperationException("le format doit etre défini");
+
+                    //processStartInfo.Arguments = $"-i {sourceFilePath} {size} {newEncodedFilePath}";
+                    processStartInfo.Arguments = $"-y -i {sourceFilePath} -crf 20 -vcodec libx264 -r 24 -s {size} -acodec aac -ar 44100 -ab 128k -ac 2 {newEncodedFilePath}";
+                }
 
                 processStartInfo.RedirectStandardError = true;
+                processStartInfo.WorkingDirectory = TempFileManager.GetTempDirectory();
 
                 processStartInfo.UseShellExecute = false;
                 processStartInfo.ErrorDialog = false;

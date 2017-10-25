@@ -30,6 +30,18 @@ namespace Uploader.Models
             return fileItem;
         }
 
+        public static FileItem NewSpriteVideoFileItem(FileContainer fileContainer)
+        {
+            FileItem fileItem = new FileItem(fileContainer, false);
+
+            fileItem.ModeSprite = true;
+            fileItem.VideoSize = VideoSize.Source;
+            fileItem.EncodeProgress = "waiting...";
+            fileItem.EncodeLastTimeProgressChanged = null;
+
+            return fileItem;
+        }
+
         public static FileItem NewSourceImageFileItem(FileContainer fileContainer, string sourceFilePath)
         {
             FileItem fileItem = new FileItem(fileContainer, true);
@@ -60,6 +72,8 @@ namespace Uploader.Models
         public string FilePath { get; set; }
 
         public FileContainer FileContainer { get; }
+
+        public bool ModeSprite { get; private set; }
 
         public bool WorkInProgress()
         {

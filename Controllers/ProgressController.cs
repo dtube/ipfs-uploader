@@ -53,7 +53,7 @@ namespace Uploader.Controllers
                                     ipfs = IpfsResultJson(e)
                                 })
                             .ToArray(),
-                        sprite = IpfsResultJson(fileContainer.SpriteFileItem)
+                        sprite = IpfsResultJson(fileContainer.SpriteVideoFileItem)
                     });
 
                 case TypeContainer.Image:

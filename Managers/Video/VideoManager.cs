@@ -40,13 +40,9 @@ namespace Uploader.Managers
             // si sprite demandé
             if(sprite??false)
             {
-                string outputPath = TempFileManager.GetNewTempFilePath();
-
-                // todo get image from video
-
-                SpriteManager.CombineBitmap(null, outputPath);
-                fileContainer.SetSprite(outputPath);
-                IpfsDaemon.Queue(fileContainer.SpriteFileItem);
+                fileContainer.SetSpriteVideo();
+                // get images from video
+                EncodeDaemon.Queue(fileContainer.SpriteVideoFileItem);
             }
 
             return fileContainer.ProgressToken;

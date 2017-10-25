@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Uploader.Managers;
@@ -42,7 +43,21 @@ namespace Uploader.Daemons
                     bool success = EncodeManager.Encode(fileItem);
                     
                     if(success)
-                        IpfsDaemon.Queue(fileItem);
+                    {
+                        if(fileItem.ModeSprite)
+                        {
+                            string[] files = SpriteManager.GetListImageFrom(fileItem.FilePath); // récupération des images
+                            string outputPath = TempFileManager.GetNewTempFilePath(); // nom du fichier sprite
+                            SpriteManager.CombineBitmap(files, outputPath); // création du sprite
+                            TempFileManager.SafeDeleteTempFiles(fileItem.FilePath); // suppression des images
+                            fileItem.FilePath = outputPath; // réaffectation chemin sprite
+                            IpfsDaemon.Queue(fileItem); // ajouter ce sprite à ipfs
+                        }
+                        else
+                        {
+                            IpfsDaemon.Queue(fileItem); // ajouter la video encodée à ipfs
+                        }
+                    }
                 }
             });
         }
