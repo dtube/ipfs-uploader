@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Threading;
 using System.Threading.Tasks;
 using IpfsUploader.Managers;
 using IpfsUploader.Models;
@@ -7,6 +8,11 @@ namespace IpfsUploader.Daemons
 {
     public class EncodeDaemon
     {
+        static EncodeDaemon()
+        {
+            Start();
+        }
+
         private static ConcurrentQueue<FileItem> queueFileItems = new ConcurrentQueue<FileItem>();
         
         private static Task daemon = null;
@@ -15,15 +21,15 @@ namespace IpfsUploader.Daemons
 
         public static int TotalAddToQueue { get; set; }
 
-        public static void Start()
+        private static void Start()
         {
             daemon = Task.Run(() =>
             {
                 while(true)
                 {
-                    FileItem fileItem;
+                    Thread.Sleep(1000);
 
-                    System.Threading.Thread.Sleep(1000);
+                    FileItem fileItem;
 
                     if(!queueFileItems.TryDequeue(out fileItem))
                     {
@@ -36,7 +42,7 @@ namespace IpfsUploader.Daemons
                     bool success = EncodeManager.Encode(fileItem);
                     
                     if(success)
-                        IpfsDaemon.QueueAttachedFile(fileItem);
+                        IpfsDaemon.Queue(fileItem);
                 }
             });
         }

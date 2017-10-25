@@ -5,7 +5,7 @@ using IpfsUploader.Models;
 
 namespace IpfsUploader.Managers
 {
-    public static class IpfsManager
+    public static class IpfsAddManager
     {
         private static FileItem currentFileItem;
 

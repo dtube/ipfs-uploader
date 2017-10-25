@@ -4,21 +4,47 @@ namespace IpfsUploader.Models
 {
     public class FileItem
     {
-        public FileItem(FileContainer fileContainer, string sourceFilePath) : this(fileContainer, true)
+        public static FileItem NewSourceVideoFileItem(FileContainer fileContainer, string sourceFilePath)
         {
-            FilePath = sourceFilePath;
-            IpfsProgressToken = Guid.NewGuid();
+            FileItem fileItem = new FileItem(fileContainer, true);
+            fileItem.FilePath = sourceFilePath;
 
-            VideoSize = VideoSize.Source;
-            EncodeProgress = "not available";
-            EncodeLastTimeProgressChanged = null;
+            fileItem.VideoSize = VideoSize.Source;
+            fileItem.EncodeProgress = "not available";
+            fileItem.EncodeLastTimeProgressChanged = null;
+
+            return fileItem;
         }
 
-        public FileItem(FileContainer fileContainer, VideoSize videoSize) : this(fileContainer, false)
+        public static FileItem NewEncodedVideoFileItem(FileContainer fileContainer, VideoSize videoSize)
         {
-            VideoSize = videoSize;
-            EncodeProgress = "waiting...";
-            EncodeLastTimeProgressChanged = null;
+            if(videoSize == VideoSize.Undefined)
+                throw new InvalidOperationException("VideoSize inconnu");
+
+            FileItem fileItem = new FileItem(fileContainer, false);
+
+            fileItem.VideoSize = videoSize;
+            fileItem.EncodeProgress = "waiting...";
+            fileItem.EncodeLastTimeProgressChanged = null;
+
+            return fileItem;
+        }
+
+        public static FileItem NewSourceImageFileItem(FileContainer fileContainer, string sourceFilePath)
+        {
+            FileItem fileItem = new FileItem(fileContainer, true);
+            fileItem.FilePath = sourceFilePath;
+            fileItem.IpfsErrorMessage = "ipfs not asked";
+
+            return fileItem;
+        }
+
+        public static FileItem NewAttachedImageFileItem(FileContainer fileContainer, string filePath)
+        {
+            FileItem fileItem = new FileItem(fileContainer, false);
+            fileItem.FilePath = filePath;
+
+            return fileItem;
         }
 
         private FileItem(FileContainer fileContainer, bool isSource)
@@ -33,7 +59,7 @@ namespace IpfsUploader.Models
 
         public string FilePath { get; set; }
 
-        public FileContainer FileContainer { get; private set; }
+        public FileContainer FileContainer { get; }
 
         public bool WorkInProgress()
         {
@@ -47,8 +73,6 @@ namespace IpfsUploader.Models
 
 
         public int IpfsPositionInQueue { get; set; }
-
-        public Guid IpfsProgressToken { get; private set; }
 
         public string IpfsHash { get; set; }
 
