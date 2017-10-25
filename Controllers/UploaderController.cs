@@ -16,7 +16,7 @@ namespace Uploader.Controllers
         [DisableFormValueModelBinding]
         [DisableRequestSizeLimit]
         [Route("/uploadVideo")]
-        public async Task<IActionResult> UploadVideo(string videoEncodingFormats, bool? sprite = null)
+        public async Task<IActionResult> UploadVideo(string videoEncodingFormats = null, bool? sprite = null)
         {
             try
             {            

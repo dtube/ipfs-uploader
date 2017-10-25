@@ -44,22 +44,22 @@ namespace Uploader.Controllers
                 case TypeContainer.Video:
                     return Json(new
                     {
-                        source = IpfsResultJson(fileContainer.SourceFileItem),
-                        EncodedVideos = fileContainer.EncodedFileItems
+                        sourceVideo = IpfsResultJson(fileContainer.SourceFileItem),
+                        encodedVideos = fileContainer.EncodedFileItems
                             .Select(e => 
                                 new 
                                 {
                                     encode = EncodeResultJson(e),
                                     ipfs = IpfsResultJson(e)
                                 })
-                            .ToArray()
+                            .ToArray(),
+                        sprite = IpfsResultJson(fileContainer.SpriteFileItem)
                     });
 
                 case TypeContainer.Image:
                     return Json(new
                     {
                         source = IpfsResultJson(fileContainer.SourceFileItem),
-                        sprite = IpfsResultJson(fileContainer.SpriteFileItem),
                         overlay = IpfsResultJson(fileContainer.OverlayFileItem)
                     });
             }

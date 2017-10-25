@@ -9,18 +9,23 @@ namespace Uploader.Managers
     {
         public static Guid ComputeVideo(string sourceFilePath, string videoEncodingFormats, bool? sprite)
         {
-            VideoSize[] formats = videoEncodingFormats
-                        .Split(',')
-                        .Select(v => 
-                        {
-                            switch(v)
+            VideoSize[] formats = new VideoSize[0];
+            
+            if(!string.IsNullOrWhiteSpace(videoEncodingFormats))
+            {
+                formats = videoEncodingFormats
+                            .Split(',')
+                            .Select(v => 
                             {
-                                case "720p": return VideoSize.F720p;
-                                case "480p": return VideoSize.F480p;
-                                default: return VideoSize.F720p;
-                            }
-                        })
-                        .ToArray();
+                                switch(v)
+                                {
+                                    case "720p": return VideoSize.F720p;
+                                    case "480p": return VideoSize.F480p;
+                                    default: return VideoSize.F720p;
+                                }
+                            })
+                            .ToArray();
+            }
 
             FileContainer fileContainer = FileContainer.NewVideoContainer(sourceFilePath, formats);
 
