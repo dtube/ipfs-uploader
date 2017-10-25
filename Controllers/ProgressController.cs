@@ -74,11 +74,11 @@ namespace Uploader.Controllers
 
             return new
             {
-                ipfsProgress = fileItem.IpfsProgress,
-                ipfsHash = fileItem.IpfsHash,
-                ipfsLastTimeProgress = fileItem.IpfsLastTimeProgressChanged,
-                ipfsErrorMessage = fileItem.IpfsErrorMessage,
-                ipfsPositionLeft = fileItem.IpfsPositionInQueue == 0 ? 999 : fileItem.IpfsPositionInQueue - IpfsDaemon.CurrentPositionInQueue,
+                progress = fileItem.IpfsProgress,
+                hash = fileItem.IpfsHash,
+                lastTimeProgress = fileItem.IpfsLastTimeProgressChanged,
+                errorMessage = fileItem.IpfsErrorMessage,
+                positionInQueue = fileItem.IpfsPositionInQueue == 0 ? 999 : fileItem.IpfsPositionInQueue - IpfsDaemon.CurrentPositionInQueue,
             };
         }
 
@@ -89,11 +89,11 @@ namespace Uploader.Controllers
 
             return new
             {
-                encodeProgress = fileItem.EncodeProgress,
+                progress = fileItem.EncodeProgress,
                 encodeSize = fileItem.VideoSize.ToString(),
-                encodeLastTimeProgress = fileItem.EncodeLastTimeProgressChanged,
-                encodeErrorMessage = fileItem.EncodeErrorMessage,
-                encodePositionLeft = fileItem.EncodePositionInQueue == 0 ? 999 : fileItem.EncodePositionInQueue - EncodeDaemon.CurrentPositionInQueue,
+                lastTimeProgress = fileItem.EncodeLastTimeProgressChanged,
+                errorMessage = fileItem.EncodeErrorMessage,
+                positionInQueue = fileItem.EncodePositionInQueue == 0 ? 999 : fileItem.EncodePositionInQueue - EncodeDaemon.CurrentPositionInQueue,
             };
         }
     }
