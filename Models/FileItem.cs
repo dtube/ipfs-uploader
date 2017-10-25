@@ -69,7 +69,23 @@ namespace Uploader.Models
 
         public bool IsSource { get; }
 
-        public string FilePath { get; set; }
+        public long FileSize { get; set; }
+
+        public string FilePath
+        { 
+            get
+            {
+                return _filePath;
+            }
+            set
+            {
+                _filePath = value;
+
+                if(System.IO.File.Exists(_filePath))
+                    FileSize = new System.IO.FileInfo(_filePath).Length;
+            }
+        }
+        private string _filePath;
 
         public FileContainer FileContainer { get; }
 

@@ -91,7 +91,10 @@ namespace Uploader.Managers
             {
                 currentFileItem.IpfsHash = output.Split(' ')[1];
                 
-                File.AppendAllLines(Path.Combine(Directory.GetCurrentDirectory(), "logs", "ipfsHash.log"), new[]{ DateTime.UtcNow.ToString("o") + " " + currentFileItem.IpfsHash });
+                string logDirectory = Path.Combine(Directory.GetCurrentDirectory(), "logs");
+                if(!Directory.Exists(logDirectory))
+                    Directory.CreateDirectory(logDirectory);
+                File.AppendAllLines(Path.Combine(logDirectory, "ipfsHash.log"), new[]{ DateTime.UtcNow.ToString("o") + " " + currentFileItem.IpfsHash });
             }
         }
     }
