@@ -38,21 +38,29 @@ namespace Uploader.Managers
                 else
                     size = size = "720x480";
 
-                //todo améliorer argument format audio ...
+                // -y loglevel error    :
+                // -i {sourceFilePath}  : fichier entrant
+                // -crf 20              : 
+                // -acodec aac          : 
+                // -ar 44100            : 
+                // -ab 128k             : 
+                // -ac 2                : 
+                // -vcodec libx264      : 
+                // -r 24                : 
+                // -s {size}            : taille de la video sortante
                 processStartInfo.Arguments = $"-i {sourceFilePath} -s {size} {newEncodedFilePath}";
+                //processStartInfo.Arguments = $"-y loglevel error -i {sourceFilePath} -crf 20 -acodec aac -ar 44100 -ab 128k -ac 2 -vcodec libx264 -r 24 -s {size} {newEncodedFilePath}";
 
                 processStartInfo.RedirectStandardError = true;
 
+                processStartInfo.UseShellExecute = false;
+                processStartInfo.ErrorDialog = false;
                 processStartInfo.CreateNoWindow = true;
                 processStartInfo.WindowStyle = ProcessWindowStyle.Hidden;
                 
-                using(var process = new Process())
+                using(var process = Process.Start(processStartInfo))
                 {
-                    process.StartInfo = processStartInfo;
-
                     process.ErrorDataReceived += new DataReceivedEventHandler(ErrorDataReceived);
-
-                    process.Start();
 
                     process.BeginErrorReadLine();
 

@@ -72,7 +72,7 @@ namespace Uploader.Models
         }
 
 
-        public int IpfsPositionInQueue { get; set; }
+        public int? IpfsPositionInQueue { get; set; }
 
         public string IpfsHash { get; set; }
 
@@ -101,7 +101,7 @@ namespace Uploader.Models
 
         public VideoSize VideoSize { get; private set; }
 
-        public int EncodePositionInQueue { get; set; }
+        public int? EncodePositionInQueue { get; set; }
 
         private string _encodeProgress;
 

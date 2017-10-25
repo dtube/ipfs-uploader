@@ -26,17 +26,15 @@ namespace Uploader.Managers
                 processStartInfo.RedirectStandardOutput = true;
                 processStartInfo.RedirectStandardError = true;
 
+                processStartInfo.UseShellExecute = false;
+                processStartInfo.ErrorDialog = false;
                 processStartInfo.CreateNoWindow = true;
                 processStartInfo.WindowStyle = ProcessWindowStyle.Hidden;
                 
-                using(var process = new Process())
+                using(var process = Process.Start(processStartInfo))
                 {
-                    process.StartInfo = processStartInfo;
-
                     process.OutputDataReceived += new DataReceivedEventHandler(OutputDataReceived);
                     process.ErrorDataReceived += new DataReceivedEventHandler(ErrorDataReceived);
-
-                    process.Start();
 
                     process.BeginOutputReadLine();
                     process.BeginErrorReadLine();

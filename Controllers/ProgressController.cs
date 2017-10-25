@@ -78,7 +78,7 @@ namespace Uploader.Controllers
                 hash = fileItem.IpfsHash,
                 lastTimeProgress = fileItem.IpfsLastTimeProgressChanged,
                 errorMessage = fileItem.IpfsErrorMessage,
-                positionInQueue = fileItem.IpfsPositionInQueue == 0 ? 999 : fileItem.IpfsPositionInQueue - IpfsDaemon.CurrentPositionInQueue,
+                positionInQueue = fileItem.IpfsPositionInQueue.HasValue ? fileItem.IpfsPositionInQueue.Value - IpfsDaemon.CurrentPositionInQueue : 999,
             };
         }
 
@@ -93,7 +93,7 @@ namespace Uploader.Controllers
                 encodeSize = fileItem.VideoSize.ToString(),
                 lastTimeProgress = fileItem.EncodeLastTimeProgressChanged,
                 errorMessage = fileItem.EncodeErrorMessage,
-                positionInQueue = fileItem.EncodePositionInQueue == 0 ? 999 : fileItem.EncodePositionInQueue - EncodeDaemon.CurrentPositionInQueue,
+                positionInQueue = fileItem.EncodePositionInQueue.HasValue ? fileItem.EncodePositionInQueue.Value - EncodeDaemon.CurrentPositionInQueue : 999,
             };
         }
     }

@@ -16,11 +16,11 @@ namespace Uploader.Controllers
         [DisableFormValueModelBinding]
         [DisableRequestSizeLimit]
         [Route("/uploadVideo")]
-        public async Task<IActionResult> UploadVideo(string videoEncodingFormats)
+        public async Task<IActionResult> UploadVideo(string videoEncodingFormats, bool? sprite = null)
         {
             try
             {            
-                return Ok(new { success = true, token = VideoManager.ComputeVideo(await GetFileToTemp(), videoEncodingFormats) });
+                return Ok(new { success = true, token = VideoManager.ComputeVideo(await GetFileToTemp(), videoEncodingFormats, sprite) });
             }
             catch(Exception ex)
             {
@@ -32,11 +32,11 @@ namespace Uploader.Controllers
         [DisableFormValueModelBinding]
         [DisableRequestSizeLimit]
         [Route("/uploadImage")]
-        public async Task<IActionResult> UploadImage(bool? sprite = null, bool? overlay = null)
+        public async Task<IActionResult> UploadImage(bool? overlay = null)
         {
             try
             {
-                return Ok(new { success = true, token = ImageManager.ComputeImage(await GetFileToTemp(), sprite, overlay) });
+                return Ok(new { success = true, token = ImageManager.ComputeImage(await GetFileToTemp(), overlay) });
             }
             catch(Exception ex)
             {

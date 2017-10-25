@@ -51,10 +51,6 @@ namespace Uploader.Managers
                     finalBitmap.Save(outputFilePath, ImageFormat.Png);
                 }
             }
-            catch (Exception ex)
-            {
-                throw;
-            }
             finally
             {
                 //clean up memory

@@ -33,11 +33,17 @@ namespace Uploader.Models
 
         public void SetSprite(string filePath)
         {
+            if(TypeContainer != TypeContainer.Video)
+                throw new InvalidOperationException("operation sprite impossible");
+
             SpriteFileItem = FileItem.NewAttachedImageFileItem(this, filePath);
         }
 
         public void SetOverlay(string filePath)
         {
+            if(TypeContainer != TypeContainer.Image)
+                throw new InvalidOperationException("operation overlay impossible");
+
             OverlayFileItem = FileItem.NewAttachedImageFileItem(this, filePath);
         }
 
@@ -71,11 +77,11 @@ namespace Uploader.Models
             switch(TypeContainer)
             {
                 case TypeContainer.Video:
+                    if(SpriteFileItem != null && SpriteFileItem.WorkInProgress())
+                        return true;
                     return EncodedFileItems.Any(f => f.WorkInProgress());
 
                 case TypeContainer.Image:
-                    if(SpriteFileItem != null && SpriteFileItem.WorkInProgress())
-                        return true;
                     if(OverlayFileItem != null && OverlayFileItem.WorkInProgress())
                         return true;
                     return false;

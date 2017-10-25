@@ -7,7 +7,7 @@ namespace Uploader.Managers
 {
     public static class VideoManager
     {
-        public static Guid ComputeVideo(string sourceFilePath, string videoEncodingFormats)
+        public static Guid ComputeVideo(string sourceFilePath, string videoEncodingFormats, bool? sprite)
         {
             VideoSize[] formats = videoEncodingFormats
                         .Split(',')
@@ -30,6 +30,18 @@ namespace Uploader.Managers
             foreach (FileItem file in fileContainer.EncodedFileItems)
             {   
                 EncodeDaemon.Queue(file);
+            }
+
+            // si sprite demandé
+            if(sprite??false)
+            {
+                string outputPath = TempFileManager.GetNewTempFilePath();
+
+                // todo get image from video
+
+                SpriteManager.CombineBitmap(null, outputPath);
+                fileContainer.SetSprite(outputPath);
+                IpfsDaemon.Queue(fileContainer.SpriteFileItem);
             }
 
             return fileContainer.ProgressToken;
