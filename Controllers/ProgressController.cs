@@ -44,23 +44,27 @@ namespace Uploader.Controllers
                 case TypeContainer.Video:
                     return Json(new
                     {
-                        sourceVideo = IpfsResultJson(fileContainer.SourceFileItem),
+                        ipfsAddSourceVideo = IpfsResultJson(fileContainer.SourceFileItem),
+                        sprite = new
+                            {
+                                spriteCreation = EncodeResultJson(fileContainer.SpriteVideoFileItem),
+                                ipfsAddSprite = IpfsResultJson(fileContainer.SpriteVideoFileItem)
+                            },
                         encodedVideos = fileContainer.EncodedFileItems
                             .Select(e => 
                                 new 
                                 {
                                     encode = EncodeResultJson(e),
-                                    ipfs = IpfsResultJson(e)
+                                    ipfsAddEncodeVideo = IpfsResultJson(e)
                                 })
-                            .ToArray(),
-                        sprite = IpfsResultJson(fileContainer.SpriteVideoFileItem)
+                            .ToArray()
                     });
 
                 case TypeContainer.Image:
                     return Json(new
                     {
-                        source = IpfsResultJson(fileContainer.SourceFileItem),
-                        overlay = IpfsResultJson(fileContainer.OverlayFileItem)
+                        ipfsAddSource = IpfsResultJson(fileContainer.SourceFileItem),
+                        ipfsAddOverlay = IpfsResultJson(fileContainer.OverlayFileItem)
                     });
             }
 
@@ -78,7 +82,7 @@ namespace Uploader.Controllers
                 hash = fileItem.IpfsHash,
                 lastTimeProgress = fileItem.IpfsLastTimeProgressChanged,
                 errorMessage = fileItem.IpfsErrorMessage,
-                positionInQueue = fileItem.IpfsPositionInQueue.HasValue ? fileItem.IpfsPositionInQueue.Value - IpfsDaemon.CurrentPositionInQueue : 999,
+                positionInQueue = Position(fileItem.IpfsPositionInQueue, IpfsDaemon.CurrentPositionInQueue),
                 fileSize = fileItem.FileSize
             };
         }
@@ -94,8 +98,19 @@ namespace Uploader.Controllers
                 encodeSize = fileItem.VideoSize.ToString(),
                 lastTimeProgress = fileItem.EncodeLastTimeProgressChanged,
                 errorMessage = fileItem.EncodeErrorMessage,
-                positionInQueue = fileItem.EncodePositionInQueue.HasValue ? fileItem.EncodePositionInQueue.Value - EncodeDaemon.CurrentPositionInQueue : 999
+                positionInQueue = Position(fileItem.EncodePositionInQueue, EncodeDaemon.CurrentPositionInQueue)
             };
+        }
+
+        private static int? Position(int? positionInQueue, int currentPositionInQueue)
+        {
+            if(!positionInQueue.HasValue)
+                return null;
+            if(positionInQueue.Value < currentPositionInQueue)
+                return null;
+            if(positionInQueue.Value == currentPositionInQueue)
+                return null;
+            return positionInQueue.Value - currentPositionInQueue;
         }
     }
 }
