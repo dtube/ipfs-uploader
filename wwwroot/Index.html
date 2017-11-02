@@ -94,17 +94,33 @@
             </div>
         </form>-->
 
-        <div id="uploader"></div>
+        <h2>Video</h2>
+        <div id="uploaderVideo"></div>
         <script>
             // Some options to pass to the uploader are discussed on the next page
             var uploader = new qq.FineUploader({
-                element: document.getElementById("uploader"),
+                element: document.getElementById("uploaderVideo"),
                 debug: true,
                 validation: {
                                 allowedExtensions: ['mp4', 'mkv'],
                                 itemLimit: 1
                             },
                 request: { endpoint: '/uploadVideo?videoEncodingFormats=720p,480p&sprite=true'}
+            })
+        </script>
+
+        <h2>Image</h2>
+        <div id="uploaderImage"></div>
+        <script>
+            // Some options to pass to the uploader are discussed on the next page
+            var uploader = new qq.FineUploader({
+                element: document.getElementById("uploaderImage"),
+                debug: true,
+                validation: {
+                                allowedExtensions: ['jpg', 'jpeg', 'bmp', 'png'],
+                                itemLimit: 1
+                            },
+                request: { endpoint: '/uploadImage?overlay=true'}
             })
         </script>
     </body>

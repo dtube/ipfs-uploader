@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Uploader.Daemons;
 using Uploader.Models;
 
@@ -11,15 +12,15 @@ namespace Uploader.Managers
             FileContainer fileContainer = FileContainer.NewImageContainer(sourceFilePath);
 
             // si pas d'option overlay, c'est qu'on veut juste ipfs add l'image
-            if(overlay??false)
+            if(!(overlay??false))
             {
-                fileContainer.SourceFileItem.IpfsErrorMessage = null;
                 IpfsDaemon.Queue(fileContainer.SourceFileItem);
             }
             else
             {
+                fileContainer.SourceFileItem.IpfsErrorMessage = "ipfs not asked";
                 string outputPath = TempFileManager.GetNewTempFilePath();
-                OverlayManager.Overlay("", outputPath); //todo récupération vrai image
+                OverlayManager.Overlay(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Capture.jpg"), fileContainer.SourceFileItem.FilePath, outputPath);
                 fileContainer.SetOverlay(outputPath);
                 IpfsDaemon.Queue(fileContainer.OverlayFileItem);
             }

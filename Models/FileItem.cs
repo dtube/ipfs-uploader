@@ -32,7 +32,6 @@ namespace Uploader.Models
         public static FileItem NewSourceImageFileItem(FileContainer fileContainer, string sourceFilePath)
         {
             FileItem fileItem = new FileItem(fileContainer, sourceFilePath, true);
-            fileItem.IpfsErrorMessage = "ipfs not asked";
             return fileItem;
         }
 

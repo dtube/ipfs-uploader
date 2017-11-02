@@ -1,12 +1,13 @@
 using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 
 namespace Uploader.Managers
 {
     public class OverlayManager
     {
-        public static void Overlay(string overlayImagePath, string imageToOverlayPath, int? x = null, int? y = null)
+        public static void Overlay(string overlayImagePath, string imageToOverlayPath, string outputPath, int? x = null, int? y = null)
         {
             using(Image overlayImage = Image.FromFile(overlayImagePath))
             {
@@ -23,10 +24,10 @@ namespace Uploader.Managers
 
                         graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
                         graphics.DrawImage(overlayImage, x.Value, y.Value);
-                        graphics.Save();
+                        //graphics.Save();
                     }
                     
-                    //imageToOverlay.Save(overlayImagePath);
+                    imageToOverlay.Save(outputPath, ImageFormat.Png);
                 }
             }
         }
