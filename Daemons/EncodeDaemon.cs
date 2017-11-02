@@ -51,22 +51,25 @@ namespace Uploader.Daemons
                             SpriteManager.CombineBitmap(files, outputPath); // création du sprite
                             TempFileManager.SafeDeleteTempFiles(fileItem.FilePath); // suppression des images
                             fileItem.FilePath = outputPath; // réaffectation chemin sprite
-                            IpfsDaemon.Queue(fileItem); // ajouter ce sprite à ipfs
                         }
-                        else
-                        {
-                            IpfsDaemon.Queue(fileItem); // ajouter la video encodée à ipfs
-                        }
+
+                        IpfsDaemon.Queue(fileItem);
                     }
                 }
             });
         }
 
-        public static void Queue(FileItem fileItem)
+        public static void Queue(FileItem fileItem, string messageIpfs)
         {
             queueFileItems.Enqueue(fileItem);
             TotalAddToQueue++;
             fileItem.EncodePositionInQueue = TotalAddToQueue;
+
+            fileItem.EncodeProgress = "Waiting in queue...";
+            fileItem.EncodeLastTimeProgressChanged = null;
+
+            fileItem.IpfsProgress = messageIpfs;
+            fileItem.IpfsLastTimeProgressChanged = null;
         }
     }
 }

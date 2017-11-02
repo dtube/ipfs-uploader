@@ -6,13 +6,8 @@ namespace Uploader.Models
     {
         public static FileItem NewSourceVideoFileItem(FileContainer fileContainer, string sourceFilePath)
         {
-            FileItem fileItem = new FileItem(fileContainer, true, "waiting in queue...");
-            fileItem.FilePath = sourceFilePath;
-
+            FileItem fileItem = new FileItem(fileContainer, sourceFilePath, true);
             fileItem.VideoSize = VideoSize.Source;
-            fileItem.EncodeProgress = "not available";
-            fileItem.EncodeLastTimeProgressChanged = null;
-
             return fileItem;
         }
 
@@ -21,50 +16,37 @@ namespace Uploader.Models
             if(videoSize == VideoSize.Undefined)
                 throw new InvalidOperationException("VideoSize inconnu");
 
-            FileItem fileItem = new FileItem(fileContainer, false, "waiting encode...");
-
+            FileItem fileItem = new FileItem(fileContainer, null, false);
             fileItem.VideoSize = videoSize;
-            fileItem.EncodeProgress = "waiting in queue...";
-            fileItem.EncodeLastTimeProgressChanged = null;
-
             return fileItem;
         }
 
         public static FileItem NewSpriteVideoFileItem(FileContainer fileContainer)
         {
-            FileItem fileItem = new FileItem(fileContainer, false, "waiting sprite creation...");
-
+            FileItem fileItem = new FileItem(fileContainer, null, false);
             fileItem.ModeSprite = true;
             fileItem.VideoSize = VideoSize.Source;
-            fileItem.EncodeProgress = "waiting in queue...";
-            fileItem.EncodeLastTimeProgressChanged = null;
-
             return fileItem;
         }
 
         public static FileItem NewSourceImageFileItem(FileContainer fileContainer, string sourceFilePath)
         {
-            FileItem fileItem = new FileItem(fileContainer, true, "waiting in queue...");
-            fileItem.FilePath = sourceFilePath;
+            FileItem fileItem = new FileItem(fileContainer, sourceFilePath, true);
             fileItem.IpfsErrorMessage = "ipfs not asked";
-
             return fileItem;
         }
 
         public static FileItem NewAttachedImageFileItem(FileContainer fileContainer, string filePath)
         {
-            FileItem fileItem = new FileItem(fileContainer, false, "waiting in queue...");
-            fileItem.FilePath = filePath;
-
+            FileItem fileItem = new FileItem(fileContainer, filePath, false);
             return fileItem;
         }
 
-        private FileItem(FileContainer fileContainer, bool isSource, string ipfsProgressInitialMessage)
+        private FileItem(FileContainer fileContainer, string filePath, bool isSource)
         {
             IsSource = isSource;
             FileContainer = fileContainer;
-            IpfsProgress = ipfsProgressInitialMessage;
-            IpfsLastTimeProgressChanged = null;
+            FilePath = filePath;
         }
 
         public bool IsSource { get; }
@@ -122,7 +104,7 @@ namespace Uploader.Models
             }
         }
 
-        public DateTime? IpfsLastTimeProgressChanged { get; private set; }
+        public DateTime? IpfsLastTimeProgressChanged { get; set; }
 
         public string IpfsErrorMessage { get; set; }
 
@@ -155,7 +137,7 @@ namespace Uploader.Models
         /// <returns></returns>
         public int? VideoDuration { get; set; }
 
-        public DateTime? EncodeLastTimeProgressChanged { get; private set; }
+        public DateTime? EncodeLastTimeProgressChanged { get; set; }
 
         public string EncodeErrorMessage { get; set; }
     }

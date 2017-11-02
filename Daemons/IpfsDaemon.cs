@@ -62,6 +62,8 @@ namespace Uploader.Daemons
             queueFileItems.Enqueue(fileItem);
             TotalAddToQueue++;
             fileItem.IpfsPositionInQueue = TotalAddToQueue;
+            fileItem.IpfsProgress = "Waiting in queue...";
+            fileItem.IpfsLastTimeProgressChanged = null;
         }
     }
 }

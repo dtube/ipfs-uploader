@@ -36,13 +36,13 @@ namespace Uploader.Managers
             {
                 fileContainer.SetSpriteVideo();
                 // get images from video
-                EncodeDaemon.Queue(fileContainer.SpriteVideoFileItem);
+                EncodeDaemon.Queue(fileContainer.SpriteVideoFileItem, "Waiting sprite creation...");
             }
 
             // si encoding est demandé
             foreach (FileItem file in fileContainer.EncodedFileItems)
             {   
-                EncodeDaemon.Queue(file);
+                EncodeDaemon.Queue(file, "Waiting encode...");
             }
 
             return fileContainer.ProgressToken;
