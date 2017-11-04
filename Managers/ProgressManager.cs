@@ -33,9 +33,21 @@ namespace Uploader.Managers
 
         public static FileContainer GetFileContainerBySourceHash(string sourceHash)
         {
-            return  progresses.Values
-                .OrderByDescending(s => s.SourceFileItem.IpfsLastTimeProgressChanged)
-                .FirstOrDefault(s => s.SourceFileItem.IpfsHash == sourceHash);
+            return progresses.Values
+                .Where(s => s.SourceFileItem.IpfsHash == sourceHash)
+                .OrderByDescending(s => s.NumInstance)
+                .FirstOrDefault();
+        }
+
+        public static FileContainer GetFileContainerByChildHash(string hash)
+        {
+            return progresses.Values.Where(s => 
+                    s.OverlayFileItem.IpfsHash == hash || 
+                    s.SpriteVideoFileItem.IpfsHash == hash || 
+                    s.EncodedFileItems.Any(v => v.IpfsHash == hash)
+                )
+                .OrderByDescending(s => s.NumInstance)
+                .FirstOrDefault();
         }
     }
 }

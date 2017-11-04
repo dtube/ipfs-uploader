@@ -7,6 +7,10 @@ namespace Uploader.Models
 {
     public class FileContainer
     {
+        private static long nbInstance;
+
+        public long NumInstance { get; }
+
         public static FileContainer NewVideoContainer(string sourceFilePath, params VideoSize[] videoSizes)
         {
             FileContainer fileContainer = new FileContainer(TypeContainer.Video);
@@ -46,7 +50,10 @@ namespace Uploader.Models
         }
 
         private FileContainer(TypeContainer typeContainer)
-        { 
+        {
+            nbInstance++;
+            NumInstance = nbInstance;
+
             TypeContainer = typeContainer;
 
             ProgressToken = Guid.NewGuid();

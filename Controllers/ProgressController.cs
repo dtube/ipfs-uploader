@@ -32,7 +32,11 @@ namespace Uploader.Controllers
         {
             FileContainer fileContainer = ProgressManager.GetFileContainerBySourceHash(sourceHash);
             if(fileContainer == null)
-                return BadRequest(new { errorMessage = "sourceHash not exist" });
+            {
+                fileContainer = ProgressManager.GetFileContainerByChildHash(sourceHash);
+                if(fileContainer == null)
+                    return BadRequest(new { errorMessage = "hash not exist" });
+            }
 
             return GetResult(fileContainer);
         }
