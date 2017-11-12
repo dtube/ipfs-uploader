@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+
 using Uploader.Models;
 
 namespace Uploader.Managers
@@ -20,9 +21,9 @@ namespace Uploader.Managers
 
                 // Send to ipfs and return hash from ipfs
                 var processStartInfo = new ProcessStartInfo();
-                processStartInfo.FileName = "ipfs";                
+                processStartInfo.FileName = "ipfs";
                 processStartInfo.Arguments = $"add {currentFileItem.FilePath}";
-                
+
                 processStartInfo.RedirectStandardOutput = true;
                 processStartInfo.RedirectStandardError = true;
                 processStartInfo.WorkingDirectory = TempFileManager.GetTempDirectory();
@@ -31,7 +32,7 @@ namespace Uploader.Managers
                 processStartInfo.ErrorDialog = false;
                 processStartInfo.CreateNoWindow = true;
                 processStartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                
+
                 using(var process = Process.Start(processStartInfo))
                 {
                     process.OutputDataReceived += new DataReceivedEventHandler(OutputDataReceived);
@@ -43,12 +44,12 @@ namespace Uploader.Managers
                     int timeout = 5 * 60 * 60 * 1000; //5h
 
                     bool success = process.WaitForExit(timeout);
-                    if(!success)
+                    if (!success)
                     {
                         throw new InvalidOperationException("Le fichier n'a pas pu être envoyé à ipfs en moins de 5 heures.");
                     }
 
-                    if(process.ExitCode != 0)
+                    if (process.ExitCode != 0)
                     {
                         throw new InvalidOperationException($"Le fichier n'a pas pu être envoyé à ipfs, erreur {process.ExitCode}.");
                     }
@@ -56,7 +57,7 @@ namespace Uploader.Managers
 
                 currentFileItem.IpfsProgress = "100.00%";
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 currentFileItem.IpfsErrorMessage = ex.Message;
             }
@@ -65,10 +66,10 @@ namespace Uploader.Managers
         private static void ErrorDataReceived(object sender, DataReceivedEventArgs e)
         {
             string output = e.Data;
-            if(string.IsNullOrWhiteSpace(output))
+            if (string.IsNullOrWhiteSpace(output))
                 return;
 
-            if(currentFileItem.IpfsLastTimeProgressChanged.HasValue && (DateTime.UtcNow - currentFileItem.IpfsLastTimeProgressChanged.Value).TotalMilliseconds < 500)
+            if (currentFileItem.IpfsLastTimeProgressChanged.HasValue && (DateTime.UtcNow - currentFileItem.IpfsLastTimeProgressChanged.Value).TotalMilliseconds < 500)
                 return;
 
             Debug.WriteLine(Path.GetFileName(currentFileItem.FilePath) + " : " + output);
@@ -82,19 +83,22 @@ namespace Uploader.Managers
         private static void OutputDataReceived(object sender, DataReceivedEventArgs e)
         {
             string output = e.Data;
-            if(string.IsNullOrWhiteSpace(output))
+            if (string.IsNullOrWhiteSpace(output))
                 return;
 
             Debug.WriteLine(Path.GetFileName(currentFileItem.FilePath) + " : " + output);
 
-            if(output.StartsWith("added "))
+            if (output.StartsWith("added "))
             {
                 currentFileItem.IpfsHash = output.Split(' ')[1];
-                
+
                 string logDirectory = Path.Combine(Directory.GetCurrentDirectory(), "logs");
-                if(!Directory.Exists(logDirectory))
+                if (!Directory.Exists(logDirectory))
                     Directory.CreateDirectory(logDirectory);
-                File.AppendAllLines(Path.Combine(logDirectory, "ipfsHash.log"), new[]{ DateTime.UtcNow.ToString("o") + " " + currentFileItem.IpfsHash });
+                File.AppendAllLines(Path.Combine(logDirectory, "ipfsHash.log"), new []
+                {
+                    DateTime.UtcNow.ToString("o") + " " + currentFileItem.IpfsHash
+                });
             }
         }
     }

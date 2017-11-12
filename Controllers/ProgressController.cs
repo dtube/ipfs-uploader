@@ -1,14 +1,19 @@
 using System;
+using System.IO;
+
+using System.Linq;
+
 using System.Threading.Tasks;
-using Uploader.Managers;
-using Uploader.Attributes;
-using Uploader.Helper;
-using Uploader.Models;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+
+using Uploader.Attributes;
 using Uploader.Daemons;
-using System.IO;
-using System.Linq;
+using Uploader.Helper;
+using Uploader.Managers;
+using Uploader.Models;
+
 
 namespace Uploader.Controllers
 {
@@ -20,8 +25,11 @@ namespace Uploader.Controllers
         public ActionResult GetProgressByToken(Guid token)
         {
             FileContainer fileContainer = ProgressManager.GetFileContainerByToken(token);
-            if(fileContainer == null)
-                return BadRequest(new { errorMessage = "token not exist" });
+            if (fileContainer == null)
+                return BadRequest(new
+                {
+                    errorMessage = "token not exist"
+                });
 
             return GetResult(fileContainer);
         }
@@ -31,11 +39,14 @@ namespace Uploader.Controllers
         public ActionResult GetProgressBySourceHash(string sourceHash)
         {
             FileContainer fileContainer = ProgressManager.GetFileContainerBySourceHash(sourceHash);
-            if(fileContainer == null)
+            if (fileContainer == null)
             {
                 fileContainer = ProgressManager.GetFileContainerByChildHash(sourceHash);
-                if(fileContainer == null)
-                    return BadRequest(new { errorMessage = "hash not exist" });
+                if (fileContainer == null)
+                    return BadRequest(new
+                    {
+                        errorMessage = "hash not exist"
+                    });
             }
 
             return GetResult(fileContainer);
@@ -49,17 +60,17 @@ namespace Uploader.Controllers
                     return Json(new
                     {
                         ipfsAddSourceVideo = IpfsResultJson(fileContainer.SourceFileItem),
-                        sprite = new
+                            sprite = new
                             {
                                 spriteCreation = EncodeResultJson(fileContainer.SpriteVideoFileItem),
-                                ipfsAddSprite = IpfsResultJson(fileContainer.SpriteVideoFileItem)
+                                    ipfsAddSprite = IpfsResultJson(fileContainer.SpriteVideoFileItem)
                             },
-                        encodedVideos = fileContainer.EncodedFileItems
-                            .Select(e => 
-                                new 
+                            encodedVideos = fileContainer.EncodedFileItems
+                            .Select(e =>
+                                new
                                 {
                                     encode = EncodeResultJson(e),
-                                    ipfsAddEncodeVideo = IpfsResultJson(e)
+                                        ipfsAddEncodeVideo = IpfsResultJson(e)
                                 })
                             .ToArray()
                     });
@@ -68,7 +79,7 @@ namespace Uploader.Controllers
                     return Json(new
                     {
                         ipfsAddSource = IpfsResultJson(fileContainer.SourceFileItem),
-                        ipfsAddOverlay = IpfsResultJson(fileContainer.OverlayFileItem)
+                            ipfsAddOverlay = IpfsResultJson(fileContainer.OverlayFileItem)
                     });
             }
 
@@ -77,7 +88,7 @@ namespace Uploader.Controllers
 
         private dynamic IpfsResultJson(FileItem fileItem)
         {
-            if(fileItem == null)
+            if (fileItem == null)
                 return string.Empty;
 
             return new
@@ -93,7 +104,7 @@ namespace Uploader.Controllers
 
         private dynamic EncodeResultJson(FileItem fileItem)
         {
-            if(fileItem == null)
+            if (fileItem == null)
                 return string.Empty;
 
             return new
@@ -108,11 +119,11 @@ namespace Uploader.Controllers
 
         private static int? Position(int? positionInQueue, int currentPositionInQueue)
         {
-            if(!positionInQueue.HasValue)
+            if (!positionInQueue.HasValue)
                 return null;
-            if(positionInQueue.Value < currentPositionInQueue)
+            if (positionInQueue.Value < currentPositionInQueue)
                 return null;
-            if(positionInQueue.Value == currentPositionInQueue)
+            if (positionInQueue.Value == currentPositionInQueue)
                 return null;
             return positionInQueue.Value - currentPositionInQueue;
         }

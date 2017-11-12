@@ -1,11 +1,14 @@
 using System;
+using System.IO;
 using System.Threading.Tasks;
-using Uploader.Managers;
-using Uploader.Attributes;
-using Uploader.Helper;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using System.IO;
+
+using Uploader.Attributes;
+using Uploader.Helper;
+
+using Uploader.Managers;
 
 namespace Uploader.Controllers
 {
@@ -19,12 +22,18 @@ namespace Uploader.Controllers
         public async Task<IActionResult> UploadVideo(string videoEncodingFormats = null, bool? sprite = null)
         {
             try
-            {            
-                return Ok(new { success = true, token = VideoManager.ComputeVideo(await GetFileToTemp(), videoEncodingFormats, sprite) });
-            }
-            catch(Exception ex)
             {
-                return BadRequest(new { errorMessage = ex.Message });
+                return Ok(new
+                {
+                    success = true, token = VideoManager.ComputeVideo(await GetFileToTemp(), videoEncodingFormats, sprite)
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    errorMessage = ex.Message
+                });
             }
         }
 
@@ -36,11 +45,17 @@ namespace Uploader.Controllers
         {
             try
             {
-                return Ok(new { success = true, token = ImageManager.ComputeImage(await GetFileToTemp(), overlay) });
+                return Ok(new
+                {
+                    success = true, token = ImageManager.ComputeImage(await GetFileToTemp(), overlay)
+                });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                return BadRequest(new { errorMessage = ex.Message });
+                return BadRequest(new
+                {
+                    errorMessage = ex.Message
+                });
             }
         }
 

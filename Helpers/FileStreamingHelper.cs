@@ -3,10 +3,12 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.WebUtilities;
+
 using Microsoft.Net.Http.Headers;
 
 namespace Uploader.Helper
@@ -52,12 +54,12 @@ namespace Uploader.Helper
                         // multipart headers length limit is already in effect.
                         string key = HeaderUtilities.RemoveQuotes(contentDisposition.Name).Value;
                         Encoding encoding = GetEncoding(section);
-                        using (var streamReader = new StreamReader(
+                        using(var streamReader = new StreamReader(
                             section.Body,
                             encoding,
-                            detectEncodingFromByteOrderMarks: true,
-                            bufferSize: 1024,
-                            leaveOpen: true))
+                            detectEncodingFromByteOrderMarks : true,
+                            bufferSize : 1024,
+                            leaveOpen : true))
                         {
                             // The value length limit is enforced by MultipartBodyLengthLimit
                             string value = await streamReader.ReadToEndAsync();

@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+
 using Uploader.Daemons;
 using Uploader.Models;
 
@@ -12,7 +13,7 @@ namespace Uploader.Managers
             FileContainer fileContainer = FileContainer.NewImageContainer(sourceFilePath);
 
             // si pas d'option overlay, c'est qu'on veut juste ipfs add l'image
-            if(!(overlay??false))
+            if (!(overlay??false))
             {
                 IpfsDaemon.Queue(fileContainer.SourceFileItem);
             }

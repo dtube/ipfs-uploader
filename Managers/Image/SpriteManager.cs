@@ -41,7 +41,7 @@ namespace Uploader.Managers
                 using(var finalBitmap = new Bitmap(width, height))
                 {
                     //get a graphics object from the image so we can draw on it
-                    using (Graphics g = Graphics.FromImage(finalBitmap))
+                    using(Graphics g = Graphics.FromImage(finalBitmap))
                     {
                         //set background color
                         g.Clear(Color.Transparent);
@@ -76,7 +76,7 @@ namespace Uploader.Managers
 
             destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
-            using (var graphics = Graphics.FromImage(destImage))
+            using(var graphics = Graphics.FromImage(destImage))
             {
                 graphics.CompositingMode = CompositingMode.SourceCopy;
                 graphics.CompositingQuality = CompositingQuality.HighQuality;
@@ -84,10 +84,10 @@ namespace Uploader.Managers
                 graphics.SmoothingMode = SmoothingMode.HighQuality;
                 graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
 
-                using (var wrapMode = new ImageAttributes())
+                using(var wrapMode = new ImageAttributes())
                 {
                     wrapMode.SetWrapMode(WrapMode.TileFlipXY);
-                    graphics.DrawImage(image, destRect, 0, 0, image.Width,image.Height, GraphicsUnit.Pixel, wrapMode);
+                    graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
                 }
             }
 

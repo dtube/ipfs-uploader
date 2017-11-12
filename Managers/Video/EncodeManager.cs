@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+
 using Uploader.Models;
 
 namespace Uploader.Managers
@@ -62,7 +63,7 @@ namespace Uploader.Managers
                 // {newEncodedFilePath} : chemin fichier sortant (foo-%03d.jpeg)
 
                 // Récupérer la durée totale de la vidéo
-                if(!currentFileItem.FileContainer.SourceFileItem.VideoDuration.HasValue)
+                if (!currentFileItem.FileContainer.SourceFileItem.VideoDuration.HasValue)
                 {
                     processStartInfo.Arguments = $"-i {sourceFilePath}";
 
@@ -70,24 +71,25 @@ namespace Uploader.Managers
                     {
                         StartProcess(processStartInfo, 30 * 1000); // 30 secondes
                     }
-                    catch{}
+                    catch
+                    {}
                 }
 
                 // si durée totale de vidéo non récupérer, on ne peut pas continuer
-                if((currentFileItem.FileContainer.SourceFileItem.VideoDuration??0) <= 0)
+                if ((currentFileItem.FileContainer.SourceFileItem.VideoDuration??0) <= 0)
                 {
                     return false;
                 }
 
                 int duration = currentFileItem.FileContainer.SourceFileItem.VideoDuration.Value;
 
-                if(currentFileItem.ModeSprite)
+                if (currentFileItem.ModeSprite)
                 {
                     // calculer nb image/s
                     //  si < 100s de vidéo -> 1 image/s
                     //  sinon (nb secondes de la vidéo / 100) image/s
                     int frameRate = 1;
-                    if(duration > 100)
+                    if (duration > 100)
                     {
                         frameRate = duration / 100;
                     }
@@ -101,9 +103,9 @@ namespace Uploader.Managers
                 else
                 {
                     string size;
-                    if(videoSize == VideoSize.F720p)
+                    if (videoSize == VideoSize.F720p)
                         size = "1280x720";
-                    else if(videoSize == VideoSize.F480p)
+                    else if (videoSize == VideoSize.F480p)
                         size = "720x480";
                     else
                         throw new InvalidOperationException("le format doit etre défini");
@@ -118,7 +120,7 @@ namespace Uploader.Managers
 
                 return true;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 currentFileItem.EncodeErrorMessage = ex.Message;
 
@@ -136,12 +138,12 @@ namespace Uploader.Managers
                 process.BeginErrorReadLine();
 
                 bool success = process.WaitForExit(timeout);
-                if(!success)
+                if (!success)
                 {
                     throw new InvalidOperationException("Le fichier n'a pas pu être encodé en moins de 10 heures.");
                 }
 
-                if(process.ExitCode != 0)
+                if (process.ExitCode != 0)
                 {
                     throw new InvalidOperationException($"Le fichier n'a pas pu être encodé, erreur {process.ExitCode}.");
                 }
@@ -151,26 +153,26 @@ namespace Uploader.Managers
         private static void ErrorDataReceived(object sender, DataReceivedEventArgs e)
         {
             string output = e.Data;
-            if(string.IsNullOrWhiteSpace(output))
+            if (string.IsNullOrWhiteSpace(output))
                 return;
 
-            const string durationMarkup = "  Duration: ";   // "  Duration: 00:01:42.11"
-            const string progressMarkup = " time=";         // " time=00:01:42.08"
+            const string durationMarkup = "  Duration: "; // "  Duration: 00:01:42.11"
+            const string progressMarkup = " time="; // " time=00:01:42.08"
 
             // Si on ne connait pas la longueur totale de la vidéo
-            if(!currentFileItem.FileContainer.SourceFileItem.VideoDuration.HasValue)
+            if (!currentFileItem.FileContainer.SourceFileItem.VideoDuration.HasValue)
             {
-                if(output.StartsWith(durationMarkup))
+                if (output.StartsWith(durationMarkup))
                     currentFileItem.FileContainer.SourceFileItem.VideoDuration = GetDurationInSeconds(output.Substring(durationMarkup.Length, 8));
                 else
                     return;
             }
 
             // récupérer la progression toutes les 500ms
-            if(currentFileItem.EncodeLastTimeProgressChanged.HasValue && (DateTime.UtcNow - currentFileItem.EncodeLastTimeProgressChanged.Value).TotalMilliseconds < 500)
+            if (currentFileItem.EncodeLastTimeProgressChanged.HasValue && (DateTime.UtcNow - currentFileItem.EncodeLastTimeProgressChanged.Value).TotalMilliseconds < 500)
                 return;
 
-            if(!output.Contains(progressMarkup))
+            if (!output.Contains(progressMarkup))
                 return;
 
             Debug.WriteLine(Path.GetFileName(currentFileItem.FileContainer.SourceFileItem.FilePath) + " : " + output);
@@ -178,7 +180,7 @@ namespace Uploader.Managers
             // Récupérer la progression d'encodage avec la durée d'encodage traitée
             int durationDone = GetDurationInSeconds(output.Substring(output.IndexOf(progressMarkup) + progressMarkup.Length, 8));
 
-            currentFileItem.EncodeProgress = string.Format("{0:N2}%", (durationDone * 100.00 / (double)currentFileItem.FileContainer.SourceFileItem.VideoDuration.Value)).Replace(',','.');
+            currentFileItem.EncodeProgress = string.Format("{0:N2}%", (durationDone * 100.00 / (double) currentFileItem.FileContainer.SourceFileItem.VideoDuration.Value)).Replace(',', '.');
         }
 
         private static int GetDurationInSeconds(string durationStr)

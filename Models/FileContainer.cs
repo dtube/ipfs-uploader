@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
 using Uploader.Managers;
 
 namespace Uploader.Models
@@ -9,7 +10,10 @@ namespace Uploader.Models
     {
         private static long nbInstance;
 
-        public long NumInstance { get; }
+        public long NumInstance
+        {
+            get;
+        }
 
         public static FileContainer NewVideoContainer(string sourceFilePath, params VideoSize[] videoSizes)
         {
@@ -19,7 +23,7 @@ namespace Uploader.Models
 
             fileContainer.EncodedFileItems = new List<FileItem>();
             foreach (VideoSize videoSize in videoSizes)
-            {   
+            {
                 fileContainer.EncodedFileItems.Add(FileItem.NewEncodedVideoFileItem(fileContainer, videoSize));
             }
 
@@ -30,7 +34,6 @@ namespace Uploader.Models
         {
             SpriteVideoFileItem = FileItem.NewSpriteVideoFileItem(this);
         }
-
 
         public static FileContainer NewImageContainer(string sourceFilePath)
         {
@@ -43,7 +46,7 @@ namespace Uploader.Models
 
         public void SetOverlay(string filePath)
         {
-            if(TypeContainer != TypeContainer.Image)
+            if (TypeContainer != TypeContainer.Image)
                 throw new InvalidOperationException("operation overlay possible que sur image");
 
             OverlayFileItem = FileItem.NewAttachedImageFileItem(this, filePath);
@@ -60,34 +63,54 @@ namespace Uploader.Models
             ProgressManager.RegisterProgress(this);
         }
 
-        public Guid ProgressToken { get; }
+        public Guid ProgressToken
+        {
+            get;
+        }
 
-        public TypeContainer TypeContainer { get; }
+        public TypeContainer TypeContainer
+        {
+            get;
+        }
 
-        public FileItem SourceFileItem { get; private set; }
+        public FileItem SourceFileItem
+        {
+            get;
+            private set;
+        }
 
-        public FileItem SpriteVideoFileItem { get; private set; }
+        public FileItem SpriteVideoFileItem
+        {
+            get;
+            private set;
+        }
 
-        public IList<FileItem> EncodedFileItems { get; private set; }
+        public IList<FileItem> EncodedFileItems
+        {
+            get;
+            private set;
+        }
 
-
-        public FileItem OverlayFileItem { get; private set; }
-
+        public FileItem OverlayFileItem
+        {
+            get;
+            private set;
+        }
 
         public bool WorkInProgress()
         {
-            if(SourceFileItem.WorkInProgress())
+            if (SourceFileItem.WorkInProgress())
                 return true;
 
-            switch(TypeContainer)
+            switch (TypeContainer)
             {
                 case TypeContainer.Video:
-                    if(SpriteVideoFileItem != null && SpriteVideoFileItem.WorkInProgress())
+                    if (SpriteVideoFileItem != null && SpriteVideoFileItem.WorkInProgress())
                         return true;
                     return EncodedFileItems.Any(f => f.WorkInProgress());
 
                 case TypeContainer.Image:
-                    if(OverlayFileItem != null && OverlayFileItem.WorkInProgress())
+                    if (OverlayFileItem != null && OverlayFileItem.WorkInProgress())
                         return true;
                     return false;
 

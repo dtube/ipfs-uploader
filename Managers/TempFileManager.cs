@@ -21,10 +21,11 @@ namespace Uploader.Managers
             try
             {
                 // suppression du fichier temporaire, ne pas jeter d'exception en cas d'erreur
-                if(File.Exists(filePath))
+                if (File.Exists(filePath))
                     File.Delete(filePath);
             }
-            catch {}
+            catch
+            {}
         }
 
         public static void SafeDeleteTempFiles(string filePath)
@@ -32,12 +33,13 @@ namespace Uploader.Managers
             try
             {
                 // suppression des images temporaires s'ils sont présent
-                foreach(string filePath2 in SpriteManager.GetListImageFrom(filePath))
+                foreach (string filePath2 in SpriteManager.GetListImageFrom(filePath))
                 {
                     File.Delete(filePath2);
                 }
             }
-            catch {}
+            catch
+            {}
         }
     }
 }

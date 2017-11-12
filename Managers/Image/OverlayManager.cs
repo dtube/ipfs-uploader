@@ -13,10 +13,10 @@ namespace Uploader.Managers
             {
                 using(Image imageToOverlay = Image.FromFile(imageToOverlayPath))
                 {
-                    using (Graphics graphics = Graphics.FromImage(imageToOverlay))
+                    using(Graphics graphics = Graphics.FromImage(imageToOverlay))
                     {
                         // Si position n'est pas fournie, centrer l'image
-                        if(x == null || y == null)
+                        if (x == null || y == null)
                         {
                             x = (imageToOverlay.Width / 2) - (overlayImage.Width / 2);
                             y = (imageToOverlay.Height / 2) - (overlayImage.Height / 2);
@@ -26,7 +26,7 @@ namespace Uploader.Managers
                         graphics.DrawImage(overlayImage, x.Value, y.Value);
                         //graphics.Save();
                     }
-                    
+
                     imageToOverlay.Save(outputPath, ImageFormat.Png);
                 }
             }

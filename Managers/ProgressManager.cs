@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+
 using Uploader.Models;
 
 namespace Uploader.Managers
@@ -41,9 +42,9 @@ namespace Uploader.Managers
 
         public static FileContainer GetFileContainerByChildHash(string hash)
         {
-            return progresses.Values.Where(s => 
-                    s.OverlayFileItem.IpfsHash == hash || 
-                    s.SpriteVideoFileItem.IpfsHash == hash || 
+            return progresses.Values.Where(s =>
+                    s.OverlayFileItem.IpfsHash == hash ||
+                    s.SpriteVideoFileItem.IpfsHash == hash ||
                     s.EncodedFileItems.Any(v => v.IpfsHash == hash)
                 )
                 .OrderByDescending(s => s.NumInstance)

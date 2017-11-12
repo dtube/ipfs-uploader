@@ -13,7 +13,7 @@ namespace Uploader.Models
 
         public static FileItem NewEncodedVideoFileItem(FileContainer fileContainer, VideoSize videoSize)
         {
-            if(videoSize == VideoSize.Undefined)
+            if (videoSize == VideoSize.Undefined)
                 throw new InvalidOperationException("VideoSize inconnu");
 
             FileItem fileItem = new FileItem(fileContainer, null, false);
@@ -48,12 +48,19 @@ namespace Uploader.Models
             FilePath = filePath;
         }
 
-        public bool IsSource { get; }
+        public bool IsSource
+        {
+            get;
+        }
 
-        public long? FileSize { get; set; }
+        public long? FileSize
+        {
+            get;
+            set;
+        }
 
         public string FilePath
-        { 
+        {
             get
             {
                 return _filePath;
@@ -62,30 +69,44 @@ namespace Uploader.Models
             {
                 _filePath = value;
 
-                if(System.IO.File.Exists(_filePath))
+                if (System.IO.File.Exists(_filePath))
                     FileSize = new System.IO.FileInfo(_filePath).Length;
             }
         }
         private string _filePath;
 
-        public FileContainer FileContainer { get; }
+        public FileContainer FileContainer
+        {
+            get;
+        }
 
-        public bool ModeSprite { get; private set; }
+        public bool ModeSprite
+        {
+            get;
+            private set;
+        }
 
         public bool WorkInProgress()
         {
-            if(!string.IsNullOrWhiteSpace(IpfsErrorMessage))
+            if (!string.IsNullOrWhiteSpace(IpfsErrorMessage))
                 return false;
-            if(!string.IsNullOrWhiteSpace(EncodeErrorMessage))
+            if (!string.IsNullOrWhiteSpace(EncodeErrorMessage))
                 return false;
 
             return string.IsNullOrWhiteSpace(IpfsHash);
         }
 
+        public int? IpfsPositionInQueue
+        {
+            get;
+            set;
+        }
 
-        public int? IpfsPositionInQueue { get; set; }
-
-        public string IpfsHash { get; set; }
+        public string IpfsHash
+        {
+            get;
+            set;
+        }
 
         private string _ipfsProgress;
 
@@ -103,16 +124,29 @@ namespace Uploader.Models
             }
         }
 
-        public DateTime? IpfsLastTimeProgressChanged { get; set; }
+        public DateTime? IpfsLastTimeProgressChanged
+        {
+            get;
+            set;
+        }
 
-        public string IpfsErrorMessage { get; set; }
+        public string IpfsErrorMessage
+        {
+            get;
+            set;
+        }
 
+        public VideoSize VideoSize
+        {
+            get;
+            private set;
+        }
 
-
-
-        public VideoSize VideoSize { get; private set; }
-
-        public int? EncodePositionInQueue { get; set; }
+        public int? EncodePositionInQueue
+        {
+            get;
+            set;
+        }
 
         private string _encodeProgress;
 
@@ -134,10 +168,22 @@ namespace Uploader.Models
         /// in seconds
         /// </summary>
         /// <returns></returns>
-        public int? VideoDuration { get; set; }
+        public int? VideoDuration
+        {
+            get;
+            set;
+        }
 
-        public DateTime? EncodeLastTimeProgressChanged { get; set; }
+        public DateTime? EncodeLastTimeProgressChanged
+        {
+            get;
+            set;
+        }
 
-        public string EncodeErrorMessage { get; set; }
+        public string EncodeErrorMessage
+        {
+            get;
+            set;
+        }
     }
 }
