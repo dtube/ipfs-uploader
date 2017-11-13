@@ -156,6 +156,8 @@ namespace Uploader.Managers
             if (string.IsNullOrWhiteSpace(output))
                 return;
 
+            Debug.WriteLine(output);
+            
             const string durationMarkup = "  Duration: "; // "  Duration: 00:01:42.11"
             const string progressMarkup = " time="; // " time=00:01:42.08"
 
