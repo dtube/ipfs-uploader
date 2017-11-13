@@ -73,8 +73,17 @@ namespace Uploader.Managers
                     }
                     catch
                     {}
-                }
 
+                    for (int i = 0; i < 5; i++)
+                    {
+                        //si pas trouver la durée
+                        if ((currentFileItem.FileContainer.SourceFileItem.VideoDuration??0) <= 0)
+                            System.Threading.Thread.Sleep(1000);
+                        else
+                            break;
+                    }
+                }
+                
                 // si durée totale de vidéo non récupérer, on ne peut pas continuer
                 if ((currentFileItem.FileContainer.SourceFileItem.VideoDuration??0) <= 0)
                 {
