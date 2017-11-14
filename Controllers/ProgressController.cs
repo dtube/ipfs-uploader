@@ -1,8 +1,7 @@
 using System;
+using System.Diagnostics;
 using System.IO;
-
 using System.Linq;
-
 using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Mvc;
@@ -13,7 +12,6 @@ using Uploader.Daemons;
 using Uploader.Helper;
 using Uploader.Managers;
 using Uploader.Models;
-
 
 namespace Uploader.Controllers
 {
@@ -63,26 +61,27 @@ namespace Uploader.Controllers
                             sprite = new
                             {
                                 spriteCreation = EncodeResultJson(fileContainer.SpriteVideoFileItem),
-                                    ipfsAddSprite = IpfsResultJson(fileContainer.SpriteVideoFileItem)
+                                ipfsAddSprite = IpfsResultJson(fileContainer.SpriteVideoFileItem)
                             },
                             encodedVideos = fileContainer.EncodedFileItems
-                            .Select(e =>
-                                new
-                                {
-                                    encode = EncodeResultJson(e),
+                                .Select(e =>
+                                    new
+                                    {
+                                        encode = EncodeResultJson(e),
                                         ipfsAddEncodeVideo = IpfsResultJson(e)
-                                })
-                            .ToArray()
+                                    })
+                                .ToArray()
                     });
 
                 case TypeContainer.Image:
                     return Json(new
                     {
                         ipfsAddSource = IpfsResultJson(fileContainer.SourceFileItem),
-                            ipfsAddOverlay = IpfsResultJson(fileContainer.OverlayFileItem)
+                        ipfsAddOverlay = IpfsResultJson(fileContainer.OverlayFileItem)
                     });
             }
 
+            Debug.WriteLine("Type container non géré " + fileContainer.TypeContainer);
             throw new InvalidOperationException("type container non géré");
         }
 

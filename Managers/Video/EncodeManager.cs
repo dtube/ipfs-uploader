@@ -131,6 +131,8 @@ namespace Uploader.Managers
             }
             catch (Exception ex)
             {
+                Debug.WriteLine("Exception Encode Video : {0}", ex);
+
                 currentFileItem.EncodeErrorMessage = ex.Message;
 
                 TempFileManager.SafeDeleteTempFile(newEncodedFilePath);

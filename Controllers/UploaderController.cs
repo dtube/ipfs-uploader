@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -7,7 +8,6 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 using Uploader.Attributes;
 using Uploader.Helper;
-
 using Uploader.Managers;
 
 namespace Uploader.Controllers
@@ -30,6 +30,7 @@ namespace Uploader.Controllers
             }
             catch (Exception ex)
             {
+                Debug.WriteLine("Exception Upload Video : {0}", ex);
                 return BadRequest(new
                 {
                     errorMessage = ex.Message
@@ -52,6 +53,7 @@ namespace Uploader.Controllers
             }
             catch (Exception ex)
             {
+                Debug.WriteLine("Exception Upload Image : {0}", ex);
                 return BadRequest(new
                 {
                     errorMessage = ex.Message
@@ -75,8 +77,9 @@ namespace Uploader.Controllers
                 //var fileName = formModel.GetValue("qqFileName");
                 return sourceFilePath;
             }
-            catch
+            catch(Exception ex)
             {
+                Debug.WriteLine("Exception Download File : {0}", ex);
                 TempFileManager.SafeDeleteTempFile(sourceFilePath);
                 throw;
             }

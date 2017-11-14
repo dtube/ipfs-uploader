@@ -59,6 +59,7 @@ namespace Uploader.Managers
             }
             catch (Exception ex)
             {
+                Debug.WriteLine("Exception Ipfs Add : {0}", ex);
                 currentFileItem.IpfsErrorMessage = ex.Message;
             }
         }
