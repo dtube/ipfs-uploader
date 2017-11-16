@@ -43,9 +43,9 @@ namespace Uploader.Managers
         public static FileContainer GetFileContainerByChildHash(string hash)
         {
             return progresses.Values.Where(s =>
-                    s.OverlayFileItem.IpfsHash == hash ||
-                    s.SpriteVideoFileItem.IpfsHash == hash ||
-                    s.EncodedFileItems.Any(v => v.IpfsHash == hash)
+                    s?.OverlayFileItem?.IpfsHash == hash ||
+                    s?.SpriteVideoFileItem?.IpfsHash == hash ||
+                    (s?.EncodedFileItems.Any(v => v.IpfsHash == hash)??false)
                 )
                 .OrderByDescending(s => s.NumInstance)
                 .FirstOrDefault();
