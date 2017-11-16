@@ -20,7 +20,7 @@
                 "args": "${auto-detect-url}",
                 "windows": {
                     "command": "cmd.exe",
-                    "args": "/C start ${auto-detect-url}/Index.html"
+                    "args": "/C start ${auto-detect-url}/index.html"
                 },
                 "osx": {
                     "command": "open"
