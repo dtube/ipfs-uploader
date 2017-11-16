@@ -2,6 +2,7 @@ using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.IO;
 
 namespace Uploader.Managers
 {
@@ -9,26 +10,41 @@ namespace Uploader.Managers
     {
         public static void Overlay(string overlayImagePath, string imageToOverlayPath, string outputPath, int? x = null, int? y = null)
         {
-            using(Image overlayImage = Image.FromFile(overlayImagePath))
+            try
             {
-                using(Image imageToOverlay = Image.FromFile(imageToOverlayPath))
+                using(Image overlayImage = Image.FromFile(overlayImagePath))
                 {
-                    using(Graphics graphics = Graphics.FromImage(imageToOverlay))
+                    using(Image imageToOverlay = Image.FromFile(imageToOverlayPath))
                     {
-                        // Si position n'est pas fournie, centrer l'image
-                        if (x == null || y == null)
+                        using(Graphics graphics = Graphics.FromImage(imageToOverlay))
                         {
-                            x = (imageToOverlay.Width / 2) - (overlayImage.Width / 2);
-                            y = (imageToOverlay.Height / 2) - (overlayImage.Height / 2);
+                            // Si position n'est pas fournie, centrer l'image
+                            if (x == null || y == null)
+                            {
+                                x = (imageToOverlay.Width / 2) - (overlayImage.Width / 2);
+                                y = (imageToOverlay.Height / 2) - (overlayImage.Height / 2);
+                            }
+
+                            graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                            graphics.DrawImage(overlayImage, x.Value, y.Value);
+                            //graphics.Save();
                         }
 
-                        graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                        graphics.DrawImage(overlayImage, x.Value, y.Value);
-                        //graphics.Save();
+                        imageToOverlay.Save(outputPath, ImageFormat.Png);
                     }
-
-                    imageToOverlay.Save(outputPath, ImageFormat.Png);
                 }
+            }
+            catch(Exception ex)
+            {
+                string logDirectory = Path.Combine(Directory.GetCurrentDirectory(), "logs");
+                if (!Directory.Exists(logDirectory))
+                    Directory.CreateDirectory(logDirectory);
+                File.AppendAllLines(Path.Combine(logDirectory, "imagesException.log"), new []
+                {
+                    DateTime.UtcNow.ToString("o") + " " + ex.ToString()
+                });
+
+                throw;
             }
         }
     }
