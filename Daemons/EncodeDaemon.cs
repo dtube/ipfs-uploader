@@ -57,12 +57,18 @@ namespace Uploader.Daemons
                         {
                             string[] files = SpriteManager.GetListImageFrom(fileItem.FilePath); // récupération des images
                             string outputPath = TempFileManager.GetNewTempFilePath(); // nom du fichier sprite
-                            SpriteManager.CombineBitmap(files, outputPath); // création du sprite
-                            TempFileManager.SafeDeleteTempFiles(fileItem.FilePath); // suppression des images
-                            fileItem.FilePath = outputPath; // réaffectation chemin sprite
+                            bool successSprite = SpriteManager.CombineBitmap(files, outputPath); // création du sprite
+                            if(successSprite)
+                            {
+                                TempFileManager.SafeDeleteTempFiles(fileItem.FilePath); // suppression des images
+                                fileItem.FilePath = outputPath; // réaffectation chemin sprite
+                                IpfsDaemon.Queue(fileItem);
+                            }
                         }
-
-                        IpfsDaemon.Queue(fileItem);
+                        else
+                        {
+                            IpfsDaemon.Queue(fileItem);
+                        }
                     }
                 }
             });

@@ -21,9 +21,12 @@ namespace Uploader.Managers
             {
                 fileContainer.SourceFileItem.IpfsErrorMessage = "ipfs not asked";
                 string outputPath = TempFileManager.GetNewTempFilePath();
-                OverlayManager.Overlay(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "overlay.jpeg"), fileContainer.SourceFileItem.FilePath, outputPath);
-                fileContainer.SetOverlay(outputPath);
-                IpfsDaemon.Queue(fileContainer.OverlayFileItem);
+                bool success = OverlayManager.Overlay(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "overlay.jpeg"), fileContainer.SourceFileItem.FilePath, outputPath);
+                if(success)
+                {
+                    fileContainer.SetOverlay(outputPath);
+                    IpfsDaemon.Queue(fileContainer.OverlayFileItem);
+                }
             }
 
             return fileContainer.ProgressToken;

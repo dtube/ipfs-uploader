@@ -8,7 +8,7 @@ namespace Uploader.Managers
 {
     public class OverlayManager
     {
-        public static void Overlay(string overlayImagePath, string imageToOverlayPath, string outputPath, int? x = null, int? y = null)
+        public static bool Overlay(string overlayImagePath, string imageToOverlayPath, string outputPath, int? x = null, int? y = null)
         {
             try
             {
@@ -33,6 +33,8 @@ namespace Uploader.Managers
                         imageToOverlay.Save(outputPath, ImageFormat.Png);
                     }
                 }
+
+                return true;
             }
             catch(Exception ex)
             {
@@ -44,7 +46,7 @@ namespace Uploader.Managers
                     DateTime.UtcNow.ToString("o") + " " + ex.ToString()
                 });
 
-                throw;
+                return false;
             }
         }
     }

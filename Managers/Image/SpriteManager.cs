@@ -10,7 +10,7 @@ namespace Uploader.Managers
 {
     public class SpriteManager
     {
-        public static void CombineBitmap(string[] filesToCombine, string outputFilePath)
+        public static bool CombineBitmap(string[] filesToCombine, string outputFilePath)
         {
             //read all images into memory
             var images = new List<Image>();
@@ -58,6 +58,7 @@ namespace Uploader.Managers
                     }
                     finalBitmap.Save(outputFilePath, ImageFormat.Png);
                 }
+                return true;
             }
             catch(Exception ex)
             {
@@ -69,7 +70,7 @@ namespace Uploader.Managers
                     DateTime.UtcNow.ToString("o") + " " + ex.ToString()
                 });
 
-                throw;
+                return false;
             }
             finally
             {
