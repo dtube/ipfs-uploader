@@ -44,7 +44,7 @@ namespace Uploader.Managers
                     using(Graphics g = Graphics.FromImage(finalBitmap))
                     {
                         //set background color
-                        g.Clear(Color.Transparent);
+                        //g.Clear(Color.Transparent);
 
                         // Ajoute les images les unes à la suite des autres verticalement
                         int offset = 0;
@@ -82,12 +82,12 @@ namespace Uploader.Managers
             }
         }
 
-        public static Bitmap ResizeImage(Image image, int width, int height)
+        public static Bitmap ResizeImage(Image image, int destWidth, int destHeight)
         {
-            var destRect = new Rectangle(0, 0, width, height);
-            var destImage = new Bitmap(width, height);
+            var destRect = new Rectangle(0, 0, destWidth, destHeight);
+            var destImage = new Bitmap(destWidth, destHeight, image.PixelFormat);
 
-            destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
+            //destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
             using(var graphics = Graphics.FromImage(destImage))
             {
