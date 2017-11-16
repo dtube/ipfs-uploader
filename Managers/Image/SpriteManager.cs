@@ -59,6 +59,18 @@ namespace Uploader.Managers
                     finalBitmap.Save(outputFilePath, ImageFormat.Png);
                 }
             }
+            catch(Exception ex)
+            {
+                string logDirectory = Path.Combine(Directory.GetCurrentDirectory(), "logs");
+                if (!Directory.Exists(logDirectory))
+                    Directory.CreateDirectory(logDirectory);
+                File.AppendAllLines(Path.Combine(logDirectory, "spriteException.log"), new []
+                {
+                    DateTime.UtcNow.ToString("o") + " " + ex.ToString()
+                });
+
+                throw;
+            }
             finally
             {
                 //clean up memory
