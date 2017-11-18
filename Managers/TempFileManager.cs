@@ -28,18 +28,13 @@ namespace Uploader.Managers
             {}
         }
 
-        public static void SafeDeleteTempFiles(string filePath)
+        public static void SafeDeleteTempFiles(string[] filesPath)
         {
-            try
+            // suppression des images
+            foreach (string filePath in filesPath)
             {
-                // suppression des images temporaires s'ils sont présent
-                foreach (string filePath2 in SpriteManager.GetListImageFrom(filePath))
-                {
-                    File.Delete(filePath2);
-                }
+                SafeDeleteTempFile(filePath);
             }
-            catch
-            {}
         }
     }
 }

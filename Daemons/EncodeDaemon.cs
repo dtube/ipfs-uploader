@@ -56,11 +56,11 @@ namespace Uploader.Daemons
                         if (fileItem.ModeSprite)
                         {
                             string[] files = SpriteManager.GetListImageFrom(fileItem.FilePath); // récupération des images
-                            string outputPath = TempFileManager.GetNewTempFilePath(); // nom du fichier sprite
+                            string outputPath = System.IO.Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".png"); // nom du fichier sprite
                             bool successSprite = SpriteManager.CombineBitmap(files, outputPath); // création du sprite
+                            TempFileManager.SafeDeleteTempFiles(files); // suppression des images
                             if(successSprite)
-                            {
-                                TempFileManager.SafeDeleteTempFiles(fileItem.FilePath); // suppression des images
+                            {                                
                                 fileItem.FilePath = outputPath; // réaffectation chemin sprite
                                 IpfsDaemon.Queue(fileItem);
                             }

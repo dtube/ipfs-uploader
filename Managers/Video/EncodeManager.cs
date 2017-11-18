@@ -21,8 +21,7 @@ namespace Uploader.Managers
                 currentFileItem.EncodeProgress = "0.00%";
 
                 string sourceFilePath = currentFileItem.FileContainer.SourceFileItem.FilePath;
-                newEncodedFilePath = TempFileManager.GetNewTempFilePath();
-                newEncodedFilePath = Path.ChangeExtension(newEncodedFilePath, ".mp4");
+                newEncodedFilePath = Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".mp4");
                 VideoSize videoSize = currentFileItem.VideoSize;
 
                 Debug.WriteLine(Path.GetFileName(sourceFilePath) + " / " + videoSize);
