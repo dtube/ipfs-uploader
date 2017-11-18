@@ -113,7 +113,7 @@ namespace Uploader.Managers
 
         public static string[] GetListImageFrom(string filePath)
         {
-            return Directory.EnumerateFiles(Path.GetDirectoryName(filePath), Path.GetFileNameWithoutExtension(filePath) + "*.jpeg").ToArray();
+            return Directory.EnumerateFiles(Path.GetDirectoryName(filePath), Path.GetFileNameWithoutExtension(filePath) + "-*.jpeg").OrderBy(s => s).ToArray();
         }
     }
 }
