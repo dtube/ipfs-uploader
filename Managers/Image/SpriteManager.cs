@@ -23,12 +23,7 @@ namespace Uploader.Managers
                 foreach (string imagePath in filesToCombine)
                 {
                     // create a Bitmap from the file and add it to the list
-                    Image imageSource = Image.FromFile(imagePath);
-
-                    // calculer largeur suivant le ratio de l'image pour garder 118 en hauteur
-                    int largeur = imageSource.Width * 118 / imageSource.Height;
-                    Image image = ResizeImage(imageSource, largeur, 118);
-                    imageSource.Dispose();
+                    Image image = Image.FromFile(imagePath);                  
 
                     // update the size of the final bitmap
                     height += image.Height;
@@ -74,11 +69,15 @@ namespace Uploader.Managers
             }
             finally
             {
-                //clean up memory
-                foreach (Image image in images)
+                try
                 {
-                    image.Dispose();
+                    //clean up memory
+                    foreach (Image image in images)
+                    {
+                        image.Dispose();
+                    }
                 }
+                catch{}
             }
         }
 

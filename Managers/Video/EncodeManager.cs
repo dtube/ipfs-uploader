@@ -102,9 +102,11 @@ namespace Uploader.Managers
                         frameRate = duration / 100;
                     }
 
+                    string sizeImageMax = "scale=w=210:h=118:force_original_aspect_ratio=decrease";
+
                     // extract frameRate image/s de la video
                     string pattern = SpriteManager.GetPattern(newEncodedFilePath);
-                    processStartInfo.Arguments = $"-y -i {sourceFilePath} -r {frameRate} -f image2 {pattern}";
+                    processStartInfo.Arguments = $"-y -i {sourceFilePath} -r {frameRate} -vf \"{sizeImageMax}\" -f image2 {pattern}";
 
                     StartProcess(processStartInfo, 2 * 60 * 1000); // 2 minutes
                 }
@@ -112,13 +114,13 @@ namespace Uploader.Managers
                 {
                     string size;
                     if (videoSize == VideoSize.F720p)
-                        size = "1280x720";
+                        size = "scale=w=1280:h=720:force_original_aspect_ratio=decrease";
                     else if (videoSize == VideoSize.F480p)
-                        size = "720x480";
+                        size = "scale=w=720:h=480:force_original_aspect_ratio=decrease";
                     else
                         throw new InvalidOperationException("le format doit etre défini");
 
-                    processStartInfo.Arguments = $"-y -i {sourceFilePath} -crf 20 -vcodec libx264 -r 24 -s {size} -acodec aac -ar 44100 -ab 128k -ac 2 {newEncodedFilePath}";
+                    processStartInfo.Arguments = $"-y -i {sourceFilePath} -crf 20 -vcodec libx264 -r 24 -vf \"{size}\" -acodec aac -ar 44100 -ab 128k -ac 2 {newEncodedFilePath}";
 
                     StartProcess(processStartInfo, 10 * 60 * 60 * 1000); // 10 heures
                 }
