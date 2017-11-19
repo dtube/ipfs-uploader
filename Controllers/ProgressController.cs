@@ -58,19 +58,19 @@ namespace Uploader.Controllers
                     return Json(new
                     {
                         ipfsAddSourceVideo = IpfsResultJson(fileContainer.SourceFileItem),
-                            sprite = new
-                            {
-                                spriteCreation = EncodeResultJson(fileContainer.SpriteVideoFileItem),
-                                ipfsAddSprite = IpfsResultJson(fileContainer.SpriteVideoFileItem)
-                            },
-                            encodedVideos = fileContainer.EncodedFileItems
-                                .Select(e =>
-                                    new
-                                    {
-                                        encode = EncodeResultJson(e),
-                                        ipfsAddEncodeVideo = IpfsResultJson(e)
-                                    })
-                                .ToArray()
+                        sprite = fileContainer.SpriteVideoFileItem == null ? null : (new
+                        {
+                            spriteCreation = EncodeResultJson(fileContainer.SpriteVideoFileItem),
+                            ipfsAddSprite = IpfsResultJson(fileContainer.SpriteVideoFileItem)
+                        }),
+                        encodedVideos = fileContainer.EncodedFileItems
+                            .Select(e =>
+                                new
+                                {
+                                    encode = EncodeResultJson(e),
+                                    ipfsAddEncodeVideo = IpfsResultJson(e)
+                                })
+                            .ToArray()
                     });
 
                 case TypeContainer.Image:
@@ -88,7 +88,7 @@ namespace Uploader.Controllers
         private dynamic IpfsResultJson(FileItem fileItem)
         {
             if (fileItem == null)
-                return string.Empty;
+                return null;
 
             return new
             {
@@ -104,7 +104,7 @@ namespace Uploader.Controllers
         private dynamic EncodeResultJson(FileItem fileItem)
         {
             if (fileItem == null)
-                return string.Empty;
+                return null;
 
             return new
             {
