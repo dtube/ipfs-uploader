@@ -37,30 +37,6 @@ namespace Uploader.Managers
                 processStartInfo.CreateNoWindow = true;
                 processStartInfo.WindowStyle = ProcessWindowStyle.Hidden;
 
-                // global options
-                // -y loglevel error    : overwrite outputfile
-
-                // input File options
-
-                // input File
-                // -i {sourceFilePath}  : chemin fichier entrant
-
-                // output File options
-                // -b:v 64k -bufsize 64k: video bitrate of the output file to 64 kbit/s
-                // -crf 20              : ??
-                // -vcodec libx264      : choix codec video libx264 (ou -c:v libx264 ou -codec:v libx264)
-                // -r 24                : frame rate 24fps
-                // -s {size}            : taille de la video sortante
-                // -f image2            : format vidéo sortant
-
-                // -acodec aac          : choix codec audio aac (ou -c:a aac ou -codec:a aac)
-                // -ar 44100            : 
-                // -ab 128k             : 
-                // -ac 2                : number of audio channel
-
-                // output File
-                // {newEncodedFilePath} : chemin fichier sortant (foo-%03d.jpeg)
-
                 // Récupérer la durée totale de la vidéo
                 if (!currentFileItem.FileContainer.SourceFileItem.VideoDuration.HasValue)
                 {
@@ -102,7 +78,7 @@ namespace Uploader.Managers
                         frameRate = "100/" + duration;
                     }
 
-                    string sizeImageMax = "scale=w=210:h=118:force_original_aspect_ratio=decrease";
+                    string sizeImageMax = "scale=210:118";
 
                     // extract frameRate image/s de la video
                     string pattern = SpriteManager.GetPattern(newEncodedFilePath);
@@ -114,13 +90,13 @@ namespace Uploader.Managers
                 {
                     string size;
                     if (videoSize == VideoSize.F720p)
-                        size = "scale=w=1280:h=720:force_original_aspect_ratio=decrease";
+                        size = "scale=1280:720";
                     else if (videoSize == VideoSize.F480p)
-                        size = "scale=w=720:h=480:force_original_aspect_ratio=decrease";
+                        size = "scale=720:480";
                     else
-                        throw new InvalidOperationException("le format doit etre défini");
+                        throw new InvalidOperationException("Le format doit être défini.");
 
-                    processStartInfo.Arguments = $"-y -i {sourceFilePath} -crf 20 -vcodec libx264 -r 24 -vf \"{size}\" -acodec aac -ar 44100 -ab 128k -ac 2 {newEncodedFilePath}";
+                    processStartInfo.Arguments = $"-y -i {sourceFilePath} -vcodec libx264 -vf \"{size}\" -acodec aac {newEncodedFilePath}";
 
                     StartProcess(processStartInfo, 10 * 60 * 60 * 1000); // 10 heures
                 }
@@ -143,6 +119,7 @@ namespace Uploader.Managers
 
         private static void StartProcess(ProcessStartInfo processStartInfo, int timeout)
         {
+            Debug.WriteLine("===> Launch : " + processStartInfo.FileName + " " + processStartInfo.Arguments);
             using(var process = Process.Start(processStartInfo))
             {
                 process.ErrorDataReceived += new DataReceivedEventHandler(ErrorDataReceived);
