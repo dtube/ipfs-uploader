@@ -96,10 +96,10 @@ namespace Uploader.Managers
                     // calculer nb image/s
                     //  si < 100s de vidéo -> 1 image/s
                     //  sinon (nb secondes de la vidéo / 100) image/s
-                    int frameRate = 1;
+                    string frameRate = "1";
                     if (duration > 100)
                     {
-                        frameRate = duration / 100;
+                        frameRate = "100/" + duration;
                     }
 
                     string sizeImageMax = "scale=w=210:h=118:force_original_aspect_ratio=decrease";

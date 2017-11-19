@@ -36,20 +36,15 @@ namespace Uploader.Managers
                 using(var finalBitmap = new Bitmap(width, height))
                 {
                     //get a graphics object from the image so we can draw on it
-                    using(Graphics g = Graphics.FromImage(finalBitmap))
+                    using(Graphics graphics = Graphics.FromImage(finalBitmap))
                     {
-                        //set background color
-                        //g.Clear(Color.Transparent);
-
                         // Ajoute les images les unes à la suite des autres verticalement
                         int offset = 0;
                         foreach (Image image in images)
                         {
-                            g.DrawImage(image, new Rectangle(0, offset, image.Width, image.Height));
+                            graphics.DrawImage(image, new Rectangle(0, offset, image.Width, image.Height));
                             offset += image.Height;
                         }
-
-                        //g.Save();
                     }
                     finalBitmap.Save(outputFilePath, ImageFormat.Png);
                 }
@@ -79,31 +74,6 @@ namespace Uploader.Managers
                 }
                 catch{}
             }
-        }
-
-        public static Bitmap ResizeImage(Image image, int destWidth, int destHeight)
-        {
-            var destRect = new Rectangle(0, 0, destWidth, destHeight);
-            var destImage = new Bitmap(destWidth, destHeight, image.PixelFormat);
-
-            //destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
-
-            using(var graphics = Graphics.FromImage(destImage))
-            {
-                graphics.CompositingMode = CompositingMode.SourceCopy;
-                graphics.CompositingQuality = CompositingQuality.HighQuality;
-                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                graphics.SmoothingMode = SmoothingMode.HighQuality;
-                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
-
-                using(var wrapMode = new ImageAttributes())
-                {
-                    wrapMode.SetWrapMode(WrapMode.TileFlipXY);
-                    graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
-                }
-            }
-
-            return destImage;
         }
 
         public static string GetPattern(string filePath)
