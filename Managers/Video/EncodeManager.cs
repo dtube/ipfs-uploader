@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 
@@ -20,7 +21,8 @@ namespace Uploader.Managers
                 currentFileItem = fileItem;
                 currentFileItem.EncodeProgress = "0.00%";
 
-                string sourceFilePath = currentFileItem.FileContainer.SourceFileItem.FilePath;
+                FileItem sourceFile = currentFileItem.FileContainer.SourceFileItem;
+                string sourceFilePath = sourceFile.FilePath;
                 newEncodedFilePath = Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".mp4");
                 VideoSize videoSize = currentFileItem.VideoSize;
 
@@ -37,35 +39,31 @@ namespace Uploader.Managers
                 processStartInfo.CreateNoWindow = true;
                 processStartInfo.WindowStyle = ProcessWindowStyle.Hidden;
 
-                // Récupérer la durée totale de la vidéo
-                if (!currentFileItem.FileContainer.SourceFileItem.VideoDuration.HasValue)
+                // Récupérer la durée totale de la vidéo et sa résolution
+                if (!sourceFile.VideoDuration.HasValue)
                 {
-                    processStartInfo.Arguments = $"-i {sourceFilePath}";
+                    string imageOutput = System.IO.Path.ChangeExtension(sourceFilePath, ".jpeg");
+                    processStartInfo.Arguments = $"-y -i {sourceFilePath} -vf fps=1 -vframes 1 {imageOutput}";
 
-                    try
-                    {
-                        StartProcess(processStartInfo, 30 * 1000); // 30 secondes
-                    }
-                    catch
-                    {}
+                    StartProcess(processStartInfo, 10 * 1000); // 10 secondes
 
-                    for (int i = 0; i < 5; i++)
+                    using(Image image = Image.FromFile(imageOutput))
                     {
-                        //si pas trouver la durée
-                        if ((currentFileItem.FileContainer.SourceFileItem.VideoDuration??0) <= 0)
-                            System.Threading.Thread.Sleep(1000);
-                        else
-                            break;
+                        sourceFile.VideoWidth = image.Width;
+                        sourceFile.VideoHeight = image.Height;
                     }
+                    TempFileManager.SafeDeleteTempFile(imageOutput);
                 }
                 
-                // si durée totale de vidéo non récupérer, on ne peut pas continuer
-                if ((currentFileItem.FileContainer.SourceFileItem.VideoDuration??0) <= 0)
-                {
+                // si durée totale de vidéo, largeur hauteur non récupéré, on ne peut pas continuer
+                if ((sourceFile.VideoDuration??0) <= 0)
+                    return false;                
+                if ((sourceFile.VideoHeight??0) <= 0)
                     return false;
-                }
+                if ((sourceFile.VideoHeight??0) <= 0)
+                    return false;
 
-                int duration = currentFileItem.FileContainer.SourceFileItem.VideoDuration.Value;
+                int duration = sourceFile.VideoDuration.Value;
 
                 if (currentFileItem.ModeSprite)
                 {
@@ -78,7 +76,8 @@ namespace Uploader.Managers
                         frameRate = "100/" + duration;
                     }
 
-                    string sizeImageMax = "scale=210:118";
+                    int spriteWidth = ImageManager.GetWidth(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, 118);
+                    string sizeImageMax = $"scale={spriteWidth}:118";
 
                     // extract frameRate image/s de la video
                     string pattern = SpriteManager.GetPattern(newEncodedFilePath);
@@ -89,12 +88,39 @@ namespace Uploader.Managers
                 else
                 {
                     string size;
-                    if (videoSize == VideoSize.F720p)
-                        size = "scale=1280:720";
-                    else if (videoSize == VideoSize.F480p)
-                        size = "scale=720:480";
-                    else
-                        throw new InvalidOperationException("Le format doit être défini.");
+                    switch (videoSize)
+                    {
+                        case VideoSize.F360p:
+                            {
+                                var spriteSize = ImageManager.GetSize(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, 640, 360);
+                                size = $"scale={spriteSize.Item1}:{spriteSize.Item2}";
+                                break;
+                            }
+
+                        case VideoSize.F480p:
+                            {
+                                var spriteSize = ImageManager.GetSize(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, 854, 480);
+                                size = $"scale={spriteSize.Item1}:{spriteSize.Item2}";
+                                break;
+                            }
+
+                        case VideoSize.F720p:
+                            {
+                                var spriteSize = ImageManager.GetSize(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, 1280, 720);
+                                size = $"scale={spriteSize.Item1}:{spriteSize.Item2}";
+                                break;
+                            }
+
+                        case VideoSize.F1080p:
+                            {
+                                var spriteSize = ImageManager.GetSize(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, 1920, 1080);
+                                size = $"scale={spriteSize.Item1}:{spriteSize.Item2}";
+                                break;
+                            }
+
+                        default:
+                            throw new InvalidOperationException("Format non reconnu.");
+                    }
 
                     processStartInfo.Arguments = $"-y -i {sourceFilePath} -vcodec libx264 -vf \"{size}\" -acodec aac {newEncodedFilePath}";
 

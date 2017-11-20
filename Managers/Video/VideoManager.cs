@@ -20,12 +20,16 @@ namespace Uploader.Managers
                     {
                         switch (v)
                         {
-                            case "720p":
-                                return VideoSize.F720p;
+                            case "360p":
+                                return VideoSize.F360p;
                             case "480p":
                                 return VideoSize.F480p;
-                            default:
+                            case "720p":
                                 return VideoSize.F720p;
+                            case "1080p":
+                                return VideoSize.F1080p;
+                            default:
+                                throw new InvalidOperationException("Format non reconnu.");
                         }
                     })
                     .ToArray();

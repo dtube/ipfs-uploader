@@ -174,6 +174,26 @@ namespace Uploader.Models
             set;
         }
 
+        /// <summary>
+        /// in seconds
+        /// </summary>
+        /// <returns></returns>
+        public int? VideoHeight
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// in seconds
+        /// </summary>
+        /// <returns></returns>
+        public int? VideoWidth
+        {
+            get;
+            set;
+        }
+
         public DateTime? EncodeLastTimeProgressChanged
         {
             get;

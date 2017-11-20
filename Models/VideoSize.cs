@@ -4,7 +4,9 @@ namespace Uploader.Models
     {
         Undefined,
         Source,
+        F360p,
         F480p,
         F720p,
+        F1080p
     }
 }
