@@ -65,6 +65,16 @@ namespace Uploader.Managers
 
                 int duration = sourceFile.VideoDuration.Value;
 
+                // désactivation encoding et sprite si vidéo > 20 minutes - 1200s
+                if(duration > 1200)
+                {
+                    currentFileItem.EncodeErrorMessage = "Disable because duration greater than 20 minutes";
+                    currentFileItem.FileContainer.EncodedFileItems.Clear();
+                    if(currentFileItem.FileContainer.SpriteVideoFileItem != null)
+                        currentFileItem.FileContainer.SpriteVideoFileItem = null;
+                    return false;
+                }
+
                 if (currentFileItem.ModeSprite)
                 {
                     // calculer nb image/s
@@ -92,28 +102,28 @@ namespace Uploader.Managers
                     {
                         case VideoSize.F360p:
                             {
-                                var spriteSize = ImageManager.GetSize(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, 640, 360);
+                                Tuple<int, int> spriteSize = ImageManager.GetSize(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, 640, 360);
                                 size = $"scale={spriteSize.Item1}:{spriteSize.Item2}";
                                 break;
                             }
 
                         case VideoSize.F480p:
                             {
-                                var spriteSize = ImageManager.GetSize(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, 854, 480);
+                                Tuple<int, int> spriteSize = ImageManager.GetSize(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, 854, 480);
                                 size = $"scale={spriteSize.Item1}:{spriteSize.Item2}";
                                 break;
                             }
 
                         case VideoSize.F720p:
                             {
-                                var spriteSize = ImageManager.GetSize(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, 1280, 720);
+                                Tuple<int, int> spriteSize = ImageManager.GetSize(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, 1280, 720);
                                 size = $"scale={spriteSize.Item1}:{spriteSize.Item2}";
                                 break;
                             }
 
                         case VideoSize.F1080p:
                             {
-                                var spriteSize = ImageManager.GetSize(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, 1920, 1080);
+                                Tuple<int, int> spriteSize = ImageManager.GetSize(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, 1920, 1080);
                                 size = $"scale={spriteSize.Item1}:{spriteSize.Item2}";
                                 break;
                             }

@@ -82,7 +82,7 @@ namespace Uploader.Models
         public FileItem SpriteVideoFileItem
         {
             get;
-            private set;
+            set;
         }
 
         public IList<FileItem> EncodedFileItems
