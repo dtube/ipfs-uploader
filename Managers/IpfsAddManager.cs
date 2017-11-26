@@ -16,6 +16,8 @@ namespace Uploader.Managers
             {
                 currentFileItem = fileItem;
 
+                LogManager.AddIpfsMessage(Path.GetFileName(currentFileItem.FilePath), "Start");
+
                 currentFileItem.IpfsHash = null;
                 currentFileItem.IpfsProgress = "0.00%";
 
@@ -56,10 +58,12 @@ namespace Uploader.Managers
                 }
 
                 currentFileItem.IpfsProgress = "100.00%";
+                LogManager.AddIpfsMessage(currentFileItem.IpfsHash, "End");
             }
             catch (Exception ex)
             {
                 Debug.WriteLine("Exception Ipfs Add : {0}", ex);
+                LogManager.AddIpfsMessage(Path.GetFileName(currentFileItem.FilePath), "Exception");
                 currentFileItem.IpfsErrorMessage = ex.Message;
             }
         }
@@ -92,14 +96,6 @@ namespace Uploader.Managers
             if (output.StartsWith("added "))
             {
                 currentFileItem.IpfsHash = output.Split(' ')[1];
-
-                string logDirectory = Path.Combine(Directory.GetCurrentDirectory(), "logs");
-                if (!Directory.Exists(logDirectory))
-                    Directory.CreateDirectory(logDirectory);
-                File.AppendAllLines(Path.Combine(logDirectory, "ipfsHash.log"), new []
-                {
-                    DateTime.UtcNow.ToString("o") + " " + currentFileItem.IpfsHash
-                });
             }
         }
     }

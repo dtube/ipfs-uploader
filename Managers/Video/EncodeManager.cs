@@ -24,6 +24,7 @@ namespace Uploader.Managers
                 FileItem sourceFile = currentFileItem.FileContainer.SourceFileItem;
                 string sourceFilePath = sourceFile.FilePath;
                 newEncodedFilePath = Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".mp4");
+                LogManager.AddEncodingMessage(Path.GetFileName(newEncodedFilePath), "Start");
                 VideoSize videoSize = currentFileItem.VideoSize;
 
                 Debug.WriteLine(Path.GetFileName(sourceFilePath) + " / " + videoSize);
@@ -139,13 +140,17 @@ namespace Uploader.Managers
 
                 currentFileItem.FilePath = newEncodedFilePath;
                 currentFileItem.EncodeProgress = "100.00%";
+                if(currentFileItem.ModeSprite)
+                    LogManager.AddEncodingMessage(Path.GetFileName(newEncodedFilePath), "End Sprite Duration " + duration + " Format " + videoSize);
+                else
+                    LogManager.AddEncodingMessage(Path.GetFileName(newEncodedFilePath), "End Encoding Duration " + duration + " Format " + videoSize + " FileSize " + currentFileItem.FileSize);
 
                 return true;
             }
             catch (Exception ex)
             {
                 Debug.WriteLine("Exception Encode Video : {0}", ex);
-
+                LogManager.AddEncodingMessage(ex.ToString(), "Exception");
                 currentFileItem.EncodeErrorMessage = ex.Message;
 
                 TempFileManager.SafeDeleteTempFile(newEncodedFilePath);

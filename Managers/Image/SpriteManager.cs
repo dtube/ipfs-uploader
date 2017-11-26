@@ -52,14 +52,7 @@ namespace Uploader.Managers
             }
             catch(Exception ex)
             {
-                string logDirectory = Path.Combine(Directory.GetCurrentDirectory(), "logs");
-                if (!Directory.Exists(logDirectory))
-                    Directory.CreateDirectory(logDirectory);
-                File.AppendAllLines(Path.Combine(logDirectory, "spriteException.log"), new []
-                {
-                    DateTime.UtcNow.ToString("o") + " " + ex.ToString()
-                });
-
+                LogManager.AddSpriteMessage(ex.ToString(), "Exception");
                 return false;
             }
             finally
