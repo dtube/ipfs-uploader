@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
@@ -48,10 +49,19 @@ namespace Uploader.Daemons
 
                     CurrentPositionInQueue++;
 
-                    // Ipfs add file
-                    IpfsAddManager.Add(fileItem);
+                    // Si le client a pas demandé le progress depuis moins  de 10s, lancer l'ipfs add
+                    if((DateTime.UtcNow - fileItem.FileContainer.LastTimeProgressRequested).TotalSeconds <= 10)
+                    {
+                        // Ipfs add file
+                        IpfsAddManager.Add(fileItem);
+                    }
+                    else
+                    {
+                        fileItem.IpfsErrorMessage = "Canceled";
+                        fileItem.IpfsProgress = null;
+                    }
 
-                    // si tout est terminé, supprimer le fichier source
+                    // Si tout est terminé, supprimer le fichier source
                     if (!fileItem.FileContainer.WorkInProgress())
                     {
                         TempFileManager.SafeDeleteTempFile(fileItem.FileContainer.SourceFileItem.FilePath);
@@ -72,7 +82,6 @@ namespace Uploader.Daemons
             TotalAddToQueue++;
             fileItem.IpfsPositionInQueue = TotalAddToQueue;
             fileItem.IpfsProgress = "Waiting in queue...";
-            fileItem.IpfsLastTimeProgressChanged = null;
         }
     }
 }

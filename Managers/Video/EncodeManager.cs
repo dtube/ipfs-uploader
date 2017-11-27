@@ -46,7 +46,7 @@ namespace Uploader.Managers
                     string imageOutput = System.IO.Path.ChangeExtension(sourceFilePath, ".jpeg");
                     processStartInfo.Arguments = $"-y -i {sourceFilePath} -vf fps=1 -vframes 1 {imageOutput}";
 
-                    StartProcess(processStartInfo, 10 * 1000); // 10 secondes
+                    StartProcess(processStartInfo, Settings.EncodeGetOneImageTimeout);
 
                     using(Image image = Image.FromFile(imageOutput))
                     {
@@ -56,7 +56,7 @@ namespace Uploader.Managers
                     TempFileManager.SafeDeleteTempFile(imageOutput);
                 }
                 
-                // si durée totale de vidéo, largeur hauteur non récupéré, on ne peut pas continuer
+                // Si durée totale de vidéo, largeur hauteur non récupéré, on ne peut pas continuer
                 if ((sourceFile.VideoDuration??0) <= 0)
                     return false;                
                 if ((sourceFile.VideoHeight??0) <= 0)
@@ -66,10 +66,10 @@ namespace Uploader.Managers
 
                 int duration = sourceFile.VideoDuration.Value;
 
-                // désactivation encoding et sprite si vidéo > 20 minutes - 1200s
-                if(duration > 1200)
+                // Désactivation encoding et sprite si dépassement de la durée maximale
+                if(duration > Settings.MaxVideoDurationForEncoding)
                 {
-                    currentFileItem.EncodeErrorMessage = "Disable because duration greater than 20 minutes";
+                    currentFileItem.EncodeErrorMessage = "Disable because duration reach the max limit.";
                     currentFileItem.FileContainer.EncodedFileItems.Clear();
                     if(currentFileItem.FileContainer.SpriteVideoFileItem != null)
                         currentFileItem.FileContainer.SpriteVideoFileItem = null;
@@ -78,23 +78,26 @@ namespace Uploader.Managers
 
                 if (currentFileItem.ModeSprite)
                 {
-                    // calculer nb image/s
+                    int nbImages = Settings.NbSpriteImages;
+                    int heightSprite = Settings.HeightSpriteImages;
+
+                    // Calculer nb image/s
                     //  si < 100s de vidéo -> 1 image/s
                     //  sinon (nb secondes de la vidéo / 100) image/s
                     string frameRate = "1";
-                    if (duration > 100)
+                    if (duration > nbImages)
                     {
-                        frameRate = "100/" + duration;
+                        frameRate = $"{nbImages}/{duration}";
                     }
 
-                    int spriteWidth = ImageManager.GetWidth(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, 118);
-                    string sizeImageMax = $"scale={spriteWidth}:118";
+                    int spriteWidth = ImageManager.GetWidth(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, heightSprite);
+                    string sizeImageMax = $"scale={spriteWidth}:{heightSprite}";
 
-                    // extract frameRate image/s de la video
+                    // Extract frameRate image/s de la video
                     string pattern = SpriteManager.GetPattern(newEncodedFilePath);
                     processStartInfo.Arguments = $"-y -i {sourceFilePath} -r {frameRate} -vf \"{sizeImageMax}\" -f image2 {pattern}";
 
-                    StartProcess(processStartInfo, 2 * 60 * 1000); // 2 minutes
+                    StartProcess(processStartInfo, Settings.EncodeGetImagesTimeout);
                 }
                 else
                 {
@@ -135,7 +138,7 @@ namespace Uploader.Managers
 
                     processStartInfo.Arguments = $"-y -i {sourceFilePath} -vcodec libx264 -vf \"{size}\" -acodec aac {newEncodedFilePath}";
 
-                    StartProcess(processStartInfo, 10 * 60 * 60 * 1000); // 10 heures
+                    StartProcess(processStartInfo, Settings.EncodeTimeout);
                 }
 
                 currentFileItem.FilePath = newEncodedFilePath;
@@ -170,7 +173,7 @@ namespace Uploader.Managers
                 bool success = process.WaitForExit(timeout);
                 if (!success)
                 {
-                    throw new InvalidOperationException("Le fichier n'a pas pu être encodé en moins de 10 heures.");
+                    throw new InvalidOperationException("Timeout : Le fichier n'a pas pu être encodé dans le temps imparti.");
                 }
 
                 if (process.ExitCode != 0)
@@ -188,8 +191,8 @@ namespace Uploader.Managers
 
             Debug.WriteLine(output);
             
-            const string durationMarkup = "  Duration: "; // "  Duration: 00:01:42.11"
-            const string progressMarkup = " time="; // " time=00:01:42.08"
+            const string durationMarkup = "  Duration: ";   // "  Duration: 00:01:42.11"
+            const string progressMarkup = " time=";         // " time=00:01:42.08"
 
             // Si on ne connait pas la longueur totale de la vidéo
             if (!currentFileItem.FileContainer.SourceFileItem.VideoDuration.HasValue)
@@ -200,8 +203,8 @@ namespace Uploader.Managers
                     return;
             }
 
-            // récupérer la progression toutes les 500ms
-            if (currentFileItem.EncodeLastTimeProgressChanged.HasValue && (DateTime.UtcNow - currentFileItem.EncodeLastTimeProgressChanged.Value).TotalMilliseconds < 500)
+            // Récupérer la progression toutes les 1s
+            if (currentFileItem.EncodeLastTimeProgressChanged.HasValue && (DateTime.UtcNow - currentFileItem.EncodeLastTimeProgressChanged.Value).TotalMilliseconds < 1000)
                 return;
 
             if (!output.Contains(progressMarkup) || output.Length < (output.IndexOf(progressMarkup) + progressMarkup.Length + 8))
@@ -211,7 +214,6 @@ namespace Uploader.Managers
 
             // Récupérer la progression d'encodage avec la durée d'encodage traitée
             int durationDone = GetDurationInSeconds(output.Substring(output.IndexOf(progressMarkup) + progressMarkup.Length, 8))??0;
-
             currentFileItem.EncodeProgress = string.Format("{0:N2}%", (durationDone * 100.00 / (double) currentFileItem.FileContainer.SourceFileItem.VideoDuration.Value)).Replace(',', '.');
         }
 

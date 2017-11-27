@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
@@ -48,8 +49,22 @@ namespace Uploader.Daemons
 
                     CurrentPositionInQueue++;
 
-                    // encode video
-                    bool success = EncodeManager.Encode(fileItem);
+                    bool success = false;
+
+                    // si le client a pas demandé le progress depuis moins  de 10s, lancer l'encoding
+                    if((DateTime.UtcNow - fileItem.FileContainer.LastTimeProgressRequested).TotalSeconds <= 10)
+                    {
+                        // encode video
+                        success = EncodeManager.Encode(fileItem);
+                    }
+                    else
+                    {
+                        fileItem.EncodeErrorMessage = "Canceled";
+                        fileItem.EncodeProgress = null;
+
+                        fileItem.IpfsErrorMessage = "Canceled";
+                        fileItem.IpfsProgress = null;
+                    }
 
                     if (success)
                     {
@@ -81,10 +96,8 @@ namespace Uploader.Daemons
             fileItem.EncodePositionInQueue = TotalAddToQueue;
 
             fileItem.EncodeProgress = "Waiting in queue...";
-            fileItem.EncodeLastTimeProgressChanged = null;
 
             fileItem.IpfsProgress = messageIpfs;
-            fileItem.IpfsLastTimeProgressChanged = null;
         }
     }
 }

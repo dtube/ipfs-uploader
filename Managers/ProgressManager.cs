@@ -29,26 +29,40 @@ namespace Uploader.Managers
         {
             FileContainer fileContainer;
             progresses.TryGetValue(progressToken, out fileContainer);
+
+            if(fileContainer != null)
+                fileContainer.LastTimeProgressRequested = DateTime.UtcNow;
+
             return fileContainer;
         }
 
         public static FileContainer GetFileContainerBySourceHash(string sourceHash)
         {
-            return progresses.Values
+            FileContainer fileContainer = progresses.Values
                 .Where(s => s.SourceFileItem.IpfsHash == sourceHash)
                 .OrderByDescending(s => s.NumInstance)
                 .FirstOrDefault();
+
+            if(fileContainer != null)
+                fileContainer.LastTimeProgressRequested = DateTime.UtcNow;
+            
+            return fileContainer;
         }
 
         public static FileContainer GetFileContainerByChildHash(string hash)
         {
-            return progresses.Values.Where(s =>
+            FileContainer fileContainer = progresses.Values.Where(s =>
                     s?.OverlayFileItem?.IpfsHash == hash ||
                     s?.SpriteVideoFileItem?.IpfsHash == hash ||
                     (s?.EncodedFileItems.Any(v => v.IpfsHash == hash)??false)
                 )
                 .OrderByDescending(s => s.NumInstance)
                 .FirstOrDefault();
+
+            if(fileContainer != null)
+                fileContainer.LastTimeProgressRequested = DateTime.UtcNow;
+            
+            return fileContainer;
         }
     }
 }

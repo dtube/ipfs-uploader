@@ -119,15 +119,21 @@ namespace Uploader.Models
 
             set
             {
+                bool changeLastTime = value == "0.00%" || _ipfsProgress != null;
+
                 _ipfsProgress = value;
-                IpfsLastTimeProgressChanged = DateTime.UtcNow;
+
+                if(value == null)
+                    IpfsLastTimeProgressChanged = null;
+                else if(changeLastTime)
+                    IpfsLastTimeProgressChanged = DateTime.UtcNow;
             }
         }
 
         public DateTime? IpfsLastTimeProgressChanged
         {
             get;
-            set;
+            private set;
         }
 
         public string IpfsErrorMessage
@@ -159,9 +165,27 @@ namespace Uploader.Models
 
             set
             {
+                bool changeLastTime = value == "0.00%" || _encodeProgress != null;
+
                 _encodeProgress = value;
-                EncodeLastTimeProgressChanged = DateTime.UtcNow;
+
+                if(value == null)
+                    EncodeLastTimeProgressChanged = null;
+                else if(changeLastTime)
+                    EncodeLastTimeProgressChanged = DateTime.UtcNow;
             }
+        }
+
+        public DateTime? EncodeLastTimeProgressChanged
+        {
+            get;
+            private set;
+        }
+
+        public string EncodeErrorMessage
+        {
+            get;
+            set;
         }
 
         /// <summary>
@@ -189,18 +213,6 @@ namespace Uploader.Models
         /// </summary>
         /// <returns></returns>
         public int? VideoWidth
-        {
-            get;
-            set;
-        }
-
-        public DateTime? EncodeLastTimeProgressChanged
-        {
-            get;
-            set;
-        }
-
-        public string EncodeErrorMessage
         {
             get;
             set;

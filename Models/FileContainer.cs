@@ -61,11 +61,19 @@ namespace Uploader.Models
 
             ProgressToken = Guid.NewGuid();
             ProgressManager.RegisterProgress(this);
+
+            LastTimeProgressRequested = DateTime.UtcNow;
         }
 
         public Guid ProgressToken
         {
             get;
+        }
+
+        public DateTime LastTimeProgressRequested
+        {
+            get;
+            set;
         }
 
         public TypeContainer TypeContainer

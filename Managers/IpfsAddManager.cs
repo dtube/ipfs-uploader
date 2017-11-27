@@ -43,12 +43,10 @@ namespace Uploader.Managers
                     process.BeginOutputReadLine();
                     process.BeginErrorReadLine();
 
-                    int timeout = 5 * 60 * 60 * 1000; //5h
-
-                    bool success = process.WaitForExit(timeout);
+                    bool success = process.WaitForExit(Settings.IpfsTimeout);
                     if (!success)
                     {
-                        throw new InvalidOperationException("Le fichier n'a pas pu être envoyé à ipfs en moins de 5 heures.");
+                        throw new InvalidOperationException("Timeout : Le fichier n'a pas pu être envoyé à ipfs dans le temps imparti.");
                     }
 
                     if (process.ExitCode != 0)
@@ -74,14 +72,14 @@ namespace Uploader.Managers
             if (string.IsNullOrWhiteSpace(output))
                 return;
 
-            if (currentFileItem.IpfsLastTimeProgressChanged.HasValue && (DateTime.UtcNow - currentFileItem.IpfsLastTimeProgressChanged.Value).TotalMilliseconds < 500)
+            // Récupérer la progression toutes les 1s
+            if (currentFileItem.IpfsLastTimeProgressChanged.HasValue && (DateTime.UtcNow - currentFileItem.IpfsLastTimeProgressChanged.Value).TotalMilliseconds < 1000)
                 return;
 
             Debug.WriteLine(Path.GetFileName(currentFileItem.FilePath) + " : " + output);
 
-            //toutes les 500ms
+            // Récupérer la progression d'envoi
             string newProgress = output.Substring(output.IndexOf('%') - 6, 7).Trim();
-
             currentFileItem.IpfsProgress = newProgress;
         }
 
