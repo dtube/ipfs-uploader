@@ -49,8 +49,8 @@ namespace Uploader.Daemons
 
                     CurrentPositionInQueue++;
 
-                    // Si le client a pas demandé le progress depuis moins  de 10s, lancer l'ipfs add
-                    if((DateTime.UtcNow - fileItem.FileContainer.LastTimeProgressRequested).TotalSeconds <= 10)
+                    // Si le client a pas demandé le progress depuis moins de 20s, lancer l'ipfs add
+                    if((DateTime.UtcNow - fileItem.FileContainer.LastTimeProgressRequested).TotalSeconds <= Settings.MaxGetProgressCanceled)
                     {
                         // Ipfs add file
                         IpfsAddManager.Add(fileItem);

@@ -51,8 +51,8 @@ namespace Uploader.Daemons
 
                     bool success = false;
 
-                    // si le client a pas demandé le progress depuis moins  de 10s, lancer l'encoding
-                    if((DateTime.UtcNow - fileItem.FileContainer.LastTimeProgressRequested).TotalSeconds <= 10)
+                    // si le client a pas demandé le progress depuis moins de 20s, lancer l'encoding
+                    if((DateTime.UtcNow - fileItem.FileContainer.LastTimeProgressRequested).TotalSeconds <= Settings.MaxGetProgressCanceled)
                     {
                         // encode video
                         success = EncodeManager.Encode(fileItem);

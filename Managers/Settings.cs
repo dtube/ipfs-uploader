@@ -28,6 +28,11 @@ namespace Uploader.Managers
         public static int MaxVideoDurationForEncoding => 20 * 60; // 20 minutes max pour encoder une vidéo
 
         /// <summary>
+        /// seconds
+        /// </summary>
+        public static int MaxGetProgressCanceled => 20;
+
+        /// <summary>
         /// 
         /// </summary>
         public static int NbSpriteImages = 100;
