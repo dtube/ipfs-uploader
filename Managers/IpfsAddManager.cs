@@ -58,7 +58,7 @@ namespace Uploader.Managers
                 }
 
                 currentFileItem.IpfsProgress = "100.00%";
-                LogManager.AddIpfsMessage(currentFileItem.IpfsHash, "End");
+                LogManager.AddIpfsMessage(currentFileItem.IpfsHash, "End FileSize " + currentFileItem.FileSize);
             }
             catch (Exception ex)
             {
