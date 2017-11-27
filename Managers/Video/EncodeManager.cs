@@ -194,7 +194,7 @@ namespace Uploader.Managers
             // Si on ne connait pas la longueur totale de la vidéo
             if (!currentFileItem.FileContainer.SourceFileItem.VideoDuration.HasValue)
             {
-                if (output.StartsWith(durationMarkup))
+                if (output.StartsWith(durationMarkup) && output.Length >= durationMarkup.Length + 8)
                     currentFileItem.FileContainer.SourceFileItem.VideoDuration = GetDurationInSeconds(output.Substring(durationMarkup.Length, 8));
                 else
                     return;
@@ -204,7 +204,7 @@ namespace Uploader.Managers
             if (currentFileItem.EncodeLastTimeProgressChanged.HasValue && (DateTime.UtcNow - currentFileItem.EncodeLastTimeProgressChanged.Value).TotalMilliseconds < 500)
                 return;
 
-            if (!output.Contains(progressMarkup))
+            if (!output.Contains(progressMarkup) || output.Length < (output.IndexOf(progressMarkup) + progressMarkup.Length + 8))
                 return;
 
             Debug.WriteLine(Path.GetFileName(currentFileItem.FileContainer.SourceFileItem.FilePath) + " : " + output);
