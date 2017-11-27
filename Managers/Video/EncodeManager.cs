@@ -210,15 +210,22 @@ namespace Uploader.Managers
             Debug.WriteLine(Path.GetFileName(currentFileItem.FileContainer.SourceFileItem.FilePath) + " : " + output);
 
             // Récupérer la progression d'encodage avec la durée d'encodage traitée
-            int durationDone = GetDurationInSeconds(output.Substring(output.IndexOf(progressMarkup) + progressMarkup.Length, 8));
+            int durationDone = GetDurationInSeconds(output.Substring(output.IndexOf(progressMarkup) + progressMarkup.Length, 8))??0;
 
             currentFileItem.EncodeProgress = string.Format("{0:N2}%", (durationDone * 100.00 / (double) currentFileItem.FileContainer.SourceFileItem.VideoDuration.Value)).Replace(',', '.');
         }
 
-        private static int GetDurationInSeconds(string durationStr)
+        private static int? GetDurationInSeconds(string durationStr)
         {
-            int[] durationTab = durationStr.Split(':').Select(v => Convert.ToInt32(v)).ToArray();
-            return durationTab[0] * 3600 + durationTab[1] * 60 + durationTab[2];
+            try
+            {
+                int[] durationTab = durationStr.Split(':').Select(v => Convert.ToInt32(v)).ToArray();
+                return durationTab[0] * 3600 + durationTab[1] * 60 + durationTab[2];
+            }
+            catch
+            {
+                return null;
+            }
         }
     }
 }
