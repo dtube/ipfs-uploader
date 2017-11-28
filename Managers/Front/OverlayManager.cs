@@ -8,15 +8,17 @@ using Uploader.Managers.Common;
 using Uploader.Managers.Ipfs;
 using Uploader.Models;
 
-namespace Uploader.Managers.Overlay
+namespace Uploader.Managers.Front
 {
     public static class OverlayManager
     {
-        public static void ComputeOverlay(FileContainer fileContainer, bool? overlay = null)
+        private static string _overlayImagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "overlay.jpeg");
+
+        public static void ComputeOverlay(FileContainer fileContainer, int? x = null, int? y = null)
         {
             fileContainer.SourceFileItem.IpfsErrorMessage = "ipfs not asked";
             string outputPath = TempFileManager.GetNewTempFilePath();
-            bool success = Combine(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "overlay.jpeg"), fileContainer.SourceFileItem.FilePath, outputPath);
+            bool success = Combine(_overlayImagePath, fileContainer.SourceFileItem.FilePath, outputPath, x, y);
             if(success)
             {
                 fileContainer.SetOverlay(outputPath);

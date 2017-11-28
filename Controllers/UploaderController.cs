@@ -10,7 +10,7 @@ using Uploader.Attributes;
 using Uploader.Helper;
 using Uploader.Managers.Common;
 using Uploader.Managers.Ipfs;
-using Uploader.Managers.Overlay;
+using Uploader.Managers.Front;
 using Uploader.Managers.Video;
 using Uploader.Models;
 
@@ -46,23 +46,13 @@ namespace Uploader.Controllers
         [DisableFormValueModelBinding]
         [DisableRequestSizeLimit]
         [Route("/uploadImage")]
-        public async Task<IActionResult> UploadImage(bool? overlay = null)
+        public async Task<IActionResult> UploadImage()
         {
             try
             {
                 string sourceFilePath = await GetFileToTemp();
                 FileContainer fileContainer = FileContainer.NewImageContainer(sourceFilePath);
-
-                // si pas d'option overlay, c'est qu'on veut juste ipfs add l'image
-                if (!(overlay??false))
-                {
-                    IpfsDaemon.Queue(fileContainer.SourceFileItem);
-                }
-                else
-                {
-                    OverlayManager.ComputeOverlay(fileContainer, overlay);
-                }
-
+                IpfsDaemon.Queue(fileContainer.SourceFileItem);
                 return Ok(new
                 {
                     success = true, token = fileContainer.ProgressToken
@@ -70,7 +60,33 @@ namespace Uploader.Controllers
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("Exception Upload Image : {0}", ex);
+                Debug.WriteLine("Exception UploadImage : {0}", ex);
+                return BadRequest(new
+                {
+                    errorMessage = ex.Message
+                });
+            }
+        }
+
+        [HttpPost]
+        [DisableFormValueModelBinding]
+        [DisableRequestSizeLimit]
+        [Route("/overlayImage")]
+        public async Task<IActionResult> OverlayImage(int? x = null, int? y = null)
+        {
+            try
+            {
+                string sourceFilePath = await GetFileToTemp();
+                FileContainer fileContainer = FileContainer.NewImageContainer(sourceFilePath);
+                OverlayManager.ComputeOverlay(fileContainer, x, y);
+                return Ok(new
+                {
+                    success = true, token = fileContainer.ProgressToken
+                });
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Exception OverlayImage : {0}", ex);
                 return BadRequest(new
                 {
                     errorMessage = ex.Message
