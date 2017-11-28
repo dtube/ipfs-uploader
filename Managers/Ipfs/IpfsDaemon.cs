@@ -4,10 +4,11 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Uploader.Managers;
+using Uploader.Managers.Common;
+using Uploader.Managers.Front;
 using Uploader.Models;
 
-namespace Uploader.Daemons
+namespace Uploader.Managers.Ipfs
 {
     public static class IpfsDaemon
     {
@@ -26,7 +27,7 @@ namespace Uploader.Daemons
             set;
         }
 
-        public static int TotalAddToQueue
+        private static int TotalAddToQueue
         {
             get;
             set;
@@ -50,7 +51,7 @@ namespace Uploader.Daemons
                     CurrentPositionInQueue++;
 
                     // Si le client a pas demandé le progress depuis moins de 20s, lancer l'ipfs add
-                    if((DateTime.UtcNow - fileItem.FileContainer.LastTimeProgressRequested).TotalSeconds <= Settings.MaxGetProgressCanceled)
+                    if((DateTime.UtcNow - fileItem.FileContainer.LastTimeProgressRequested).TotalSeconds <= FrontSettings.MaxGetProgressCanceled)
                     {
                         // Ipfs add file
                         IpfsAddManager.Add(fileItem);

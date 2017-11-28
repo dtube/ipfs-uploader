@@ -4,10 +4,12 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Uploader.Managers;
+using Uploader.Managers.Common;
+using Uploader.Managers.Front;
+using Uploader.Managers.Ipfs;
 using Uploader.Models;
 
-namespace Uploader.Daemons
+namespace Uploader.Managers.Video
 {
     public class EncodeDaemon
     {
@@ -26,7 +28,7 @@ namespace Uploader.Daemons
             set;
         }
 
-        public static int TotalAddToQueue
+        private static int TotalAddToQueue
         {
             get;
             set;
@@ -52,7 +54,7 @@ namespace Uploader.Daemons
                     bool success = false;
 
                     // si le client a pas demandé le progress depuis moins de 20s, lancer l'encoding
-                    if((DateTime.UtcNow - fileItem.FileContainer.LastTimeProgressRequested).TotalSeconds <= Settings.MaxGetProgressCanceled)
+                    if((DateTime.UtcNow - fileItem.FileContainer.LastTimeProgressRequested).TotalSeconds <= FrontSettings.MaxGetProgressCanceled)
                     {
                         // encode video
                         success = EncodeManager.Encode(fileItem);
@@ -70,7 +72,7 @@ namespace Uploader.Daemons
                     {
                         if (fileItem.ModeSprite)
                         {
-                            string[] files = SpriteManager.GetListImageFrom(fileItem.FilePath); // récupération des images
+                            string[] files = EncodeManager.GetListImageFrom(fileItem.FilePath); // récupération des images
                             string outputPath = System.IO.Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".png"); // nom du fichier sprite
                             bool successSprite = SpriteManager.CombineBitmap(files, outputPath); // création du sprite
                             TempFileManager.SafeDeleteTempFiles(files); // suppression des images

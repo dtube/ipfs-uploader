@@ -4,9 +4,10 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 
+using Uploader.Managers.Common;
 using Uploader.Models;
 
-namespace Uploader.Managers
+namespace Uploader.Managers.Video
 {
     public static class EncodeManager
     {
@@ -46,7 +47,7 @@ namespace Uploader.Managers
                     string imageOutput = System.IO.Path.ChangeExtension(sourceFilePath, ".jpeg");
                     processStartInfo.Arguments = $"-y -i {sourceFilePath} -vf fps=1 -vframes 1 {imageOutput}";
 
-                    StartProcess(processStartInfo, Settings.EncodeGetOneImageTimeout);
+                    StartProcess(processStartInfo, VideoSettings.EncodeGetOneImageTimeout);
 
                     using(Image image = Image.FromFile(imageOutput))
                     {
@@ -67,7 +68,7 @@ namespace Uploader.Managers
                 int duration = sourceFile.VideoDuration.Value;
 
                 // Désactivation encoding et sprite si dépassement de la durée maximale
-                if(duration > Settings.MaxVideoDurationForEncoding)
+                if(duration > VideoSettings.MaxVideoDurationForEncoding)
                 {
                     currentFileItem.EncodeErrorMessage = "Disable because duration reach the max limit.";
                     currentFileItem.FileContainer.EncodedFileItems.Clear();
@@ -78,8 +79,8 @@ namespace Uploader.Managers
 
                 if (currentFileItem.ModeSprite)
                 {
-                    int nbImages = Settings.NbSpriteImages;
-                    int heightSprite = Settings.HeightSpriteImages;
+                    int nbImages = VideoSettings.NbSpriteImages;
+                    int heightSprite = VideoSettings.HeightSpriteImages;
 
                     // Calculer nb image/s
                     //  si < 100s de vidéo -> 1 image/s
@@ -90,14 +91,14 @@ namespace Uploader.Managers
                         frameRate = $"{nbImages}/{duration}";
                     }
 
-                    int spriteWidth = ImageManager.GetWidth(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, heightSprite);
+                    int spriteWidth = GetWidth(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, heightSprite);
                     string sizeImageMax = $"scale={spriteWidth}:{heightSprite}";
 
                     // Extract frameRate image/s de la video
-                    string pattern = SpriteManager.GetPattern(newEncodedFilePath);
+                    string pattern = GetPattern(newEncodedFilePath);
                     processStartInfo.Arguments = $"-y -i {sourceFilePath} -r {frameRate} -vf \"{sizeImageMax}\" -f image2 {pattern}";
 
-                    StartProcess(processStartInfo, Settings.EncodeGetImagesTimeout);
+                    StartProcess(processStartInfo, VideoSettings.EncodeGetImagesTimeout);
                 }
                 else
                 {
@@ -106,29 +107,29 @@ namespace Uploader.Managers
                     {
                         case VideoSize.F360p:
                             {
-                                Tuple<int, int> spriteSize = ImageManager.GetSize(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, 640, 360);
-                                size = $"scale={spriteSize.Item1}:{spriteSize.Item2}";
+                                Tuple<int, int> finalSize = GetSize(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, 640, 360);
+                                size = $"scale={finalSize.Item1}:{finalSize.Item2}";
                                 break;
                             }
 
                         case VideoSize.F480p:
                             {
-                                Tuple<int, int> spriteSize = ImageManager.GetSize(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, 854, 480);
-                                size = $"scale={spriteSize.Item1}:{spriteSize.Item2}";
+                                Tuple<int, int> finalSize = GetSize(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, 854, 480);
+                                size = $"scale={finalSize.Item1}:{finalSize.Item2}";
                                 break;
                             }
 
                         case VideoSize.F720p:
                             {
-                                Tuple<int, int> spriteSize = ImageManager.GetSize(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, 1280, 720);
-                                size = $"scale={spriteSize.Item1}:{spriteSize.Item2}";
+                                Tuple<int, int> finalSize = GetSize(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, 1280, 720);
+                                size = $"scale={finalSize.Item1}:{finalSize.Item2}";
                                 break;
                             }
 
                         case VideoSize.F1080p:
                             {
-                                Tuple<int, int> spriteSize = ImageManager.GetSize(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, 1920, 1080);
-                                size = $"scale={spriteSize.Item1}:{spriteSize.Item2}";
+                                Tuple<int, int> finalSize = GetSize(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, 1920, 1080);
+                                size = $"scale={finalSize.Item1}:{finalSize.Item2}";
                                 break;
                             }
 
@@ -138,7 +139,7 @@ namespace Uploader.Managers
 
                     processStartInfo.Arguments = $"-y -i {sourceFilePath} -vcodec libx264 -vf \"{size}\" -acodec aac {newEncodedFilePath}";
 
-                    StartProcess(processStartInfo, Settings.EncodeTimeout);
+                    StartProcess(processStartInfo, VideoSettings.EncodeTimeout);
                 }
 
                 currentFileItem.FilePath = newEncodedFilePath;
@@ -228,6 +229,49 @@ namespace Uploader.Managers
             {
                 return null;
             }
+        }
+
+        private static string GetPattern(string filePath)
+        {
+            return Path.GetFileNameWithoutExtension(filePath) + "-%03d.jpeg";
+        }
+
+        public static string[] GetListImageFrom(string filePath)
+        {
+            return Directory.EnumerateFiles(Path.GetDirectoryName(filePath), Path.GetFileNameWithoutExtension(filePath) + "-*.jpeg").OrderBy(s => s).ToArray();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <param name="finalWidth"></param>
+        /// <param name="finalHeight"></param>
+        /// <returns>largeur, hauteur</returns>
+        private static Tuple<int, int> GetSize(double width, double height, double finalWidth, double finalHeight)
+        {
+            //video verticale, garder hauteur finale, réduire largeur finale
+            if(width / height < finalWidth / finalHeight)
+                return new Tuple<int, int>(GetWidth(width, height, finalHeight), (int)finalHeight);
+            
+            // sinon garder largeur finale, réduire hauteur finale
+            return new Tuple<int, int>((int)finalWidth, GetHeight(width, height, finalWidth));
+        }
+        
+        private static int GetWidth(double width, double height, double finalHeight)
+        {
+            return GetPair((int)(finalHeight * width / height));
+        }
+
+        private static int GetHeight(double width, double height, double finalWidth)
+        {
+            return GetPair((int)(finalWidth * height / width));
+        }
+
+        private static int GetPair(int number)
+        {
+            return number % 2 == 0 ? number : number + 1;
         }
     }
 }

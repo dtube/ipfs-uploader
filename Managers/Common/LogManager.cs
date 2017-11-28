@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 
-namespace Uploader.Managers
+namespace Uploader.Managers.Common
 {
     public static class LogManager
     {

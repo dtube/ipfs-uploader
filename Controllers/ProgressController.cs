@@ -7,9 +7,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 using Uploader.Attributes;
-using Uploader.Daemons;
 using Uploader.Helper;
-using Uploader.Managers;
+using Uploader.Managers.Front;
+using Uploader.Managers.Ipfs;
+using Uploader.Managers.Video;
 using Uploader.Models;
 
 namespace Uploader.Controllers

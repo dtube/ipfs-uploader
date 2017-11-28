@@ -8,7 +8,11 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 using Uploader.Attributes;
 using Uploader.Helper;
-using Uploader.Managers;
+using Uploader.Managers.Common;
+using Uploader.Managers.Ipfs;
+using Uploader.Managers.Overlay;
+using Uploader.Managers.Video;
+using Uploader.Models;
 
 namespace Uploader.Controllers
 {
@@ -46,9 +50,22 @@ namespace Uploader.Controllers
         {
             try
             {
+                string sourceFilePath = await GetFileToTemp();
+                FileContainer fileContainer = FileContainer.NewImageContainer(sourceFilePath);
+
+                // si pas d'option overlay, c'est qu'on veut juste ipfs add l'image
+                if (!(overlay??false))
+                {
+                    IpfsDaemon.Queue(fileContainer.SourceFileItem);
+                }
+                else
+                {
+                    OverlayManager.ComputeOverlay(fileContainer, overlay);
+                }
+
                 return Ok(new
                 {
-                    success = true, token = ImageManager.ComputeImage(await GetFileToTemp(), overlay)
+                    success = true, token = fileContainer.ProgressToken
                 });
             }
             catch (Exception ex)

@@ -2,9 +2,10 @@ using System;
 using System.Diagnostics;
 using System.IO;
 
+using Uploader.Managers.Common;
 using Uploader.Models;
 
-namespace Uploader.Managers
+namespace Uploader.Managers.Ipfs
 {
     public static class IpfsAddManager
     {
@@ -43,7 +44,7 @@ namespace Uploader.Managers
                     process.BeginOutputReadLine();
                     process.BeginErrorReadLine();
 
-                    bool success = process.WaitForExit(Settings.IpfsTimeout);
+                    bool success = process.WaitForExit(IpfsSettings.IpfsTimeout);
                     if (!success)
                     {
                         throw new InvalidOperationException("Timeout : Le fichier n'a pas pu être envoyé à ipfs dans le temps imparti.");

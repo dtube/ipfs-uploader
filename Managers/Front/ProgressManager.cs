@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using Uploader.Models;
 
-namespace Uploader.Managers
+namespace Uploader.Managers.Front
 {
     public static class ProgressManager
     {

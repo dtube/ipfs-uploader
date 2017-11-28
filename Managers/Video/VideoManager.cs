@@ -1,10 +1,10 @@
 using System;
 using System.Linq;
 
-using Uploader.Daemons;
+using Uploader.Managers.Ipfs;
 using Uploader.Models;
 
-namespace Uploader.Managers
+namespace Uploader.Managers.Video
 {
     public static class VideoManager
     {

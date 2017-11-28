@@ -1,6 +1,6 @@
-namespace Uploader.Managers
+namespace Uploader.Managers.Video
 {
-    public static class Settings
+    public static class VideoSettings
     {
         /// <summary>
         /// milliseconds
@@ -18,19 +18,9 @@ namespace Uploader.Managers
         public static int EncodeTimeout => 30 * 60 * 60 * 1000; // 30h max pour encoder la vidéo
 
         /// <summary>
-        /// milliseconds
-        /// </summary>
-        public static int IpfsTimeout => 30 * 60 * 60 * 1000; // 30h max pour envoyer un document
-
-        /// <summary>
         /// minutes
         /// </summary>
         public static int MaxVideoDurationForEncoding => 20 * 60; // 20 minutes max pour encoder une vidéo
-
-        /// <summary>
-        /// seconds
-        /// </summary>
-        public static int MaxGetProgressCanceled => 20;
 
         /// <summary>
         /// 

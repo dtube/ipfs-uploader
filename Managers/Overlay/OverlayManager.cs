@@ -2,12 +2,29 @@ using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.IO;
 
-namespace Uploader.Managers
+using Uploader.Managers.Common;
+using Uploader.Managers.Ipfs;
+using Uploader.Models;
+
+namespace Uploader.Managers.Overlay
 {
-    public class OverlayManager
+    public static class OverlayManager
     {
-        public static bool Overlay(string overlayImagePath, string imageToOverlayPath, string outputPath, int? x = null, int? y = null)
+        public static void ComputeOverlay(FileContainer fileContainer, bool? overlay = null)
+        {
+            fileContainer.SourceFileItem.IpfsErrorMessage = "ipfs not asked";
+            string outputPath = TempFileManager.GetNewTempFilePath();
+            bool success = Combine(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "overlay.jpeg"), fileContainer.SourceFileItem.FilePath, outputPath);
+            if(success)
+            {
+                fileContainer.SetOverlay(outputPath);
+                IpfsDaemon.Queue(fileContainer.OverlayFileItem);
+            }
+        }
+
+        private static bool Combine(string overlayImagePath, string imageToOverlayPath, string outputPath, int? x = null, int? y = null)
         {
             try
             {
@@ -40,6 +57,6 @@ namespace Uploader.Managers
                 LogManager.AddOverlayMessage(ex.ToString(), "Exception");
                 return false;
             }
-        }
+        }        
     }
 }

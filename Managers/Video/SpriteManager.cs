@@ -6,7 +6,9 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 
-namespace Uploader.Managers
+using Uploader.Managers.Common;
+
+namespace Uploader.Managers.Video
 {
     public class SpriteManager
     {
@@ -67,16 +69,6 @@ namespace Uploader.Managers
                 }
                 catch{}
             }
-        }
-
-        public static string GetPattern(string filePath)
-        {
-            return Path.GetFileNameWithoutExtension(filePath) + "-%03d.jpeg";
-        }
-
-        public static string[] GetListImageFrom(string filePath)
-        {
-            return Directory.EnumerateFiles(Path.GetDirectoryName(filePath), Path.GetFileNameWithoutExtension(filePath) + "-*.jpeg").OrderBy(s => s).ToArray();
         }
     }
 }
