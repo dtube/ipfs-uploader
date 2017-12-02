@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-
+using Uploader.Managers.Common;
 using Uploader.Managers.Front;
 
 namespace Uploader.Models
@@ -30,26 +31,24 @@ namespace Uploader.Models
             return fileContainer;
         }
 
-        public void SetSpriteVideo()
+        public void AddSpriteVideo()
         {
             SpriteVideoFileItem = FileItem.NewSpriteVideoFileItem(this);
         }
 
-        public static FileContainer NewImageContainer(string sourceFilePath)
+        public void DeleteSpriteVideo()
         {
-            FileContainer fileContainer = new FileContainer(TypeContainer.Image);
-
-            fileContainer.SourceFileItem = FileItem.NewSourceImageFileItem(fileContainer, sourceFilePath);
-
-            return fileContainer;
+            SpriteVideoFileItem = null;
         }
 
-        public void SetOverlay(string filePath)
+        public static FileContainer NewOverlayContainer(string sourceFilePath)
         {
-            if (TypeContainer != TypeContainer.Image)
-                throw new InvalidOperationException("operation overlay possible que sur image");
+            FileContainer fileContainer = new FileContainer(TypeContainer.Overlay);
 
-            OverlayFileItem = FileItem.NewAttachedImageFileItem(this, filePath);
+            fileContainer.SourceFileItem = FileItem.NewSourceImageFileItem(fileContainer, sourceFilePath);
+            fileContainer.OverlayFileItem = FileItem.NewOverlayImageFileItem(fileContainer);
+
+            return fileContainer;
         }
 
         private FileContainer(TypeContainer typeContainer)
@@ -90,7 +89,7 @@ namespace Uploader.Models
         public FileItem SpriteVideoFileItem
         {
             get;
-            set;
+            private set;
         }
 
         public IList<FileItem> EncodedFileItems
@@ -117,13 +116,14 @@ namespace Uploader.Models
                         return true;
                     return EncodedFileItems.Any(f => f.WorkInProgress());
 
-                case TypeContainer.Image:
+                case TypeContainer.Overlay:
                     if (OverlayFileItem != null && OverlayFileItem.WorkInProgress())
                         return true;
                     return false;
 
                 default:
-                    return false;
+                    Debug.WriteLine("Type container non géré " + TypeContainer);
+                    throw new InvalidOperationException("type container non géré");
             }
         }
     }

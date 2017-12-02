@@ -2,8 +2,8 @@ namespace Uploader.Models
 {
     public enum TypeContainer
     {
+        Undefined,
         Video,
-        Image,
-        Audio
+        Overlay
     }
 }

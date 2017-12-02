@@ -43,7 +43,7 @@ namespace Uploader.Managers.Front
             // si sprite demandé
             if (sprite??false)
             {
-                fileContainer.SetSpriteVideo();
+                fileContainer.AddSpriteVideo();
                 // get images from video
                 EncodeDaemon.Queue(fileContainer.SpriteVideoFileItem, "Waiting sprite creation...");
             }

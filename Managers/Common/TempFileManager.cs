@@ -18,6 +18,9 @@ namespace Uploader.Managers.Common
 
         public static void SafeDeleteTempFile(string filePath)
         {
+            if(string.IsNullOrWhiteSpace(filePath))
+                return;
+
             try
             {
                 // suppression du fichier temporaire, ne pas jeter d'exception en cas d'erreur
@@ -30,6 +33,9 @@ namespace Uploader.Managers.Common
 
         public static void SafeDeleteTempFiles(string[] filesPath)
         {
+            if(filesPath == null)
+                return;
+
             // suppression des images
             foreach (string filePath in filesPath)
             {

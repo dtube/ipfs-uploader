@@ -6,7 +6,7 @@ namespace Uploader.Models
     {
         public static FileItem NewSourceVideoFileItem(FileContainer fileContainer, string sourceFilePath)
         {
-            FileItem fileItem = new FileItem(fileContainer, sourceFilePath, true);
+            FileItem fileItem = new FileItem(fileContainer, sourceFilePath, TypeFile.SourceVideo);
             fileItem.VideoSize = VideoSize.Source;
             return fileItem;
         }
@@ -16,42 +16,43 @@ namespace Uploader.Models
             if (videoSize == VideoSize.Undefined)
                 throw new InvalidOperationException("VideoSize inconnu");
 
-            FileItem fileItem = new FileItem(fileContainer, null, false);
+            FileItem fileItem = new FileItem(fileContainer, null, TypeFile.EncodedVideo);
             fileItem.VideoSize = videoSize;
             return fileItem;
         }
 
         public static FileItem NewSpriteVideoFileItem(FileContainer fileContainer)
         {
-            FileItem fileItem = new FileItem(fileContainer, null, false);
-            fileItem.ModeSprite = true;
+            FileItem fileItem = new FileItem(fileContainer, null, TypeFile.SpriteVideo);
             fileItem.VideoSize = VideoSize.Source;
             return fileItem;
         }
 
         public static FileItem NewSourceImageFileItem(FileContainer fileContainer, string sourceFilePath)
         {
-            FileItem fileItem = new FileItem(fileContainer, sourceFilePath, true);
+            FileItem fileItem = new FileItem(fileContainer, sourceFilePath, TypeFile.SourceImage);
             return fileItem;
         }
 
-        public static FileItem NewAttachedImageFileItem(FileContainer fileContainer, string filePath)
+        public static FileItem NewOverlayImageFileItem(FileContainer fileContainer)
         {
-            FileItem fileItem = new FileItem(fileContainer, filePath, false);
+            FileItem fileItem = new FileItem(fileContainer, null, TypeFile.OverlayImage);
             return fileItem;
         }
 
-        private FileItem(FileContainer fileContainer, string filePath, bool isSource)
+        private FileItem(FileContainer fileContainer, string filePath, TypeFile typeFile)
         {
-            IsSource = isSource;
             FileContainer = fileContainer;
             FilePath = filePath;
+            TypeFile = typeFile;
         }
 
-        public bool IsSource
+        public TypeFile TypeFile
         {
             get;
         }
+
+        public bool IsSource => TypeFile == TypeFile.SourceVideo || TypeFile == TypeFile.SourceImage;
 
         public long? FileSize
         {
@@ -69,7 +70,7 @@ namespace Uploader.Models
             {
                 _filePath = value;
 
-                if (System.IO.File.Exists(_filePath))
+                if (_filePath != null && System.IO.File.Exists(_filePath))
                     FileSize = new System.IO.FileInfo(_filePath).Length;
             }
         }
@@ -78,12 +79,6 @@ namespace Uploader.Models
         public FileContainer FileContainer
         {
             get;
-        }
-
-        public bool ModeSprite
-        {
-            get;
-            private set;
         }
 
         public bool WorkInProgress()

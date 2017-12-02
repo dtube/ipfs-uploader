@@ -45,43 +45,14 @@ namespace Uploader.Controllers
         [HttpPost]
         [DisableFormValueModelBinding]
         [DisableRequestSizeLimit]
-        [Route("/uploadImage")]
-        public async Task<IActionResult> UploadImage()
-        {
-            try
-            {
-                string sourceFilePath = await GetFileToTemp();
-                FileContainer fileContainer = FileContainer.NewImageContainer(sourceFilePath);
-                IpfsDaemon.Queue(fileContainer.SourceFileItem);
-                return Ok(new
-                {
-                    success = true, token = fileContainer.ProgressToken
-                });
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine("Exception UploadImage : {0}", ex);
-                return BadRequest(new
-                {
-                    errorMessage = ex.Message
-                });
-            }
-        }
-
-        [HttpPost]
-        [DisableFormValueModelBinding]
-        [DisableRequestSizeLimit]
         [Route("/overlayImage")]
         public async Task<IActionResult> OverlayImage(int? x = null, int? y = null)
         {
             try
             {
-                string sourceFilePath = await GetFileToTemp();
-                FileContainer fileContainer = FileContainer.NewImageContainer(sourceFilePath);
-                OverlayManager.ComputeOverlay(fileContainer, x, y);
                 return Ok(new
                 {
-                    success = true, token = fileContainer.ProgressToken
+                    success = true, token = OverlayManager.ComputeOverlay(await GetFileToTemp(), x, y)
                 });
             }
             catch (Exception ex)

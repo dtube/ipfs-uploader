@@ -14,25 +14,17 @@ namespace Uploader.Managers.Front
     {
         private static string _overlayImagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "overlay.jpeg");
 
-        public static void ComputeOverlay(FileContainer fileContainer, int? x = null, int? y = null)
+        public static Guid ComputeOverlay(string sourceFilePath, int? x = null, int? y = null)
         {
-            fileContainer.SourceFileItem.IpfsErrorMessage = "ipfs not asked";
-            string outputPath = TempFileManager.GetNewTempFilePath();
-            bool success = Combine(_overlayImagePath, fileContainer.SourceFileItem.FilePath, outputPath, x, y);
-            if(success)
-            {
-                fileContainer.SetOverlay(outputPath);
-                IpfsDaemon.Queue(fileContainer.OverlayFileItem);
-            }
-        }
+            FileContainer fileContainer = FileContainer.NewOverlayContainer(sourceFilePath);
 
-        private static bool Combine(string overlayImagePath, string imageToOverlayPath, string outputPath, int? x = null, int? y = null)
-        {
             try
             {
-                using(Image overlayImage = Image.FromFile(overlayImagePath))
+                // TODO resize source 210*118, si non 16/9 crop image, save in jpeg
+
+                using(Image overlayImage = Image.FromFile(_overlayImagePath)) // TODO tester avec png transparent
                 {
-                    using(Image imageToOverlay = Image.FromFile(imageToOverlayPath))
+                    using(Image imageToOverlay = Image.FromFile(fileContainer.SourceFileItem.FilePath))
                     {
                         using(Graphics graphics = Graphics.FromImage(imageToOverlay))
                         {
@@ -43,22 +35,24 @@ namespace Uploader.Managers.Front
                                 y = (imageToOverlay.Height / 2) - (overlayImage.Height / 2);
                             }
 
-                            graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
                             graphics.DrawImage(overlayImage, x.Value, y.Value);
-                            //graphics.Save();
                         }
 
-                        imageToOverlay.Save(outputPath, ImageFormat.Png);
+                        string outputPath = System.IO.Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".jpeg");
+                        imageToOverlay.Save(outputPath, ImageFormat.Jpeg);
+                        fileContainer.OverlayFileItem.FilePath = outputPath;
                     }
                 }
 
-                return true;
+                IpfsDaemon.Queue(fileContainer.OverlayFileItem);
+                IpfsDaemon.Queue(fileContainer.SourceFileItem);
             }
             catch(Exception ex)
             {
                 LogManager.AddOverlayMessage(ex.ToString(), "Exception");
-                return false;
             }
-        }        
+
+            return fileContainer.ProgressToken;
+        }
     }
 }

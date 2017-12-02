@@ -51,13 +51,13 @@ namespace Uploader.Managers.Video
 
                     CurrentPositionInQueue++;
 
-                    bool success = false;
+                    bool successEncoded = false;
 
                     // si le client a pas demandé le progress depuis moins de 20s, lancer l'encoding
                     if((DateTime.UtcNow - fileItem.FileContainer.LastTimeProgressRequested).TotalSeconds <= FrontSettings.MaxGetProgressCanceled)
                     {
                         // encode video
-                        success = EncodeManager.Encode(fileItem);
+                        successEncoded = EncodeManager.Encode(fileItem);
                     }
                     else
                     {
@@ -68,12 +68,12 @@ namespace Uploader.Managers.Video
                         fileItem.IpfsProgress = null;
                     }
 
-                    if (success)
+                    if (successEncoded)
                     {
-                        if (fileItem.ModeSprite)
+                        if (fileItem.TypeFile == TypeFile.SpriteVideo)
                         {
                             string[] files = EncodeManager.GetListImageFrom(fileItem.FilePath); // récupération des images
-                            string outputPath = System.IO.Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".png"); // nom du fichier sprite
+                            string outputPath = System.IO.Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".jpeg"); // nom du fichier sprite
                             bool successSprite = SpriteManager.CombineBitmap(files, outputPath); // création du sprite
                             TempFileManager.SafeDeleteTempFiles(files); // suppression des images
                             if(successSprite)
@@ -81,10 +81,34 @@ namespace Uploader.Managers.Video
                                 fileItem.FilePath = outputPath; // réaffectation chemin sprite
                                 IpfsDaemon.Queue(fileItem);
                             }
+                            else
+                            {
+                                TempFileManager.SafeDeleteTempFile(outputPath);
+                            }
+                        }
+                        else if (fileItem.TypeFile == TypeFile.EncodedVideo)
+                        {
+                            IpfsDaemon.Queue(fileItem);
                         }
                         else
                         {
-                            IpfsDaemon.Queue(fileItem);
+                            throw new InvalidOperationException("type non prévu");
+                        }
+                    }
+                    else
+                    {
+                        if (fileItem.TypeFile == TypeFile.SpriteVideo)
+                        {
+                            string[] files = EncodeManager.GetListImageFrom(fileItem.FilePath); // récupération des images
+                            TempFileManager.SafeDeleteTempFiles(files); // suppression des images
+                        }
+                        else if (fileItem.TypeFile == TypeFile.EncodedVideo)
+                        {
+                            TempFileManager.SafeDeleteTempFile(fileItem.FilePath);
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("type non prévu");
                         }
                     }
                 }

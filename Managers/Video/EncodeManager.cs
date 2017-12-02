@@ -72,12 +72,11 @@ namespace Uploader.Managers.Video
                 {
                     currentFileItem.EncodeErrorMessage = "Disable because duration reach the max limit.";
                     currentFileItem.FileContainer.EncodedFileItems.Clear();
-                    if(currentFileItem.FileContainer.SpriteVideoFileItem != null)
-                        currentFileItem.FileContainer.SpriteVideoFileItem = null;
+                    currentFileItem.FileContainer.DeleteSpriteVideo();
                     return false;
                 }
 
-                if (currentFileItem.ModeSprite)
+                if (currentFileItem.TypeFile == TypeFile.SpriteVideo)
                 {
                     int nbImages = VideoSettings.NbSpriteImages;
                     int heightSprite = VideoSettings.HeightSpriteImages;
@@ -100,7 +99,7 @@ namespace Uploader.Managers.Video
 
                     StartProcess(processStartInfo, VideoSettings.EncodeGetImagesTimeout);
                 }
-                else
+                else if (fileItem.TypeFile == TypeFile.EncodedVideo)
                 {
                     string size;
                     switch (videoSize)
@@ -141,14 +140,20 @@ namespace Uploader.Managers.Video
 
                     StartProcess(processStartInfo, VideoSettings.EncodeTimeout);
                 }
+                else
+                {
+                    throw new InvalidOperationException("type non prévu");
+                }
 
                 currentFileItem.FilePath = newEncodedFilePath;
                 currentFileItem.EncodeProgress = "100.00%";
-                if(currentFileItem.ModeSprite)
+                if(currentFileItem.TypeFile == TypeFile.SpriteVideo)
                     LogManager.AddEncodingMessage(Path.GetFileName(newEncodedFilePath), "End Sprite Duration " + duration + " Format " + videoSize);
-                else
+                else if (fileItem.TypeFile == TypeFile.EncodedVideo)
                     LogManager.AddEncodingMessage(Path.GetFileName(newEncodedFilePath), "End Encoding Duration " + duration + " Format " + videoSize + " FileSize " + currentFileItem.FileSize);
-
+                else
+                    throw new InvalidOperationException("type non prévu");
+                        
                 return true;
             }
             catch (Exception ex)

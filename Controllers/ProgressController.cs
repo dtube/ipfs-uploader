@@ -73,7 +73,7 @@ namespace Uploader.Controllers
                             .ToArray()
                     });
 
-                case TypeContainer.Image:
+                case TypeContainer.Overlay:
                     return Json(new
                     {
                         ipfsAddSource = IpfsResultJson(fileContainer.SourceFileItem),

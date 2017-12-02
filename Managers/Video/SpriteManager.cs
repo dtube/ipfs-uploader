@@ -48,7 +48,7 @@ namespace Uploader.Managers.Video
                             offset += image.Height;
                         }
                     }
-                    finalBitmap.Save(outputFilePath, ImageFormat.Png);
+                    finalBitmap.Save(outputFilePath, ImageFormat.Jpeg);
                 }
                 return true;
             }
