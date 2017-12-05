@@ -57,12 +57,12 @@ namespace Uploader.Managers.Ipfs
                 }
 
                 currentFileItem.IpfsProgress = "100.00%";
-                LogManager.AddIpfsMessage(currentFileItem.IpfsHash, "End FileSize " + currentFileItem.FileSize);
+                LogManager.AddIpfsMessage(currentFileItem.IpfsHash + " / FileSize " + currentFileItem.FileSize, "End");
             }
             catch (Exception ex)
             {
                 Debug.WriteLine("Exception Ipfs Add : {0}", ex);
-                LogManager.AddIpfsMessage(Path.GetFileName(currentFileItem.FilePath), "Exception");
+                LogManager.AddIpfsMessage("FileSize " + currentFileItem.FileSize + " / Progress " + currentFileItem.IpfsProgress + " / Exception " + ex, "Exception");
                 currentFileItem.IpfsErrorMessage = ex.Message;
             }
         }

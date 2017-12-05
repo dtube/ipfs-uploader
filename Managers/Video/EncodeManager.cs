@@ -148,9 +148,9 @@ namespace Uploader.Managers.Video
                 currentFileItem.FilePath = newEncodedFilePath;
                 currentFileItem.EncodeProgress = "100.00%";
                 if(currentFileItem.TypeFile == TypeFile.SpriteVideo)
-                    LogManager.AddEncodingMessage(Path.GetFileName(newEncodedFilePath), "End Sprite Duration " + duration + " Format " + videoSize);
+                    LogManager.AddEncodingMessage("Video Duration " + duration + " / FileSize " + currentFileItem.FileSize, "End Sprite");
                 else if (fileItem.TypeFile == TypeFile.EncodedVideo)
-                    LogManager.AddEncodingMessage(Path.GetFileName(newEncodedFilePath), "End Encoding Duration " + duration + " Format " + videoSize + " FileSize " + currentFileItem.FileSize);
+                    LogManager.AddEncodingMessage("Video Duration " + duration + " / FileSize " + currentFileItem.FileSize + " / Format " + videoSize, "End Encoding");
                 else
                     throw new InvalidOperationException("type non prévu");
                         
@@ -159,7 +159,7 @@ namespace Uploader.Managers.Video
             catch (Exception ex)
             {
                 Debug.WriteLine("Exception Encode Video : {0}", ex);
-                LogManager.AddEncodingMessage(ex.ToString(), "Exception");
+                LogManager.AddEncodingMessage("Video Duration " + currentFileItem.VideoDuration + " / FileSize " + currentFileItem.FileSize + " / Progress " + currentFileItem.EncodeProgress + " / Exception : " + ex, "Exception");
                 currentFileItem.EncodeErrorMessage = ex.Message;
 
                 TempFileManager.SafeDeleteTempFile(newEncodedFilePath);
