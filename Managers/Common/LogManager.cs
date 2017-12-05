@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 
 namespace Uploader.Managers.Common
@@ -23,21 +24,25 @@ namespace Uploader.Managers.Common
 
         public static void AddEncodingMessage(string message, string typeMessage)
         {
+            Debug.WriteLine("Ffmeg {1} : {0}", message, typeMessage);
             AddMessage("ffmpeg.log", message, typeMessage);
         }
 
         public static void AddIpfsMessage(string message, string typeMessage)
         {
+            Debug.WriteLine("Ipfs {1} : {0}", message, typeMessage);
             AddMessage("ipfs.log", message, typeMessage);
         }
 
         public static void AddSpriteMessage(string message, string typeMessage)
         {
+            Debug.WriteLine("Sprite {1} : {0}", message, typeMessage);
             AddMessage("sprite.log", message, typeMessage);
         }
 
         public static void AddOverlayMessage(string message, string typeMessage)
         {
+            Debug.WriteLine("Overlay {1} : {0}", message, typeMessage);
             AddMessage("overlay.log", message, typeMessage);
         }
     }

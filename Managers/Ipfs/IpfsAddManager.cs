@@ -61,7 +61,6 @@ namespace Uploader.Managers.Ipfs
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("Exception Ipfs Add : {0}", ex);
                 LogManager.AddIpfsMessage("FileSize " + currentFileItem.FileSize + " / Progress " + currentFileItem.IpfsProgress + " / Exception " + ex, "Exception");
                 currentFileItem.IpfsErrorMessage = ex.Message;
             }

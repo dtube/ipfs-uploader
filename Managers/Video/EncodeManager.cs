@@ -158,7 +158,6 @@ namespace Uploader.Managers.Video
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("Exception Encode Video : {0}", ex);
                 LogManager.AddEncodingMessage("Video Duration " + currentFileItem.VideoDuration + " / FileSize " + currentFileItem.FileSize + " / Progress " + currentFileItem.EncodeProgress + " / Exception : " + ex, "Exception");
                 currentFileItem.EncodeErrorMessage = ex.Message;
 
