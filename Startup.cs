@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -37,13 +38,21 @@ namespace Uploader
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            if (env.IsDevelopment())
+            string origins;
+            if (env.IsStaging() || env.IsProduction())
             {
+                origins = "https://d.tube";
+            }
+            else
+            {
+                origins = "http://localhost:3000";
                 app.UseDeveloperExceptionPage();
             }
 
+            Console.WriteLine("CORS Settings: " + origins);
+
             app.UseCors(
-                options => options.WithOrigins("http://localhost:3000").AllowAnyMethod()
+                options => options.WithOrigins(origins).AllowAnyMethod()
             );
 
             app.UseMvc();
