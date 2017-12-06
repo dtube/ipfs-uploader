@@ -39,39 +39,46 @@ namespace Uploader.Managers.Ipfs
             {
                 while (true)
                 {
-                    Thread.Sleep(1000);
-
-                    FileItem fileItem;
-
-                    if (!queueFileItems.TryDequeue(out fileItem))
+                    try
                     {
-                        continue;
+                        Thread.Sleep(1000);
+
+                        FileItem fileItem;
+
+                        if (!queueFileItems.TryDequeue(out fileItem))
+                        {
+                            continue;
+                        }
+
+                        CurrentPositionInQueue++;
+
+                        // Si le client a pas demandé le progress depuis moins de 20s, lancer l'ipfs add
+                        if((DateTime.UtcNow - fileItem.FileContainer.LastTimeProgressRequested).TotalSeconds <= FrontSettings.MaxGetProgressCanceled)
+                        {
+                            // Ipfs add file
+                            IpfsAddManager.Add(fileItem);
+                        }
+                        else
+                        {
+                            fileItem.IpfsErrorMessage = "Canceled";
+                            fileItem.IpfsProgress = null;
+                        }
+
+                        // Si tout est terminé, supprimer le fichier source
+                        if (!fileItem.FileContainer.WorkInProgress())
+                        {
+                            TempFileManager.SafeDeleteTempFile(fileItem.FileContainer.SourceFileItem.FilePath);
+                        }
+
+                        if (!fileItem.IsSource)
+                        {
+                            // Supprimer le fichier attaché
+                            TempFileManager.SafeDeleteTempFile(fileItem.FilePath);
+                        }
                     }
-
-                    CurrentPositionInQueue++;
-
-                    // Si le client a pas demandé le progress depuis moins de 20s, lancer l'ipfs add
-                    if((DateTime.UtcNow - fileItem.FileContainer.LastTimeProgressRequested).TotalSeconds <= FrontSettings.MaxGetProgressCanceled)
+                    catch(Exception ex)
                     {
-                        // Ipfs add file
-                        IpfsAddManager.Add(fileItem);
-                    }
-                    else
-                    {
-                        fileItem.IpfsErrorMessage = "Canceled";
-                        fileItem.IpfsProgress = null;
-                    }
-
-                    // Si tout est terminé, supprimer le fichier source
-                    if (!fileItem.FileContainer.WorkInProgress())
-                    {
-                        TempFileManager.SafeDeleteTempFile(fileItem.FileContainer.SourceFileItem.FilePath);
-                    }
-
-                    if (!fileItem.IsSource)
-                    {
-                        // Supprimer le fichier attaché
-                        TempFileManager.SafeDeleteTempFile(fileItem.FilePath);
+                        LogManager.AddIpfsMessage(ex.ToString(), "Exception non gérée");
                     }
                 }
             });
