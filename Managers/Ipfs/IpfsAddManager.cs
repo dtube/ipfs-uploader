@@ -17,7 +17,7 @@ namespace Uploader.Managers.Ipfs
             {
                 currentFileItem = fileItem;
 
-                LogManager.AddIpfsMessage(Path.GetFileName(currentFileItem.FilePath), "Start");
+                LogManager.AddIpfsMessage("FileName " + Path.GetFileName(currentFileItem.FilePath), "Start");
 
                 currentFileItem.IpfsHash = null;
                 currentFileItem.IpfsProgress = "0.00%";
@@ -57,7 +57,7 @@ namespace Uploader.Managers.Ipfs
                 }
 
                 currentFileItem.IpfsProgress = "100.00%";
-                LogManager.AddIpfsMessage(currentFileItem.IpfsHash + " / FileSize " + currentFileItem.FileSize, "End");
+                LogManager.AddIpfsMessage("Hash " + currentFileItem.IpfsHash + " / FileSize " + currentFileItem.FileSize, "End");
             }
             catch (Exception ex)
             {

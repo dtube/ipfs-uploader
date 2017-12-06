@@ -25,7 +25,7 @@ namespace Uploader.Managers.Video
                 FileItem sourceFile = currentFileItem.FileContainer.SourceFileItem;
                 string sourceFilePath = sourceFile.FilePath;
                 newEncodedFilePath = Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".mp4");
-                LogManager.AddEncodingMessage(Path.GetFileName(newEncodedFilePath), "Start");
+                LogManager.AddEncodingMessage("FileName " + Path.GetFileName(newEncodedFilePath), "Start");
                 VideoSize videoSize = currentFileItem.VideoSize;
 
                 Debug.WriteLine(Path.GetFileName(sourceFilePath) + " / " + videoSize);
@@ -148,7 +148,7 @@ namespace Uploader.Managers.Video
                 currentFileItem.FilePath = newEncodedFilePath;
                 currentFileItem.EncodeProgress = "100.00%";
                 if(currentFileItem.TypeFile == TypeFile.SpriteVideo)
-                    LogManager.AddEncodingMessage("Video Duration " + duration + " / FileSize " + currentFileItem.FileSize, "End Sprite");
+                    LogManager.AddEncodingMessage("Video Duration " + duration + " / SourceVideoFileSize " + currentFileItem.FileContainer.SourceFileItem.FileSize, "End Extract Images");
                 else if (fileItem.TypeFile == TypeFile.EncodedVideo)
                     LogManager.AddEncodingMessage("Video Duration " + duration + " / FileSize " + currentFileItem.FileSize + " / Format " + videoSize, "End Encoding");
                 else

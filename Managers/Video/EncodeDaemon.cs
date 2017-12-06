@@ -76,11 +76,12 @@ namespace Uploader.Managers.Video
                             {
                                 string[] files = EncodeManager.GetListImageFrom(fileItem.FilePath); // récupération des images
                                 string outputPath = System.IO.Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".jpeg"); // nom du fichier sprite
-                                bool successSprite = SpriteManager.CombineBitmap(files, outputPath); // création du sprite
+                                bool successSprite = SpriteManager.CombineBitmap(files, outputPath); // création du sprite                                
                                 TempFileManager.SafeDeleteTempFiles(files); // suppression des images
                                 if(successSprite)
                                 {                                
                                     fileItem.FilePath = outputPath; // réaffectation chemin sprite
+                                    LogManager.AddEncodingMessage("FileSize " + fileItem.FileSize, "End Sprite");
                                     IpfsDaemon.Queue(fileItem);
                                 }
                                 else
