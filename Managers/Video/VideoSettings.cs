@@ -25,11 +25,17 @@ namespace Uploader.Managers.Video
         /// <summary>
         /// 
         /// </summary>
-        public static int NbSpriteImages = 100;
+        public static int NbSpriteImages => 100;
 
         /// <summary>
         /// pixels
         /// </summary>
-        public static int HeightSpriteImages = 118;
+        public static int HeightSpriteImages => 118;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public static bool GpuEncodeMode => false;
     }
 }

@@ -140,7 +140,32 @@ namespace Uploader.Managers.Video
                                     throw new InvalidOperationException("Format non reconnu.");
                             }
 
-                            processStartInfo.Arguments = $"-y -i {sourceFilePath} -vcodec libx264 -vf \"{size}\" -acodec aac {newEncodedFilePath}";
+                            string formatEncode = "libx264";
+                            string maxRate = string.Empty;
+                            if(VideoSettings.GpuEncodeMode)
+                            {
+                                formatEncode = "h264_nvenc";
+                                switch (videoSize)
+                                {
+                                    case VideoSize.F360p:
+                                        maxRate = "-b:v 350k -maxrate 350k -bufsize 350k";
+                                        break;
+                                    case VideoSize.F480p:
+                                        maxRate = "-b:v 500k -maxrate 500k -bufsize 500k";
+                                        break;
+                                    case VideoSize.F720p:
+                                        maxRate = "-b:v 750k -maxrate 750k -bufsize 750k";
+                                        break;
+                                    case VideoSize.F1080p:
+                                        maxRate = "-b:v 1000k -maxrate 1000k -bufsize 1000k";
+                                        break;
+
+                                    default:
+                                        throw new InvalidOperationException("Format non reconnu.");
+                                }
+                            }
+
+                            processStartInfo.Arguments = $"-y -i {sourceFilePath} -vcodec {formatEncode} -vf \"{size}\" {maxRate} -acodec aac {newEncodedFilePath}";
 
                             StartProcess(processStartInfo, VideoSettings.EncodeTimeout);
                             break;
