@@ -76,84 +76,96 @@ namespace Uploader.Managers.Video
                     return false;
                 }
 
-                if (currentFileItem.TypeFile == TypeFile.SpriteVideo)
+                switch (currentFileItem.TypeFile)
                 {
-                    int nbImages = VideoSettings.NbSpriteImages;
-                    int heightSprite = VideoSettings.HeightSpriteImages;
+                    case TypeFile.SpriteVideo:
+                        {
+                            int nbImages = VideoSettings.NbSpriteImages;
+                            int heightSprite = VideoSettings.HeightSpriteImages;
 
-                    // Calculer nb image/s
-                    //  si < 100s de vidéo -> 1 image/s
-                    //  sinon (nb secondes de la vidéo / 100) image/s
-                    string frameRate = "1";
-                    if (duration > nbImages)
-                    {
-                        frameRate = $"{nbImages}/{duration}";
-                    }
-
-                    int spriteWidth = GetWidth(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, heightSprite);
-                    string sizeImageMax = $"scale={spriteWidth}:{heightSprite}";
-
-                    // Extract frameRate image/s de la video
-                    string pattern = GetPattern(newEncodedFilePath);
-                    processStartInfo.Arguments = $"-y -i {sourceFilePath} -r {frameRate} -vf \"{sizeImageMax}\" -f image2 {pattern}";
-
-                    StartProcess(processStartInfo, VideoSettings.EncodeGetImagesTimeout);
-                }
-                else if (fileItem.TypeFile == TypeFile.EncodedVideo)
-                {
-                    string size;
-                    switch (videoSize)
-                    {
-                        case VideoSize.F360p:
+                            // Calculer nb image/s
+                            //  si < 100s de vidéo -> 1 image/s
+                            //  sinon (nb secondes de la vidéo / 100) image/s
+                            string frameRate = "1";
+                            if (duration > nbImages)
                             {
-                                Tuple<int, int> finalSize = GetSize(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, 640, 360);
-                                size = $"scale={finalSize.Item1}:{finalSize.Item2}";
-                                break;
+                                frameRate = $"{nbImages}/{duration}";
                             }
 
-                        case VideoSize.F480p:
+                            int spriteWidth = GetWidth(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, heightSprite);
+                            string sizeImageMax = $"scale={spriteWidth}:{heightSprite}";
+
+                            // Extract frameRate image/s de la video
+                            string pattern = GetPattern(newEncodedFilePath);
+                            processStartInfo.Arguments = $"-y -i {sourceFilePath} -r {frameRate} -vf \"{sizeImageMax}\" -f image2 {pattern}";
+
+                            StartProcess(processStartInfo, VideoSettings.EncodeGetImagesTimeout);
+                            break;
+                        }
+
+                    case TypeFile.EncodedVideo:
+                        {
+                            string size;
+                            switch (videoSize)
                             {
-                                Tuple<int, int> finalSize = GetSize(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, 854, 480);
-                                size = $"scale={finalSize.Item1}:{finalSize.Item2}";
-                                break;
+                                case VideoSize.F360p:
+                                    {
+                                        Tuple<int, int> finalSize = GetSize(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, 640, 360);
+                                        size = $"scale={finalSize.Item1}:{finalSize.Item2}";
+                                        break;
+                                    }
+
+                                case VideoSize.F480p:
+                                    {
+                                        Tuple<int, int> finalSize = GetSize(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, 854, 480);
+                                        size = $"scale={finalSize.Item1}:{finalSize.Item2}";
+                                        break;
+                                    }
+
+                                case VideoSize.F720p:
+                                    {
+                                        Tuple<int, int> finalSize = GetSize(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, 1280, 720);
+                                        size = $"scale={finalSize.Item1}:{finalSize.Item2}";
+                                        break;
+                                    }
+
+                                case VideoSize.F1080p:
+                                    {
+                                        Tuple<int, int> finalSize = GetSize(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, 1920, 1080);
+                                        size = $"scale={finalSize.Item1}:{finalSize.Item2}";
+                                        break;
+                                    }
+
+                                default:
+                                    throw new InvalidOperationException("Format non reconnu.");
                             }
 
-                        case VideoSize.F720p:
-                            {
-                                Tuple<int, int> finalSize = GetSize(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, 1280, 720);
-                                size = $"scale={finalSize.Item1}:{finalSize.Item2}";
-                                break;
-                            }
+                            processStartInfo.Arguments = $"-y -i {sourceFilePath} -vcodec libx264 -vf \"{size}\" -acodec aac {newEncodedFilePath}";
 
-                        case VideoSize.F1080p:
-                            {
-                                Tuple<int, int> finalSize = GetSize(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, 1920, 1080);
-                                size = $"scale={finalSize.Item1}:{finalSize.Item2}";
-                                break;
-                            }
+                            StartProcess(processStartInfo, VideoSettings.EncodeTimeout);
+                            break;
+                        }
 
-                        default:
-                            throw new InvalidOperationException("Format non reconnu.");
-                    }
-
-                    processStartInfo.Arguments = $"-y -i {sourceFilePath} -vcodec libx264 -vf \"{size}\" -acodec aac {newEncodedFilePath}";
-
-                    StartProcess(processStartInfo, VideoSettings.EncodeTimeout);
-                }
-                else
-                {
-                    throw new InvalidOperationException("type non prévu");
+                    default:
+                        throw new InvalidOperationException("type non prévu");
                 }
 
                 currentFileItem.FilePath = newEncodedFilePath;
                 currentFileItem.EncodeProgress = "100.00%";
-                if(currentFileItem.TypeFile == TypeFile.SpriteVideo)
-                    LogManager.AddEncodingMessage("Video Duration " + duration + " / SourceVideoFileSize " + currentFileItem.FileContainer.SourceFileItem.FileSize, "End Extract Images");
-                else if (fileItem.TypeFile == TypeFile.EncodedVideo)
-                    LogManager.AddEncodingMessage("Video Duration " + duration + " / FileSize " + currentFileItem.FileSize + " / Format " + videoSize, "End Encoding");
-                else
-                    throw new InvalidOperationException("type non prévu");
-                        
+                switch (currentFileItem.TypeFile)
+                {
+                    case TypeFile.SpriteVideo:
+                        LogManager.AddEncodingMessage("Video Duration " + duration + " / SourceVideoFileSize " + currentFileItem.FileContainer.SourceFileItem.FileSize, "End Extract Images");
+                        break;
+
+                    case TypeFile.EncodedVideo:
+                        LogManager.AddEncodingMessage("Video Duration " + duration + " / FileSize " + currentFileItem.FileSize + " / Format " + videoSize, "End Encoding");
+                        break;
+
+                    default:
+                        throw new InvalidOperationException("type non prévu");
+                }
+
                 return true;
             }
             catch (Exception ex)
@@ -162,6 +174,16 @@ namespace Uploader.Managers.Video
                 currentFileItem.EncodeErrorMessage = ex.Message;
 
                 TempFileManager.SafeDeleteTempFile(newEncodedFilePath);
+
+                if(currentFileItem.VideoSize != VideoSize.Source)
+                    TempFileManager.SafeDeleteTempFile(currentFileItem.FilePath);
+
+                if (currentFileItem.TypeFile == TypeFile.SpriteVideo)
+                {
+                    string[] files = EncodeManager.GetListImageFrom(newEncodedFilePath); // récupération des images
+                    TempFileManager.SafeDeleteTempFiles(files); // suppression des images
+                }
+
                 return false;
             }
         }
@@ -242,7 +264,14 @@ namespace Uploader.Managers.Video
 
         public static string[] GetListImageFrom(string filePath)
         {
-            return Directory.EnumerateFiles(Path.GetDirectoryName(filePath), Path.GetFileNameWithoutExtension(filePath) + "-*.jpeg").OrderBy(s => s).ToArray();
+            if(string.IsNullOrWhiteSpace(filePath))
+                return new string[0];
+
+            string directoryName = Path.GetDirectoryName(filePath);
+            if(directoryName == null)
+                return new string[0];
+
+            return Directory.EnumerateFiles(directoryName, Path.GetFileNameWithoutExtension(filePath) + "-*.jpeg").OrderBy(s => s).ToArray();
         }
 
         /// <summary>

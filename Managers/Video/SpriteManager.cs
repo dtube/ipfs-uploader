@@ -14,6 +14,11 @@ namespace Uploader.Managers.Video
     {
         public static bool CombineBitmap(string[] filesToCombine, string outputFilePath)
         {
+            if(filesToCombine == null || filesToCombine.Length == 0)
+                return false;
+            if(string.IsNullOrWhiteSpace(outputFilePath))
+                return false;
+
             //read all images into memory
             var images = new List<Image>();
 
