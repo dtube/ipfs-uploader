@@ -148,16 +148,16 @@ namespace Uploader.Managers.Video
                                 switch (videoSize)
                                 {
                                     case VideoSize.F360p:
-                                        maxRate = "-b:v 350k -maxrate 350k -bufsize 350k";
+                                        maxRate = "200k";
                                         break;
                                     case VideoSize.F480p:
-                                        maxRate = "-b:v 500k -maxrate 500k -bufsize 500k";
+                                        maxRate = "500k";
                                         break;
                                     case VideoSize.F720p:
-                                        maxRate = "-b:v 750k -maxrate 750k -bufsize 750k";
+                                        maxRate = "1000k";
                                         break;
                                     case VideoSize.F1080p:
-                                        maxRate = "-b:v 1000k -maxrate 1000k -bufsize 1000k";
+                                        maxRate = "1600k";
                                         break;
 
                                     default:
@@ -165,7 +165,7 @@ namespace Uploader.Managers.Video
                                 }
                             }
 
-                            processStartInfo.Arguments = $"-y -i {sourceFilePath} -vcodec {formatEncode} -vf \"{size}\" {maxRate} -acodec aac {newEncodedFilePath}";
+                            processStartInfo.Arguments = $"-y -i {sourceFilePath} -vcodec {formatEncode} -vf \"{size}\" -b:v {maxRate} -maxrate {maxRate} -bufsize {maxRate} -acodec aac {newEncodedFilePath}";
 
                             StartProcess(processStartInfo, VideoSettings.EncodeTimeout);
                             break;
