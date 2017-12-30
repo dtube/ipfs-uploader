@@ -27,6 +27,12 @@ namespace Uploader.Managers.Ipfs
                 processStartInfo.FileName = "ipfs";
                 processStartInfo.Arguments = $"add {currentFileItem.FilePath}";
 
+                if(IpfsSettings.VideoAndSpriteTriggleDag)                
+                    if(currentFileItem.TypeFile == TypeFile.SourceVideo || 
+                        currentFileItem.TypeFile == TypeFile.EncodedVideo || 
+                        currentFileItem.TypeFile == TypeFile.SpriteVideo)
+                        processStartInfo.Arguments = $"add -t {currentFileItem.FilePath}";
+
                 processStartInfo.RedirectStandardOutput = true;
                 processStartInfo.RedirectStandardError = true;
                 processStartInfo.WorkingDirectory = TempFileManager.GetTempDirectory();
