@@ -89,7 +89,7 @@ namespace Uploader.Managers.Video
                             string frameRate = "1";
                             if (duration > nbImages)
                             {
-                                frameRate = $"{nbImages}/{duration}";
+                                frameRate = $"{nbImages}/{duration}"; //frameRate = inverse de image/s
                             }
 
                             int spriteWidth = GetWidth(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, heightSprite);

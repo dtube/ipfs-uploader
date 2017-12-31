@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -75,7 +76,7 @@ namespace Uploader.Managers.Video
                                 {
                                     string[] files = EncodeManager.GetListImageFrom(fileItem.FilePath); // récupération des images
                                     string outputPath = System.IO.Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".jpeg"); // nom du fichier sprite
-                                    bool successSprite = SpriteManager.CombineBitmap(files, outputPath); // création du sprite                                
+                                    bool successSprite = SpriteManager.CombineBitmap(files.Skip(files.Length - VideoSettings.NbSpriteImages).ToArray(), outputPath); // création du sprite                                
                                     TempFileManager.SafeDeleteTempFiles(files); // suppression des images
                                     if(successSprite)
                                     {                                
