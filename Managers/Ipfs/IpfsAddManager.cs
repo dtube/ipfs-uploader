@@ -27,7 +27,7 @@ namespace Uploader.Managers.Ipfs
                 processStartInfo.FileName = "ipfs";
                 processStartInfo.Arguments = $"add {currentFileItem.FilePath}";
 
-                if(IpfsSettings.VideoAndSpriteTriggleDag)                
+                if(IpfsSettings.VideoAndSpriteTrickleDag)                
                     if(currentFileItem.TypeFile == TypeFile.SourceVideo || 
                         currentFileItem.TypeFile == TypeFile.EncodedVideo || 
                         currentFileItem.TypeFile == TypeFile.SpriteVideo)
