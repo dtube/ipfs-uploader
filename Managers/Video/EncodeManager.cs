@@ -141,9 +141,9 @@ namespace Uploader.Managers.Video
                             }
 
                             string formatEncode = "libx264";
-                            string maxRate = string.Empty;
                             if(VideoSettings.GpuEncodeMode)
                             {
+                                string maxRate = string.Empty;
                                 formatEncode = "h264_nvenc";
                                 switch (videoSize)
                                 {
@@ -163,9 +163,13 @@ namespace Uploader.Managers.Video
                                     default:
                                         throw new InvalidOperationException("Format non reconnu.");
                                 }
-                            }
 
-                            processStartInfo.Arguments = $"-y -i {sourceFilePath} -vcodec {formatEncode} -vf \"{size}\" -b:v {maxRate} -maxrate {maxRate} -bufsize {maxRate} -acodec aac {newEncodedFilePath}";
+                                processStartInfo.Arguments = $"-y -i {sourceFilePath} -vcodec {formatEncode} -vf \"{size}\" -b:v {maxRate} -maxrate {maxRate} -bufsize {maxRate} -acodec aac {newEncodedFilePath}";
+                            }
+                            else
+                            {
+                                processStartInfo.Arguments = $"-y -i {sourceFilePath} -vcodec {formatEncode} -vf \"{size}\" -acodec aac {newEncodedFilePath}";
+                            }
 
                             StartProcess(processStartInfo, VideoSettings.EncodeTimeout);
                             break;
