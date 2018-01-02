@@ -1,8 +1,9 @@
 using System;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
+
+using ImageMagick;
 
 using Uploader.Managers.Common;
 using Uploader.Models;
@@ -49,7 +50,7 @@ namespace Uploader.Managers.Video
 
                     StartProcess(processStartInfo, VideoSettings.EncodeGetOneImageTimeout);
 
-                    using(Image image = Image.FromFile(imageOutput))
+                    using (MagickImage image = new MagickImage(imageOutput))
                     {
                         sourceFile.VideoWidth = image.Width;
                         sourceFile.VideoHeight = image.Height;
