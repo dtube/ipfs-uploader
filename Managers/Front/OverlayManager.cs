@@ -1,7 +1,8 @@
 using System;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.IO;
-
-using ImageMagick;
 
 using Uploader.Managers.Common;
 using Uploader.Managers.Ipfs;
@@ -19,32 +20,31 @@ namespace Uploader.Managers.Front
         {
             FileContainer fileContainer = FileContainer.NewOverlayContainer(sourceFilePath);
 
-            ResizeImage(fileContainer);            
+            ResizeImage(fileContainer);
 
             try
             {
-                // Read image that needs a watermark
-                using (MagickImage sourceImage = new MagickImage(fileContainer.SourceFileItem.FilePath))
+                using(Image overlayImage = Image.FromFile(_overlayImagePath))
                 {
-                    // Read the watermark that will be put on top of the image
-                    using (MagickImage watermark = new MagickImage(_overlayImagePath))
+                    using(Image sourceImage = Image.FromFile(fileContainer.SourceFileItem.FilePath))
                     {
-                        // Si position n'est pas fournie, centrer l'image
-                        if (x == null || y == null)
+                        using(Graphics graphics = Graphics.FromImage(sourceImage))
                         {
-                            x = (sourceImage.Width / 2) - (watermark.Width / 2);
-                            y = (sourceImage.Height / 2) - (watermark.Height / 2);
+                            // Si position n'est pas fournie, centrer l'image
+                            if (x == null || y == null)
+                            {
+                                x = (sourceImage.Width / 2) - (overlayImage.Width / 2);
+                                y = (sourceImage.Height / 2) - (overlayImage.Height / 2);
+                            }
+
+                            Rectangle srctRectangle = new Rectangle(0, 0, overlayImage.Width, overlayImage.Height);
+                            Rectangle destRectangle = new Rectangle(x.Value, y.Value, overlayImage.Width, overlayImage.Height);
+                            graphics.DrawImage(overlayImage, destRectangle, srctRectangle, GraphicsUnit.Pixel);
                         }
-
-                        // draw the watermark at a specific location
-                        sourceImage.Composite(watermark, x.Value, y.Value, CompositeOperator.Over);
+                        string outputFilePath = System.IO.Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".png");
+                        sourceImage.Save(outputFilePath, ImageFormat.Png);
+                        fileContainer.OverlayFileItem.FilePath = outputFilePath;
                     }
-
-                    string outputFilePath = System.IO.Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".png");
-                    sourceImage.Format = MagickFormat.Png;
-                    // Save the result
-                    sourceImage.Write(outputFilePath);
-                    fileContainer.OverlayFileItem.FilePath = outputFilePath;
                 }
 
                 IpfsDaemon.Queue(fileContainer.OverlayFileItem);
@@ -62,31 +62,34 @@ namespace Uploader.Managers.Front
             try
             {
                 string oldFilePath = fileContainer.SourceFileItem.FilePath;
-                // Read from file
-                using (MagickImage sourceImage = new MagickImage(oldFilePath))
+                using(Image sourceImage = Image.FromFile(oldFilePath))
                 {
-                    MagickGeometry size = new MagickGeometry(_finalWidth, _finalHeight);
-                    size.IgnoreAspectRatio = false;
-
-                    // video verticale, garder largeur _finalWidth, couper la hauteur
-                    if((double)sourceImage.Width / (double)sourceImage.Height < ((double)_finalWidth / (double)_finalHeight))
+                    //create a bitmap to hold the new image
+                    using(var finalBitmap = new Bitmap(_finalWidth, _finalHeight))
                     {
-                        int hauteur = sourceImage.Width * _finalHeight / _finalWidth;
-                        sourceImage.Crop(sourceImage.Width, hauteur);
+                        using(Graphics graphics = Graphics.FromImage(finalBitmap))
+                        {
+                            Rectangle sourceRectangle;
+                            Rectangle destRectangle = new Rectangle(0, 0, _finalWidth, _finalHeight);
+                            // video verticale, garder largeur _finalWidth, couper la hauteur
+                            if((double)sourceImage.Width / (double)sourceImage.Height < ((double)_finalWidth / (double)_finalHeight))
+                            {
+                                int hauteur = sourceImage.Width * _finalHeight / _finalWidth;
+                                int yOffset = (sourceImage.Height - hauteur) / 2;
+                                sourceRectangle = new Rectangle(0, yOffset, sourceImage.Width, hauteur);
+                            }
+                            else // video horizontale, garder hauteur _finalHeight, couper la largeur
+                            {
+                                int largeur = sourceImage.Height * _finalWidth / _finalHeight;
+                                int xOffset = (sourceImage.Width - largeur) / 2;
+                                sourceRectangle = new Rectangle(xOffset, 0, largeur, sourceImage.Height);
+                            }
+                            graphics.DrawImage(sourceImage, destRectangle, sourceRectangle, GraphicsUnit.Pixel);
+                        }
+                        string outputFilePath = System.IO.Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".png");
+                        finalBitmap.Save(outputFilePath, ImageFormat.Png);
+                        fileContainer.SourceFileItem.FilePath = outputFilePath;
                     }
-                    else // video horizontale, garder hauteur _finalHeight, couper la largeur
-                    {
-                        int largeur = sourceImage.Height * _finalWidth / _finalHeight;
-                        sourceImage.Crop(largeur, sourceImage.Height);
-                    }
-
-                    sourceImage.Resize(size);
-
-                    string outputFilePath = System.IO.Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".png");
-                    sourceImage.Format = MagickFormat.Png;
-                    // Save the result
-                    sourceImage.Write(outputFilePath);
-                    fileContainer.SourceFileItem.FilePath = outputFilePath;
                 }
 
                 IpfsDaemon.Queue(fileContainer.SourceFileItem);
