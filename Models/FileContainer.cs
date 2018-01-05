@@ -46,7 +46,7 @@ namespace Uploader.Models
             FileContainer fileContainer = new FileContainer(TypeContainer.Overlay);
 
             fileContainer.SourceFileItem = FileItem.NewSourceImageFileItem(fileContainer, sourceFilePath);
-            fileContainer.OverlayFileItem = FileItem.NewOverlayImageFileItem(fileContainer);
+            //fileContainer.OverlayFileItem = FileItem.NewOverlayImageFileItem(fileContainer); // TMP cancel overlay
 
             return fileContainer;
         }

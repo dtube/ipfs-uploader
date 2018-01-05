@@ -22,6 +22,7 @@ namespace Uploader.Managers.Front
 
             ResizeImage(fileContainer);
 
+/* TMP cancel overlay
             try
             {
                 using(Image overlayImage = Image.FromFile(_overlayImagePath))
@@ -53,7 +54,7 @@ namespace Uploader.Managers.Front
             {
                 LogManager.AddOverlayMessage(ex.ToString(), "Exception");
             }
-
+*/
             return fileContainer.ProgressToken;
         }
 
