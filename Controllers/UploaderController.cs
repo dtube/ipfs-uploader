@@ -45,7 +45,7 @@ namespace Uploader.Controllers
         [HttpPost]
         [DisableFormValueModelBinding]
         [DisableRequestSizeLimit]
-        [Route("/overlayImage")]
+        [Route("/uploadImage")]
         public async Task<IActionResult> OverlayImage(int? x = null, int? y = null)
         {
             try
