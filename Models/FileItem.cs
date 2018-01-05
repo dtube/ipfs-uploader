@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 
 namespace Uploader.Models
 {
@@ -70,8 +71,8 @@ namespace Uploader.Models
             {
                 _filePath = value;
 
-                if (_filePath != null && System.IO.File.Exists(_filePath))
-                    FileSize = new System.IO.FileInfo(_filePath).Length;
+                if (_filePath != null && File.Exists(_filePath))
+                    FileSize = new FileInfo(_filePath).Length;
             }
         }
         private string _filePath;

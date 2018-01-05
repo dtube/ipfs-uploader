@@ -25,13 +25,13 @@ namespace Uploader.Managers.Ipfs
                 // Send to ipfs and return hash from ipfs
                 var processStartInfo = new ProcessStartInfo();
                 processStartInfo.FileName = "ipfs";
-                processStartInfo.Arguments = $"add {currentFileItem.FilePath}";
+                processStartInfo.Arguments = $"add {Path.GetFileName(currentFileItem.FilePath)}";
 
                 if(IpfsSettings.VideoAndSpriteTrickleDag)                
                     if(currentFileItem.TypeFile == TypeFile.SourceVideo || 
                         currentFileItem.TypeFile == TypeFile.EncodedVideo || 
                         currentFileItem.TypeFile == TypeFile.SpriteVideo)
-                        processStartInfo.Arguments = $"add -t {currentFileItem.FilePath}";
+                        processStartInfo.Arguments = $"add -t {Path.GetFileName(currentFileItem.FilePath)}";
 
                 processStartInfo.RedirectStandardOutput = true;
                 processStartInfo.RedirectStandardError = true;

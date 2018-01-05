@@ -44,8 +44,8 @@ namespace Uploader.Managers.Video
                 // Récupérer la durée totale de la vidéo et sa résolution
                 if (!sourceFile.VideoDuration.HasValue)
                 {
-                    string imageOutput = System.IO.Path.ChangeExtension(sourceFilePath, ".jpeg");
-                    processStartInfo.Arguments = $"-y -i {sourceFilePath} -vf fps=1 -vframes 1 {imageOutput}";
+                    string imageOutput = Path.ChangeExtension(sourceFilePath, ".jpeg");
+                    processStartInfo.Arguments = $"-y -i {Path.GetFileName(sourceFilePath)} -vf fps=1 -vframes 1 {Path.GetFileName(imageOutput)}";
 
                     StartProcess(processStartInfo, VideoSettings.EncodeGetOneImageTimeout);
 
@@ -97,7 +97,7 @@ namespace Uploader.Managers.Video
 
                             // Extract frameRate image/s de la video
                             string pattern = GetPattern(newEncodedFilePath);
-                            processStartInfo.Arguments = $"-y -i {sourceFilePath} -r {frameRate} -vf \"{sizeImageMax}\" -f image2 {pattern}";
+                            processStartInfo.Arguments = $"-y -i {Path.GetFileName(sourceFilePath)} -r {frameRate} -vf \"{sizeImageMax}\" -f image2 {pattern}";
 
                             StartProcess(processStartInfo, VideoSettings.EncodeGetImagesTimeout);
                             break;
@@ -164,11 +164,11 @@ namespace Uploader.Managers.Video
                                         throw new InvalidOperationException("Format non reconnu.");
                                 }
 
-                                processStartInfo.Arguments = $"-y -i {sourceFilePath} -vcodec {formatEncode} -vf \"{size}\" -b:v {maxRate} -maxrate {maxRate} -bufsize {maxRate} -acodec aac {newEncodedFilePath}";
+                                processStartInfo.Arguments = $"-y -i {Path.GetFileName(sourceFilePath)} -vcodec {formatEncode} -vf \"{size}\" -b:v {maxRate} -maxrate {maxRate} -bufsize {maxRate} -acodec aac {Path.GetFileName(newEncodedFilePath)}";
                             }
                             else
                             {
-                                processStartInfo.Arguments = $"-y -i {sourceFilePath} -vcodec {formatEncode} -vf \"{size}\" -acodec aac {newEncodedFilePath}";
+                                processStartInfo.Arguments = $"-y -i {Path.GetFileName(sourceFilePath)} -vcodec {formatEncode} -vf \"{size}\" -acodec aac {Path.GetFileName(newEncodedFilePath)}";
                             }
 
                             StartProcess(processStartInfo, VideoSettings.EncodeTimeout);
