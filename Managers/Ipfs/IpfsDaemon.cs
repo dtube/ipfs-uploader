@@ -27,7 +27,7 @@ namespace Uploader.Managers.Ipfs
             set;
         }
 
-        private static int TotalAddToQueue
+        public static int TotalAddToQueue
         {
             get;
             set;

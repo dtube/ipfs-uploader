@@ -19,6 +19,17 @@ namespace Uploader.Controllers
     public class ProgressController : Controller
     {
         [HttpGet]
+        [Route("/getStatus")]
+        public JsonResult GetStatus()
+        {
+            return Json(new
+                    {
+                        ffmpegInQueue = EncodeDaemon.TotalAddToQueue - EncodeDaemon.CurrentPositionInQueue,
+                        ipfsInQueue = IpfsDaemon.TotalAddToQueue - IpfsDaemon.CurrentPositionInQueue
+                    });
+        }
+
+        [HttpGet]
         [Route("/getProgressByToken/{token}")]
         public ActionResult GetProgressByToken(Guid token)
         {

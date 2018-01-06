@@ -30,7 +30,7 @@ namespace Uploader.Managers.Video
             set;
         }
 
-        private static int TotalAddToQueue
+        public static int TotalAddToQueue
         {
             get;
             set;
