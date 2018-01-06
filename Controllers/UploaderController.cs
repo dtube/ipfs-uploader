@@ -1,6 +1,5 @@
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Mvc;
@@ -70,16 +69,15 @@ namespace Uploader.Controllers
             // Copy file to temp location
             string sourceFilePath = TempFileManager.GetNewTempFilePath();
 
+            FormValueProvider formModel;
+
             try
             {
                 // Récupération du fichier
-                FormValueProvider formModel;
-                using(FileStream stream = System.IO.File.Create(sourceFilePath))
+                using(System.IO.FileStream stream = System.IO.File.Create(sourceFilePath))
                 {
                     formModel = await Request.StreamFile(stream);
-                }
-                //var fileName = formModel.GetValue("qqFileName");
-                return sourceFilePath;
+                }                
             }
             catch(Exception ex)
             {
@@ -87,6 +85,24 @@ namespace Uploader.Controllers
                 TempFileManager.SafeDeleteTempFile(sourceFilePath);
                 throw;
             }
+
+            try
+            {
+                ValueProviderResult fileName = formModel.GetValue("qqFileName");
+                if(fileName.Length == 1)
+                {
+                    var extension = System.IO.Path.GetExtension(fileName.FirstValue);
+                    if(!string.IsNullOrWhiteSpace(extension))
+                    {
+                        string newFilePath = System.IO.Path.ChangeExtension(sourceFilePath, extension);
+                        System.IO.File.Move(sourceFilePath, newFilePath);
+                        sourceFilePath = newFilePath;
+                    }
+                }
+            }
+            catch {}
+
+            return sourceFilePath;
         }
     }
 }
