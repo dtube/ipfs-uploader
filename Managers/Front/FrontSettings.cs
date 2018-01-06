@@ -6,5 +6,7 @@ namespace Uploader.Managers.Front
         /// seconds
         /// </summary>
         public static int MaxGetProgressCanceled => 20;
+
+        public static string ImageMagickPath => @"C:\ImageMagick\";
     }
 }

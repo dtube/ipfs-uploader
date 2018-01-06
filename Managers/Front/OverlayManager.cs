@@ -1,7 +1,5 @@
 using System;
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
+using System.Diagnostics;
 using System.IO;
 
 using Uploader.Managers.Common;
@@ -20,85 +18,56 @@ namespace Uploader.Managers.Front
         {
             FileContainer fileContainer = FileContainer.NewOverlayContainer(sourceFilePath);
 
-            ResizeImage(fileContainer);
+            var processStartInfo = new ProcessStartInfo();
+            processStartInfo.WorkingDirectory = TempFileManager.GetTempDirectory();
+            processStartInfo.UseShellExecute = false;
+            processStartInfo.ErrorDialog = false;
+            processStartInfo.CreateNoWindow = true;
+            processStartInfo.WindowStyle = ProcessWindowStyle.Hidden;
 
-/* TMP cancel overlay
             try
             {
-                using(Image overlayImage = Image.FromFile(_overlayImagePath))
-                {
-                    using(Image sourceImage = Image.FromFile(fileContainer.SourceFileItem.FilePath))
-                    {
-                        using(Graphics graphics = Graphics.FromImage(sourceImage))
-                        {
-                            // Si position n'est pas fournie, centrer l'image
-                            if (x == null || y == null)
-                            {
-                                x = (sourceImage.Width / 2) - (overlayImage.Width / 2);
-                                y = (sourceImage.Height / 2) - (overlayImage.Height / 2);
-                            }
+                // resize + crop source image
+                string oldFilePath = fileContainer.SourceFileItem.FilePath;
+                string outputFilePath = Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".png");
+                processStartInfo.FileName = Path.Combine(FrontSettings.ImageMagickPath, "convert");
+                processStartInfo.Arguments = $"{Path.GetFileName(fileContainer.SourceFileItem.FilePath)} -resize \"{_finalWidth}x{_finalHeight}^\" -gravity center -crop {_finalWidth}x{_finalHeight}+0+0 {Path.GetFileName(outputFilePath)}";
+                StartProcess(processStartInfo, 5000);
+                fileContainer.SourceFileItem.FilePath = outputFilePath;
+                IpfsDaemon.Queue(fileContainer.SourceFileItem);
+                TempFileManager.SafeDeleteTempFile(oldFilePath);
 
-                            Rectangle srctRectangle = new Rectangle(0, 0, overlayImage.Width, overlayImage.Height);
-                            Rectangle destRectangle = new Rectangle(x.Value, y.Value, overlayImage.Width, overlayImage.Height);
-                            graphics.DrawImage(overlayImage, destRectangle, srctRectangle, GraphicsUnit.Pixel);
-                        }
-                        string outputFilePath = System.IO.Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".png");
-                        sourceImage.Save(outputFilePath, ImageFormat.Png);
-                        fileContainer.OverlayFileItem.FilePath = outputFilePath;
-                    }
-                }
-
+                // watermark source image
+                outputFilePath = Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".png");
+                processStartInfo.FileName = Path.Combine(FrontSettings.ImageMagickPath, "composite");
+                processStartInfo.Arguments = $"-gravity Center {_overlayImagePath} {Path.GetFileName(fileContainer.SourceFileItem.FilePath)} {Path.GetFileName(outputFilePath)}";
+                StartProcess(processStartInfo, 5000);
+                fileContainer.OverlayFileItem.FilePath = outputFilePath;
                 IpfsDaemon.Queue(fileContainer.OverlayFileItem);
             }
             catch(Exception ex)
             {
                 LogManager.AddOverlayMessage(ex.ToString(), "Exception");
             }
-*/
+
             return fileContainer.ProgressToken;
         }
 
-        public static void ResizeImage(FileContainer fileContainer)
+        private static void StartProcess(ProcessStartInfo processStartInfo, int timeout)
         {
-            try
+            Debug.WriteLine("===> Launch : " + processStartInfo.FileName + " " + processStartInfo.Arguments);
+            using(var process = Process.Start(processStartInfo))
             {
-                string oldFilePath = fileContainer.SourceFileItem.FilePath;
-                using(Image sourceImage = Image.FromFile(oldFilePath))
+                bool success = process.WaitForExit(timeout);
+                if (!success)
                 {
-                    //create a bitmap to hold the new image
-                    using(var finalBitmap = new Bitmap(_finalWidth, _finalHeight))
-                    {
-                        using(Graphics graphics = Graphics.FromImage(finalBitmap))
-                        {
-                            Rectangle sourceRectangle;
-                            Rectangle destRectangle = new Rectangle(0, 0, _finalWidth, _finalHeight);
-                            // video verticale, garder largeur _finalWidth, couper la hauteur
-                            if((double)sourceImage.Width / (double)sourceImage.Height < ((double)_finalWidth / (double)_finalHeight))
-                            {
-                                int hauteur = sourceImage.Width * _finalHeight / _finalWidth;
-                                int yOffset = (sourceImage.Height - hauteur) / 2;
-                                sourceRectangle = new Rectangle(0, yOffset, sourceImage.Width, hauteur);
-                            }
-                            else // video horizontale, garder hauteur _finalHeight, couper la largeur
-                            {
-                                int largeur = sourceImage.Height * _finalWidth / _finalHeight;
-                                int xOffset = (sourceImage.Width - largeur) / 2;
-                                sourceRectangle = new Rectangle(xOffset, 0, largeur, sourceImage.Height);
-                            }
-                            graphics.DrawImage(sourceImage, destRectangle, sourceRectangle, GraphicsUnit.Pixel);
-                        }
-                        string outputFilePath = System.IO.Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".png");
-                        finalBitmap.Save(outputFilePath, ImageFormat.Png);
-                        fileContainer.SourceFileItem.FilePath = outputFilePath;
-                    }
+                    throw new InvalidOperationException("Timeout : Le fichier n'a pas pu être encodé dans le temps imparti.");
                 }
 
-                IpfsDaemon.Queue(fileContainer.SourceFileItem);
-                TempFileManager.SafeDeleteTempFile(oldFilePath);
-            }
-            catch(Exception ex)
-            {
-                LogManager.AddOverlayMessage(ex.ToString(), "Exception");
+                if (process.ExitCode != 0)
+                {
+                    throw new InvalidOperationException($"Le fichier n'a pas pu être encodé, erreur {process.ExitCode}.");
+                }
             }
         }
     }
