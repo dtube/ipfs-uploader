@@ -14,7 +14,7 @@ namespace Uploader.Managers.Front
         private static int _finalWidth = 210;
         private static int _finalHeight = 118;
 
-        public static Guid ComputeOverlay(string sourceFilePath, int? x = null, int? y = null)
+        public static Guid ComputeOverlay(string sourceFilePath)
         {
             FileContainer fileContainer = FileContainer.NewOverlayContainer(sourceFilePath);
 
@@ -31,7 +31,7 @@ namespace Uploader.Managers.Front
                 string oldFilePath = fileContainer.SourceFileItem.FilePath;
                 string outputFilePath = Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".png");
                 processStartInfo.FileName = Path.Combine(FrontSettings.ImageMagickPath, "convert");
-                processStartInfo.Arguments = $"{Path.GetFileName(fileContainer.SourceFileItem.FilePath)} -resize \"{_finalWidth}x{_finalHeight}^\" -gravity center -crop {_finalWidth}x{_finalHeight}+0+0 {Path.GetFileName(outputFilePath)}";
+                processStartInfo.Arguments = $"{Path.GetFileName(fileContainer.SourceFileItem.FilePath)} -resize \"{_finalWidth}x{_finalHeight}^\" -gravity Center -crop {_finalWidth}x{_finalHeight}+0+0 {Path.GetFileName(outputFilePath)}";
                 StartProcess(processStartInfo, 5000);
                 fileContainer.SourceFileItem.FilePath = outputFilePath;
                 IpfsDaemon.Queue(fileContainer.SourceFileItem);
@@ -40,7 +40,7 @@ namespace Uploader.Managers.Front
                 // watermark source image
                 outputFilePath = Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".png");
                 processStartInfo.FileName = Path.Combine(FrontSettings.ImageMagickPath, "composite");
-                processStartInfo.Arguments = $"-gravity Center {_overlayImagePath} {Path.GetFileName(fileContainer.SourceFileItem.FilePath)} {Path.GetFileName(outputFilePath)}";
+                processStartInfo.Arguments = $"-gravity NorthEast {_overlayImagePath} {Path.GetFileName(fileContainer.SourceFileItem.FilePath)} {Path.GetFileName(outputFilePath)}";
                 StartProcess(processStartInfo, 5000);
                 fileContainer.OverlayFileItem.FilePath = outputFilePath;
                 IpfsDaemon.Queue(fileContainer.OverlayFileItem);

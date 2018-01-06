@@ -45,13 +45,13 @@ namespace Uploader.Controllers
         [DisableFormValueModelBinding]
         [DisableRequestSizeLimit]
         [Route("/uploadImage")]
-        public async Task<IActionResult> OverlayImage(int? x = null, int? y = null)
+        public async Task<IActionResult> OverlayImage()
         {
             try
             {
                 return Ok(new
                 {
-                    success = true, token = OverlayManager.ComputeOverlay(await GetFileToTemp(), x, y)
+                    success = true, token = OverlayManager.ComputeOverlay(await GetFileToTemp())
                 });
             }
             catch (Exception ex)
