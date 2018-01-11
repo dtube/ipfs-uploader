@@ -111,28 +111,28 @@ namespace Uploader.Managers.Video
                                 case VideoSize.F360p:
                                     {
                                         Tuple<int, int> finalSize = GetSize(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, 640, 360);
-                                        size = $"scale={finalSize.Item1}:{finalSize.Item2}";
+                                        size = $"{finalSize.Item1}:{finalSize.Item2}";
                                         break;
                                     }
 
                                 case VideoSize.F480p:
                                     {
                                         Tuple<int, int> finalSize = GetSize(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, 854, 480);
-                                        size = $"scale={finalSize.Item1}:{finalSize.Item2}";
+                                        size = $"{finalSize.Item1}:{finalSize.Item2}";
                                         break;
                                     }
 
                                 case VideoSize.F720p:
                                     {
                                         Tuple<int, int> finalSize = GetSize(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, 1280, 720);
-                                        size = $"scale={finalSize.Item1}:{finalSize.Item2}";
+                                        size = $"{finalSize.Item1}:{finalSize.Item2}";
                                         break;
                                     }
 
                                 case VideoSize.F1080p:
                                     {
                                         Tuple<int, int> finalSize = GetSize(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, 1920, 1080);
-                                        size = $"scale={finalSize.Item1}:{finalSize.Item2}";
+                                        size = $"{finalSize.Item1}:{finalSize.Item2}";
                                         break;
                                     }
 
@@ -164,11 +164,11 @@ namespace Uploader.Managers.Video
                                         throw new InvalidOperationException("Format non reconnu.");
                                 }
 
-                                processStartInfo.Arguments = $"-y -i {Path.GetFileName(sourceFilePath)} -vcodec {formatEncode} -vf \"{size}\" -b:v {maxRate} -maxrate {maxRate} -bufsize {maxRate} -acodec aac {Path.GetFileName(newEncodedFilePath)}";
+                                processStartInfo.Arguments = $"-y -i {Path.GetFileName(sourceFilePath)} -vcodec {formatEncode} -vf \"scale={size},format=yuv420p\" -b:v {maxRate} -maxrate {maxRate} -bufsize {maxRate} -acodec aac {Path.GetFileName(newEncodedFilePath)}";
                             }
                             else
                             {
-                                processStartInfo.Arguments = $"-y -i {Path.GetFileName(sourceFilePath)} -vcodec {formatEncode} -vf \"{size}\" -acodec aac {Path.GetFileName(newEncodedFilePath)}";
+                                processStartInfo.Arguments = $"-y -i {Path.GetFileName(sourceFilePath)} -vcodec {formatEncode} -vf \"scale={size},format=yuv420p\" -acodec aac {Path.GetFileName(newEncodedFilePath)}";
                             }
 
                             StartProcess(processStartInfo, VideoSettings.EncodeTimeout);
