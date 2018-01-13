@@ -60,6 +60,7 @@ namespace Uploader.Managers.Video
             catch(Exception ex)
             {
                 LogManager.AddSpriteMessage(ex.ToString(), "Exception");
+                TempFileManager.SafeDeleteTempFile(outputFilePath);
                 return false;
             }
             finally

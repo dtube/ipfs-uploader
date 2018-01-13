@@ -24,11 +24,17 @@ namespace Uploader.Managers.Video
 
                 FileItem sourceFile = currentFileItem.FileContainer.SourceFileItem;
                 string sourceFilePath = sourceFile.FilePath;
-                newEncodedFilePath = Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".mp4");
-                LogManager.AddEncodingMessage("FileName " + Path.GetFileName(newEncodedFilePath), "Start");
                 VideoSize videoSize = currentFileItem.VideoSize;
-
-                Debug.WriteLine(Path.GetFileName(sourceFilePath) + " / " + videoSize);
+                if(currentFileItem.TypeFile == TypeFile.SpriteVideo)
+                {
+                    newEncodedFilePath = Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".sprite");
+                    LogManager.AddSpriteMessage("SourceFilePath " + Path.GetFileName(sourceFilePath), "Start Sprite");
+                }
+                else
+                {
+                    newEncodedFilePath = Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".mp4");
+                    LogManager.AddEncodingMessage("SourceFilePath " + Path.GetFileName(sourceFilePath) + " -> " + videoSize, "Start");
+                }
 
                 var processStartInfo = new ProcessStartInfo();
                 processStartInfo.FileName = "ffmpeg";
@@ -44,28 +50,51 @@ namespace Uploader.Managers.Video
                 // Récupérer la durée totale de la vidéo et sa résolution
                 if (!sourceFile.VideoDuration.HasValue)
                 {
-                    string imageOutput = Path.ChangeExtension(sourceFilePath, ".jpeg");
-                    processStartInfo.Arguments = $"-y -i {Path.GetFileName(sourceFilePath)} -vf fps=1 -vframes 1 {Path.GetFileName(imageOutput)}";
+                    string imageOutputPath = Path.ChangeExtension(sourceFilePath, ".jpeg");
 
-                    StartProcess(processStartInfo, VideoSettings.EncodeGetOneImageTimeout);
-
-                    using(Image image = Image.FromFile(imageOutput))
+                    try
                     {
-                        sourceFile.VideoWidth = image.Width;
-                        sourceFile.VideoHeight = image.Height;
+                        processStartInfo.Arguments = $"-y -i {Path.GetFileName(sourceFilePath)} -vf fps=1 -vframes 1 {Path.GetFileName(imageOutputPath)}";
+                        StartProcess(processStartInfo, VideoSettings.EncodeGetOneImageTimeout);
+
+                        using(Image image = Image.FromFile(imageOutputPath))
+                        {
+                            sourceFile.VideoWidth = image.Width;
+                            sourceFile.VideoHeight = image.Height;
+                        }
                     }
-                    TempFileManager.SafeDeleteTempFile(imageOutput);
+                    catch(Exception ex)
+                    {
+                        if(currentFileItem.TypeFile == TypeFile.SpriteVideo)
+                            LogManager.AddSpriteMessage(ex.ToString(), "Exception");
+                        else
+                            LogManager.AddEncodingMessage(ex.ToString(), "Exception");
+
+                        sourceFile.VideoDuration = -1; //pour ne pas essayer de le recalculer sur une demande de video à encoder
+                    }
+
+                    TempFileManager.SafeDeleteTempFile(imageOutputPath);
                 }
                 
                 // Si durée totale de vidéo, largeur hauteur non récupéré, on ne peut pas continuer
-                if ((sourceFile.VideoDuration??0) <= 0)
-                    return false;                
-                if ((sourceFile.VideoHeight??0) <= 0)
+                if ((sourceFile.VideoDuration??0) <= 0 || (sourceFile.VideoWidth??0) <= 0 || (sourceFile.VideoHeight??0) <= 0)
+                {
+                    if(currentFileItem.TypeFile == TypeFile.SpriteVideo)
+                            LogManager.AddSpriteMessage("Error while getting duration, height or width. FileName : " + Path.GetFileName(sourceFile.FilePath), "Error");
+                        else
+                            LogManager.AddEncodingMessage("Error while getting duration, height or width. FileName : " + Path.GetFileName(sourceFile.FilePath), "Error");
+                    
+                    currentFileItem.EncodeErrorMessage = "Error while getting duration, height or width.";
+                    currentFileItem.CleanFiles();
                     return false;
-                if ((sourceFile.VideoHeight??0) <= 0)
-                    return false;
+                }
 
                 int duration = sourceFile.VideoDuration.Value;
+
+                if(currentFileItem.TypeFile == TypeFile.SpriteVideo)
+                    LogManager.AddSpriteMessage("SourceVideoDuration " + duration + " / SourceVideoFileSize " + currentFileItem.FileContainer.SourceFileItem.FileSize, "Info source");
+                else
+                    LogManager.AddEncodingMessage("SourceVideoDuration " + duration + " / SourceVideoFileSize " + currentFileItem.FileContainer.SourceFileItem.FileSize, "Info source");
 
                 // Désactivation encoding et sprite si dépassement de la durée maximale
                 if(duration > VideoSettings.MaxVideoDurationForEncoding)
@@ -73,6 +102,7 @@ namespace Uploader.Managers.Video
                     currentFileItem.EncodeErrorMessage = "Disable because duration reach the max limit.";
                     currentFileItem.FileContainer.EncodedFileItems.Clear();
                     currentFileItem.FileContainer.DeleteSpriteVideo();
+                    currentFileItem.CleanFiles();
                     return false;
                 }
 
@@ -179,39 +209,62 @@ namespace Uploader.Managers.Video
                         throw new InvalidOperationException("type non prévu");
                 }
 
-                currentFileItem.FilePath = newEncodedFilePath;
-                currentFileItem.EncodeProgress = "100.00%";
                 switch (currentFileItem.TypeFile)
                 {
                     case TypeFile.SpriteVideo:
-                        LogManager.AddEncodingMessage("Video Duration " + duration + " / SourceVideoFileSize " + currentFileItem.FileContainer.SourceFileItem.FileSize, "End Extract Images");
+                        string[] files = EncodeManager.GetListImageFrom(newEncodedFilePath); // récupération des images
+                        LogManager.AddSpriteMessage((files.Length - 1) + " images", "Start Combine images");
+                        string outputFilePath = Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".jpeg"); // nom du fichier sprite
+                        bool successSprite = SpriteManager.CombineBitmap(files.Skip(files.Length - VideoSettings.NbSpriteImages).ToArray(), outputFilePath); // création du sprite                                
+                        TempFileManager.SafeDeleteTempFiles(files); // suppression des images
+                        if(successSprite)
+                        {
+                            newEncodedFilePath = outputFilePath;
+                            currentFileItem.FilePath = newEncodedFilePath;
+                            LogManager.AddSpriteMessage("OutputFileName " + Path.GetFileName(outputFilePath) + " / FileSize " + currentFileItem.FileSize, "End Sprite");
+                        }
+                        else
+                        {
+                            LogManager.AddSpriteMessage("Error while combine images", "Error");
+                            currentFileItem.EncodeErrorMessage = "Error creation sprite while combine images";
+                            currentFileItem.CleanFiles();
+                            return false;
+                        }
+
                         break;
 
                     case TypeFile.EncodedVideo:
-                        LogManager.AddEncodingMessage("Video Duration " + duration + " / FileSize " + currentFileItem.FileSize + " / Format " + videoSize, "End Encoding");
+                        currentFileItem.FilePath = newEncodedFilePath;
+                        LogManager.AddEncodingMessage("OutputFileName " + Path.GetFileName(newEncodedFilePath) + " / FileSize " + currentFileItem.FileSize + " / Format " + videoSize, "End Encoding");
                         break;
 
                     default:
                         throw new InvalidOperationException("type non prévu");
                 }
 
+                currentFileItem.EncodeProgress = "100.00%";
                 return true;
             }
             catch (Exception ex)
             {
-                LogManager.AddEncodingMessage("Video Duration " + currentFileItem.VideoDuration + " / FileSize " + currentFileItem.FileSize + " / Progress " + currentFileItem.EncodeProgress + " / Exception : " + ex, "Exception");
-                currentFileItem.EncodeErrorMessage = ex.Message;
+                if(currentFileItem.TypeFile == TypeFile.SpriteVideo)
+                    LogManager.AddSpriteMessage("Video Duration " + currentFileItem.VideoDuration + " / FileSize " + currentFileItem.FileSize + " / Progress " + currentFileItem.EncodeProgress + " / Exception : " + ex, "Exception");
+                else
+                    LogManager.AddEncodingMessage("Video Duration " + currentFileItem.VideoDuration + " / FileSize " + currentFileItem.FileSize + " / Progress " + currentFileItem.EncodeProgress + " / Exception : " + ex, "Exception");
 
-                TempFileManager.SafeDeleteTempFile(newEncodedFilePath);
-
-                if(currentFileItem.VideoSize != VideoSize.Source)
-                    TempFileManager.SafeDeleteTempFile(currentFileItem.FilePath);
+                currentFileItem.EncodeErrorMessage = "Exception";
 
                 if (currentFileItem.TypeFile == TypeFile.SpriteVideo)
                 {
                     string[] files = EncodeManager.GetListImageFrom(newEncodedFilePath); // récupération des images
                     TempFileManager.SafeDeleteTempFiles(files); // suppression des images
                 }
+                else
+                {
+                    TempFileManager.SafeDeleteTempFile(newEncodedFilePath);
+                }
+
+                currentFileItem.CleanFiles();
 
                 return false;
             }
@@ -219,8 +272,12 @@ namespace Uploader.Managers.Video
 
         private static void StartProcess(ProcessStartInfo processStartInfo, int timeout)
         {
-            Debug.WriteLine("===> Launch : " + processStartInfo.FileName + " " + processStartInfo.Arguments);
-            using(var process = Process.Start(processStartInfo))
+            if(currentFileItem.TypeFile == TypeFile.SpriteVideo)
+                LogManager.AddSpriteMessage(processStartInfo.FileName + " " + processStartInfo.Arguments, "Launch command");
+            else
+                LogManager.AddEncodingMessage(processStartInfo.FileName + " " + processStartInfo.Arguments, "Launch command");
+
+            using(Process process = Process.Start(processStartInfo))
             {
                 process.ErrorDataReceived += new DataReceivedEventHandler(ErrorDataReceived);
 
@@ -291,7 +348,7 @@ namespace Uploader.Managers.Video
             return Path.GetFileNameWithoutExtension(filePath) + "-%03d.jpeg";
         }
 
-        public static string[] GetListImageFrom(string filePath)
+        private static string[] GetListImageFrom(string filePath)
         {
             if(string.IsNullOrWhiteSpace(filePath))
                 return new string[0];

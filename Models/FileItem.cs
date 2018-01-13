@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Uploader.Managers.Common;
 
 namespace Uploader.Models
 {
@@ -90,6 +91,22 @@ namespace Uploader.Models
                 return false;
 
             return string.IsNullOrWhiteSpace(IpfsHash);
+        }
+
+        public void CleanFiles()
+        {
+            try
+            {
+                if(!IsSource)
+                    TempFileManager.SafeDeleteTempFile(FilePath);
+
+                // vérification si on peut supprimer le fichier source
+                if (!FileContainer.WorkInProgress())
+                {
+                    TempFileManager.SafeDeleteTempFile(FileContainer.SourceFileItem.FilePath);
+                }
+            }
+            catch{}
         }
 
         public int? IpfsPositionInQueue

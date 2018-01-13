@@ -42,7 +42,8 @@ namespace Uploader.Managers.Ipfs
                 processStartInfo.CreateNoWindow = true;
                 processStartInfo.WindowStyle = ProcessWindowStyle.Hidden;
 
-                using(var process = Process.Start(processStartInfo))
+                LogManager.AddIpfsMessage(processStartInfo.FileName + " " + processStartInfo.Arguments, "Launch command");
+                using(Process process = Process.Start(processStartInfo))
                 {
                     process.OutputDataReceived += new DataReceivedEventHandler(OutputDataReceived);
                     process.ErrorDataReceived += new DataReceivedEventHandler(ErrorDataReceived);
@@ -68,7 +69,8 @@ namespace Uploader.Managers.Ipfs
             catch (Exception ex)
             {
                 LogManager.AddIpfsMessage("FileSize " + currentFileItem.FileSize + " / Progress " + currentFileItem.IpfsProgress + " / Exception " + ex, "Exception");
-                currentFileItem.IpfsErrorMessage = ex.Message;
+                currentFileItem.IpfsErrorMessage = "Exception";
+                currentFileItem.CleanFiles();
             }
         }
 

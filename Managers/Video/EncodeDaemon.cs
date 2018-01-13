@@ -42,11 +42,12 @@ namespace Uploader.Managers.Video
             {
                 while (true)
                 {
+                    FileItem fileItem = null;
                     try
                     {
                         Thread.Sleep(1000);
 
-                        FileItem fileItem;
+                        fileItem = null;
 
                         if (!queueFileItems.TryDequeue(out fileItem))
                         {
@@ -64,46 +65,29 @@ namespace Uploader.Managers.Video
                             fileItem.IpfsErrorMessage = "Canceled";
                             fileItem.IpfsProgress = null;
 
-                            continue;
+                            if(fileItem.TypeFile == TypeFile.SpriteVideo)                            
+                                LogManager.AddSpriteMessage("SourceFileName " + Path.GetFileName(fileItem.FileContainer.SourceFileItem.FilePath) + " car dernier getProgress a dépassé 20s", "Annulation");
+                            else
+                                LogManager.AddEncodingMessage("SourceFileName " + Path.GetFileName(fileItem.FileContainer.SourceFileItem.FilePath) + " car dernier getProgress a dépassé 20s", "Annulation");
+
+                            fileItem.CleanFiles();
                         }
-
-                        // encode video
-                        if (!EncodeManager.Encode(fileItem))
-                            continue;
-
-                        switch (fileItem.TypeFile)
+                        else
                         {
-                            case TypeFile.SpriteVideo:
-                                {
-                                    string[] files = EncodeManager.GetListImageFrom(fileItem.FilePath); // récupération des images
-                                    string outputPath = Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".jpeg"); // nom du fichier sprite
-                                    bool successSprite = SpriteManager.CombineBitmap(files.Skip(files.Length - VideoSettings.NbSpriteImages).ToArray(), outputPath); // création du sprite                                
-                                    TempFileManager.SafeDeleteTempFiles(files); // suppression des images
-                                    if(successSprite)
-                                    {                                
-                                        fileItem.FilePath = outputPath; // réaffectation chemin sprite
-                                        LogManager.AddEncodingMessage("FileSize " + fileItem.FileSize, "End Sprite");
-                                        IpfsDaemon.Queue(fileItem);
-                                    }
-                                    else
-                                    {
-                                        TempFileManager.SafeDeleteTempFile(outputPath);
-                                    }
-
-                                    break;
-                                }
-
-                            case TypeFile.EncodedVideo:
+                            // encode video
+                            if (EncodeManager.Encode(fileItem))
                                 IpfsDaemon.Queue(fileItem);
-                                break;
-                                
-                            default:
-                                throw new InvalidOperationException("type non prévu");
                         }
                     }
                     catch(Exception ex)
                     {
-                        LogManager.AddEncodingMessage(ex.ToString(), "Exception non gérée");
+                        if(fileItem.TypeFile == TypeFile.SpriteVideo)
+                            LogManager.AddSpriteMessage(ex.ToString(), "Exception non gérée");
+                        else
+                            LogManager.AddEncodingMessage(ex.ToString(), "Exception non gérée");
+                        
+                        fileItem.EncodeErrorMessage = "Exception non gérée";
+                        fileItem.CleanFiles();
                     }
                 }
             });

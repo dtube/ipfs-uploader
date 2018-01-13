@@ -25,29 +25,46 @@ namespace Uploader.Managers.Front
             processStartInfo.CreateNoWindow = true;
             processStartInfo.WindowStyle = ProcessWindowStyle.Hidden;
 
+            string oldFilePath = fileContainer.SourceFileItem.FilePath;
+            string outputFilePath = null;
             try
             {
-                // resize + crop source image
-                string oldFilePath = fileContainer.SourceFileItem.FilePath;
-                string outputFilePath = Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".png");
+                LogManager.AddOverlayMessage("SourceFileName " + Path.GetFileName(oldFilePath), "Start Crop");
+                // resize + crop source image                
+                outputFilePath = Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".png");
                 processStartInfo.FileName = Path.Combine(FrontSettings.ImageMagickPath, "convert");
                 processStartInfo.Arguments = $"{Path.GetFileName(fileContainer.SourceFileItem.FilePath)} -resize \"{_finalWidth}x{_finalHeight}^\" -gravity Center -crop {_finalWidth}x{_finalHeight}+0+0 {Path.GetFileName(outputFilePath)}";
                 StartProcess(processStartInfo, 5000);
                 fileContainer.SourceFileItem.FilePath = outputFilePath;
+                LogManager.AddOverlayMessage("OutputFileName " + Path.GetFileName(outputFilePath), "End Crop");
                 IpfsDaemon.Queue(fileContainer.SourceFileItem);
+            }
+            catch(Exception ex)
+            {
                 TempFileManager.SafeDeleteTempFile(oldFilePath);
+                TempFileManager.SafeDeleteTempFile(outputFilePath);
+                LogManager.AddOverlayMessage(ex.ToString(), "Exception");
+                return fileContainer.ProgressToken;
+            }            
 
+            try
+            {
+                LogManager.AddOverlayMessage("SourceFileName " + Path.GetFileName(fileContainer.SourceFileItem.FilePath), "Start Overlay");
                 // watermark source image
                 outputFilePath = Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".png");
                 processStartInfo.FileName = Path.Combine(FrontSettings.ImageMagickPath, "composite");
                 processStartInfo.Arguments = $"-gravity NorthEast {_overlayImagePath} {Path.GetFileName(fileContainer.SourceFileItem.FilePath)} {Path.GetFileName(outputFilePath)}";
                 StartProcess(processStartInfo, 5000);
                 fileContainer.OverlayFileItem.FilePath = outputFilePath;
+                LogManager.AddOverlayMessage("OutputFileName " + Path.GetFileName(outputFilePath), "End Overlay");
                 IpfsDaemon.Queue(fileContainer.OverlayFileItem);
             }
             catch(Exception ex)
             {
+                TempFileManager.SafeDeleteTempFile(fileContainer.SourceFileItem.FilePath);
+                TempFileManager.SafeDeleteTempFile(outputFilePath);
                 LogManager.AddOverlayMessage(ex.ToString(), "Exception");
+                return fileContainer.ProgressToken;
             }
 
             return fileContainer.ProgressToken;
@@ -55,8 +72,8 @@ namespace Uploader.Managers.Front
 
         private static void StartProcess(ProcessStartInfo processStartInfo, int timeout)
         {
-            Debug.WriteLine("===> Launch : " + processStartInfo.FileName + " " + processStartInfo.Arguments);
-            using(var process = Process.Start(processStartInfo))
+            LogManager.AddOverlayMessage(processStartInfo.FileName + " " + processStartInfo.Arguments, "Launch command");
+            using(Process process = Process.Start(processStartInfo))
             {
                 bool success = process.WaitForExit(timeout);
                 if (!success)
