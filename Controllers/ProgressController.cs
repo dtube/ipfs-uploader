@@ -25,7 +25,8 @@ namespace Uploader.Controllers
             return Json(new
                     {
                         ffmpegInQueue = EncodeDaemon.TotalAddToQueue - EncodeDaemon.CurrentPositionInQueue,
-                        ipfsInQueue = IpfsDaemon.TotalAddToQueue - IpfsDaemon.CurrentPositionInQueue
+                        ipfsInQueue = IpfsDaemon.TotalAddToQueue - IpfsDaemon.CurrentPositionInQueue,
+                        version = "0.6.4"
                     });
         }
 
