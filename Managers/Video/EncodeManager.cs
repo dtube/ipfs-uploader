@@ -170,11 +170,9 @@ namespace Uploader.Managers.Video
                                     throw new InvalidOperationException("Format non reconnu.");
                             }
 
-                            string formatEncode = "libx264";
                             if(VideoSettings.GpuEncodeMode)
                             {
                                 string maxRate = string.Empty;
-                                formatEncode = "h264_nvenc";
                                 switch (videoSize)
                                 {
                                     case VideoSize.F360p:
@@ -194,11 +192,11 @@ namespace Uploader.Managers.Video
                                         throw new InvalidOperationException("Format non reconnu.");
                                 }
 
-                                processStartInfo.Arguments = $"-y -i {Path.GetFileName(sourceFilePath)} -vcodec {formatEncode} -vf \"scale={size},format=yuv420p\" -b:v {maxRate} -maxrate {maxRate} -bufsize {maxRate} -acodec aac {Path.GetFileName(newEncodedFilePath)}";
+                                processStartInfo.Arguments = $"-y -hwaccel cuvid -vcodec h264_cuvid -vsync 0 -i {Path.GetFileName(sourceFilePath)} -vf \"scale_npp={size},format=yuv420p\" -b:v {maxRate} -maxrate {maxRate} -bufsize {maxRate} -vcodec h264_nvenc -acodec copy {Path.GetFileName(newEncodedFilePath)}";
                             }
                             else
                             {
-                                processStartInfo.Arguments = $"-y -i {Path.GetFileName(sourceFilePath)} -vcodec {formatEncode} -vf \"scale={size},format=yuv420p\" -acodec aac {Path.GetFileName(newEncodedFilePath)}";
+                                processStartInfo.Arguments = $"-y -i {Path.GetFileName(sourceFilePath)} -vf \"scale={size},format=yuv420p\" -vcodec libx264 -acodec aac {Path.GetFileName(newEncodedFilePath)}";
                             }
 
                             StartProcess(processStartInfo, VideoSettings.EncodeTimeout);
