@@ -1,8 +1,5 @@
 using System;
-using System.Diagnostics;
-using System.Drawing;
 using System.IO;
-using System.Linq;
 
 using Uploader.Managers.Common;
 using Uploader.Models;
@@ -11,384 +8,87 @@ namespace Uploader.Managers.Video
 {
     public static class EncodeManager
     {
-        private static FileItem currentFileItem;
-
         public static bool Encode(FileItem fileItem)
         {
             string newEncodedFilePath = null;
 
             try
             {
-                currentFileItem = fileItem;
-                currentFileItem.EncodeProgress = "0.00%";
+                fileItem.EncodeProgress = "0.00%";
 
-                FileItem sourceFile = currentFileItem.FileContainer.SourceFileItem;
+                FileItem sourceFile = fileItem.FileContainer.SourceFileItem;
                 string sourceFilePath = sourceFile.FilePath;
-                VideoSize videoSize = currentFileItem.VideoSize;
-                if(currentFileItem.TypeFile == TypeFile.SpriteVideo)
-                {
-                    newEncodedFilePath = Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".sprite");
-                    LogManager.AddSpriteMessage("SourceFilePath " + Path.GetFileName(sourceFilePath), "Start Sprite");
-                }
-                else
-                {
-                    newEncodedFilePath = Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".mp4");
-                    LogManager.AddEncodingMessage("SourceFilePath " + Path.GetFileName(sourceFilePath) + " -> " + videoSize, "Start");
-                }
-
-                var processStartInfo = new ProcessStartInfo();
-                processStartInfo.FileName = "ffmpeg";
-
-                processStartInfo.RedirectStandardError = true;
-                processStartInfo.WorkingDirectory = TempFileManager.GetTempDirectory();
-
-                processStartInfo.UseShellExecute = false;
-                processStartInfo.ErrorDialog = false;
-                processStartInfo.CreateNoWindow = true;
-                processStartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-
-                // Récupérer la durée totale de la vidéo et sa résolution
-                if (!sourceFile.VideoDuration.HasValue)
-                {
-                    string imageOutputPath = Path.ChangeExtension(sourceFilePath, ".jpeg");
-
-                    try
-                    {
-                        processStartInfo.Arguments = $"-y -i {Path.GetFileName(sourceFilePath)} -vf fps=1 -vframes 1 {Path.GetFileName(imageOutputPath)}";
-                        StartProcess(processStartInfo, VideoSettings.EncodeGetOneImageTimeout);
-
-                        using(Image image = Image.FromFile(imageOutputPath))
-                        {
-                            sourceFile.VideoWidth = image.Width;
-                            sourceFile.VideoHeight = image.Height;
-                        }
-                    }
-                    catch(Exception ex)
-                    {
-                        if(currentFileItem.TypeFile == TypeFile.SpriteVideo)
-                            LogManager.AddSpriteMessage(ex.ToString(), "Exception");
-                        else
-                            LogManager.AddEncodingMessage(ex.ToString(), "Exception");
-
-                        sourceFile.VideoDuration = -1; //pour ne pas essayer de le recalculer sur une demande de video à encoder
-                    }
-
-                    TempFileManager.SafeDeleteTempFile(imageOutputPath);
-                }
+                VideoSize videoSize = fileItem.VideoSize;
+                LogManager.AddEncodingMessage("SourceFilePath " + Path.GetFileName(sourceFilePath) + " -> " + videoSize, "Start");
+   
+                // Récupérer la durée totale de la vidéo et sa résolution, autorisation encoding
+                if(!VideoSourceManager.CheckAndAnalyseSource(fileItem, false))
+                    return false;
                 
-                // Si durée totale de vidéo, largeur hauteur non récupéré, on ne peut pas continuer
-                if ((sourceFile.VideoDuration??0) <= 0 || (sourceFile.VideoWidth??0) <= 0 || (sourceFile.VideoHeight??0) <= 0)
+                string size;
+                string maxRate = string.Empty;
+                switch (videoSize)
                 {
-                    if(currentFileItem.TypeFile == TypeFile.SpriteVideo)
-                            LogManager.AddSpriteMessage("Error while getting duration, height or width. FileName : " + Path.GetFileName(sourceFile.FilePath), "Error");
-                        else
-                            LogManager.AddEncodingMessage("Error while getting duration, height or width. FileName : " + Path.GetFileName(sourceFile.FilePath), "Error");
-                    
-                    currentFileItem.EncodeErrorMessage = "Error while getting duration, height or width.";
-                    currentFileItem.CleanFiles();
-                    return false;
+                    case VideoSize.F360p:
+                        {
+                            maxRate = "200k";
+                            Tuple<int, int> finalSize = SizeHelper.GetSize(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, 640, 360);
+                            size = $"{finalSize.Item1}:{finalSize.Item2}";
+                            break;
+                        }
+
+                    case VideoSize.F480p:
+                        {
+                            maxRate = "500k";
+                            Tuple<int, int> finalSize = SizeHelper.GetSize(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, 854, 480);
+                            size = $"{finalSize.Item1}:{finalSize.Item2}";
+                            break;
+                        }
+
+                    case VideoSize.F720p:
+                        {
+                            maxRate = "1000k";
+                            Tuple<int, int> finalSize = SizeHelper.GetSize(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, 1280, 720);
+                            size = $"{finalSize.Item1}:{finalSize.Item2}";
+                            break;
+                        }
+
+                    case VideoSize.F1080p:
+                        {
+                            maxRate = "1600k";
+                            Tuple<int, int> finalSize = SizeHelper.GetSize(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, 1920, 1080);
+                            size = $"{finalSize.Item1}:{finalSize.Item2}";
+                            break;
+                        }
+
+                    default:
+                        throw new InvalidOperationException("Format non reconnu.");
                 }
 
-                int duration = sourceFile.VideoDuration.Value;
-
-                if(currentFileItem.TypeFile == TypeFile.SpriteVideo)
-                    LogManager.AddSpriteMessage("SourceVideoDuration " + duration + " / SourceVideoFileSize " + currentFileItem.FileContainer.SourceFileItem.FileSize, "Info source");
+                newEncodedFilePath = Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".mp4");
+                string arguments;                
+                if(VideoSettings.GpuEncodeMode)
+                    arguments = $"-y -hwaccel cuvid -vcodec h264_cuvid -vsync 0 -i {Path.GetFileName(sourceFilePath)} -vf \"scale_npp={size},format=yuv420p\" -b:v {maxRate} -maxrate {maxRate} -bufsize {maxRate} -vcodec h264_nvenc -acodec copy {Path.GetFileName(newEncodedFilePath)}";
                 else
-                    LogManager.AddEncodingMessage("SourceVideoDuration " + duration + " / SourceVideoFileSize " + currentFileItem.FileContainer.SourceFileItem.FileSize, "Info source");
+                    arguments = $"-y -i {Path.GetFileName(sourceFilePath)} -vf \"scale={size},format=yuv420p\" -vcodec libx264 -acodec aac {Path.GetFileName(newEncodedFilePath)}";
 
-                // Désactivation encoding et sprite si dépassement de la durée maximale
-                if(duration > VideoSettings.MaxVideoDurationForEncoding)
-                {
-                    currentFileItem.EncodeErrorMessage = "Disable because duration reach the max limit.";
-                    currentFileItem.FileContainer.EncodedFileItems.Clear();
-                    currentFileItem.FileContainer.DeleteSpriteVideo();
-                    currentFileItem.CleanFiles();
-                    return false;
-                }
+                var ffmpegProcessManager = new FfmpegProcessManager(fileItem);
+                ffmpegProcessManager.StartProcess(arguments, VideoSettings.EncodeTimeout);
 
-                switch (currentFileItem.TypeFile)
-                {
-                    case TypeFile.SpriteVideo:
-                        {
-                            int nbImages = VideoSettings.NbSpriteImages;
-                            int heightSprite = VideoSettings.HeightSpriteImages;
+                fileItem.FilePath = newEncodedFilePath;
+                LogManager.AddEncodingMessage("OutputFileName " + Path.GetFileName(newEncodedFilePath) + " / FileSize " + fileItem.FileSize + " / Format " + videoSize, "End Encoding");
 
-                            // Calculer nb image/s
-                            //  si < 100s de vidéo -> 1 image/s
-                            //  sinon (nb secondes de la vidéo / 100) image/s
-                            string frameRate = "1";
-                            if (duration > nbImages)
-                            {
-                                frameRate = $"{nbImages}/{duration}"; //frameRate = inverse de image/s
-                            }
-
-                            int spriteWidth = GetWidth(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, heightSprite);
-                            string sizeImageMax = $"scale={spriteWidth}:{heightSprite}";
-
-                            // Extract frameRate image/s de la video
-                            string pattern = GetPattern(newEncodedFilePath);
-                            processStartInfo.Arguments = $"-y -i {Path.GetFileName(sourceFilePath)} -r {frameRate} -vf \"{sizeImageMax}\" -f image2 {pattern}";
-
-                            StartProcess(processStartInfo, VideoSettings.EncodeGetImagesTimeout);
-                            break;
-                        }
-
-                    case TypeFile.EncodedVideo:
-                        {
-                            string size;
-                            switch (videoSize)
-                            {
-                                case VideoSize.F360p:
-                                    {
-                                        Tuple<int, int> finalSize = GetSize(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, 640, 360);
-                                        size = $"{finalSize.Item1}:{finalSize.Item2}";
-                                        break;
-                                    }
-
-                                case VideoSize.F480p:
-                                    {
-                                        Tuple<int, int> finalSize = GetSize(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, 854, 480);
-                                        size = $"{finalSize.Item1}:{finalSize.Item2}";
-                                        break;
-                                    }
-
-                                case VideoSize.F720p:
-                                    {
-                                        Tuple<int, int> finalSize = GetSize(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, 1280, 720);
-                                        size = $"{finalSize.Item1}:{finalSize.Item2}";
-                                        break;
-                                    }
-
-                                case VideoSize.F1080p:
-                                    {
-                                        Tuple<int, int> finalSize = GetSize(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, 1920, 1080);
-                                        size = $"{finalSize.Item1}:{finalSize.Item2}";
-                                        break;
-                                    }
-
-                                default:
-                                    throw new InvalidOperationException("Format non reconnu.");
-                            }
-
-                            if(VideoSettings.GpuEncodeMode)
-                            {
-                                string maxRate = string.Empty;
-                                switch (videoSize)
-                                {
-                                    case VideoSize.F360p:
-                                        maxRate = "200k";
-                                        break;
-                                    case VideoSize.F480p:
-                                        maxRate = "500k";
-                                        break;
-                                    case VideoSize.F720p:
-                                        maxRate = "1000k";
-                                        break;
-                                    case VideoSize.F1080p:
-                                        maxRate = "1600k";
-                                        break;
-
-                                    default:
-                                        throw new InvalidOperationException("Format non reconnu.");
-                                }
-
-                                processStartInfo.Arguments = $"-y -hwaccel cuvid -vcodec h264_cuvid -vsync 0 -i {Path.GetFileName(sourceFilePath)} -vf \"scale_npp={size},format=yuv420p\" -b:v {maxRate} -maxrate {maxRate} -bufsize {maxRate} -vcodec h264_nvenc -acodec copy {Path.GetFileName(newEncodedFilePath)}";
-                            }
-                            else
-                            {
-                                processStartInfo.Arguments = $"-y -i {Path.GetFileName(sourceFilePath)} -vf \"scale={size},format=yuv420p\" -vcodec libx264 -acodec aac {Path.GetFileName(newEncodedFilePath)}";
-                            }
-
-                            StartProcess(processStartInfo, VideoSettings.EncodeTimeout);
-                            break;
-                        }
-
-                    default:
-                        throw new InvalidOperationException("type non prévu");
-                }
-
-                switch (currentFileItem.TypeFile)
-                {
-                    case TypeFile.SpriteVideo:
-                        string[] files = EncodeManager.GetListImageFrom(newEncodedFilePath); // récupération des images
-                        LogManager.AddSpriteMessage((files.Length - 1) + " images", "Start Combine images");
-                        string outputFilePath = Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".jpeg"); // nom du fichier sprite
-                        bool successSprite = SpriteManager.CombineBitmap(files.Skip(files.Length - VideoSettings.NbSpriteImages).ToArray(), outputFilePath); // création du sprite                                
-                        TempFileManager.SafeDeleteTempFiles(files); // suppression des images
-                        if(successSprite)
-                        {
-                            newEncodedFilePath = outputFilePath;
-                            currentFileItem.FilePath = newEncodedFilePath;
-                            LogManager.AddSpriteMessage("OutputFileName " + Path.GetFileName(outputFilePath) + " / FileSize " + currentFileItem.FileSize, "End Sprite");
-                        }
-                        else
-                        {
-                            LogManager.AddSpriteMessage("Error while combine images", "Error");
-                            currentFileItem.EncodeErrorMessage = "Error creation sprite while combine images";
-                            currentFileItem.CleanFiles();
-                            return false;
-                        }
-
-                        break;
-
-                    case TypeFile.EncodedVideo:
-                        currentFileItem.FilePath = newEncodedFilePath;
-                        LogManager.AddEncodingMessage("OutputFileName " + Path.GetFileName(newEncodedFilePath) + " / FileSize " + currentFileItem.FileSize + " / Format " + videoSize, "End Encoding");
-                        break;
-
-                    default:
-                        throw new InvalidOperationException("type non prévu");
-                }
-
-                currentFileItem.EncodeProgress = "100.00%";
+                fileItem.EncodeProgress = "100.00%";
                 return true;
             }
             catch (Exception ex)
             {
-                if(currentFileItem.TypeFile == TypeFile.SpriteVideo)
-                    LogManager.AddSpriteMessage("Video Duration " + currentFileItem.VideoDuration + " / FileSize " + currentFileItem.FileSize + " / Progress " + currentFileItem.EncodeProgress + " / Exception : " + ex, "Exception");
-                else
-                    LogManager.AddEncodingMessage("Video Duration " + currentFileItem.VideoDuration + " / FileSize " + currentFileItem.FileSize + " / Progress " + currentFileItem.EncodeProgress + " / Exception : " + ex, "Exception");
-
-                currentFileItem.EncodeErrorMessage = "Exception";
-
-                if (currentFileItem.TypeFile == TypeFile.SpriteVideo)
-                {
-                    string[] files = EncodeManager.GetListImageFrom(newEncodedFilePath); // récupération des images
-                    TempFileManager.SafeDeleteTempFiles(files); // suppression des images
-                }
-                else
-                {
-                    TempFileManager.SafeDeleteTempFile(newEncodedFilePath);
-                }
-
-                currentFileItem.CleanFiles();
-
+                LogManager.AddEncodingMessage("Video Duration " + fileItem.VideoDuration + " / FileSize " + fileItem.FileSize + " / Progress " + fileItem.EncodeProgress + " / Exception : " + ex, "Exception");
+                fileItem.EncodeErrorMessage = "Exception";
+                TempFileManager.SafeDeleteTempFile(newEncodedFilePath);
+                fileItem.CleanFiles();
                 return false;
             }
-        }
-
-        private static void StartProcess(ProcessStartInfo processStartInfo, int timeout)
-        {
-            if(currentFileItem.TypeFile == TypeFile.SpriteVideo)
-                LogManager.AddSpriteMessage(processStartInfo.FileName + " " + processStartInfo.Arguments, "Launch command");
-            else
-                LogManager.AddEncodingMessage(processStartInfo.FileName + " " + processStartInfo.Arguments, "Launch command");
-
-            using(Process process = Process.Start(processStartInfo))
-            {
-                process.ErrorDataReceived += new DataReceivedEventHandler(ErrorDataReceived);
-
-                process.BeginErrorReadLine();
-
-                bool success = process.WaitForExit(timeout);
-                if (!success)
-                {
-                    throw new InvalidOperationException("Timeout : Le fichier n'a pas pu être encodé dans le temps imparti.");
-                }
-
-                if (process.ExitCode != 0)
-                {
-                    throw new InvalidOperationException($"Le fichier n'a pas pu être encodé, erreur {process.ExitCode}.");
-                }
-            }
-        }
-
-        private static void ErrorDataReceived(object sender, DataReceivedEventArgs e)
-        {
-            string output = e.Data;
-            if (string.IsNullOrWhiteSpace(output))
-                return;
-
-            Debug.WriteLine(output);
-            
-            const string durationMarkup = "  Duration: ";   // "  Duration: 00:01:42.11"
-            const string progressMarkup = " time=";         // " time=00:01:42.08"
-
-            // Si on ne connait pas la longueur totale de la vidéo
-            if (!currentFileItem.FileContainer.SourceFileItem.VideoDuration.HasValue)
-            {
-                if (output.StartsWith(durationMarkup) && output.Length >= durationMarkup.Length + 8)
-                    currentFileItem.FileContainer.SourceFileItem.VideoDuration = GetDurationInSeconds(output.Substring(durationMarkup.Length, 8));
-                else
-                    return;
-            }
-
-            // Récupérer la progression toutes les 1s
-            if (currentFileItem.EncodeLastTimeProgressChanged.HasValue && (DateTime.UtcNow - currentFileItem.EncodeLastTimeProgressChanged.Value).TotalMilliseconds < 1000)
-                return;
-
-            if (!output.Contains(progressMarkup) || output.Length < (output.IndexOf(progressMarkup) + progressMarkup.Length + 8))
-                return;
-
-            Debug.WriteLine(Path.GetFileName(currentFileItem.FileContainer.SourceFileItem.FilePath) + " : " + output);
-
-            // Récupérer la progression d'encodage avec la durée d'encodage traitée
-            int durationDone = GetDurationInSeconds(output.Substring(output.IndexOf(progressMarkup) + progressMarkup.Length, 8))??0;
-            currentFileItem.EncodeProgress = string.Format("{0:N2}%", (durationDone * 100.00 / (double) currentFileItem.FileContainer.SourceFileItem.VideoDuration.Value)).Replace(',', '.');
-        }
-
-        private static int? GetDurationInSeconds(string durationStr)
-        {
-            try
-            {
-                int[] durationTab = durationStr.Split(':').Select(v => Convert.ToInt32(v)).ToArray();
-                return durationTab[0] * 3600 + durationTab[1] * 60 + durationTab[2];
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        private static string GetPattern(string filePath)
-        {
-            return Path.GetFileNameWithoutExtension(filePath) + "-%03d.jpeg";
-        }
-
-        private static string[] GetListImageFrom(string filePath)
-        {
-            if(string.IsNullOrWhiteSpace(filePath))
-                return new string[0];
-
-            string directoryName = Path.GetDirectoryName(filePath);
-            if(directoryName == null)
-                return new string[0];
-
-            return Directory.EnumerateFiles(directoryName, Path.GetFileNameWithoutExtension(filePath) + "-*.jpeg").OrderBy(s => s).ToArray();
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
-        /// <param name="finalWidth"></param>
-        /// <param name="finalHeight"></param>
-        /// <returns>largeur, hauteur</returns>
-        private static Tuple<int, int> GetSize(double width, double height, double finalWidth, double finalHeight)
-        {
-            //video verticale, garder hauteur finale, réduire largeur finale
-            if(width / height < finalWidth / finalHeight)
-                return new Tuple<int, int>(GetWidth(width, height, finalHeight), (int)finalHeight);
-            
-            // sinon garder largeur finale, réduire hauteur finale
-            return new Tuple<int, int>((int)finalWidth, GetHeight(width, height, finalWidth));
-        }
-        
-        private static int GetWidth(double width, double height, double finalHeight)
-        {
-            return GetPair((int)(finalHeight * width / height));
-        }
-
-        private static int GetHeight(double width, double height, double finalWidth)
-        {
-            return GetPair((int)(finalWidth * height / width));
-        }
-
-        private static int GetPair(int number)
-        {
-            return number % 2 == 0 ? number : number + 1;
         }
     }
 }

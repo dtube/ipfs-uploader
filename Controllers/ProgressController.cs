@@ -24,9 +24,10 @@ namespace Uploader.Controllers
         {
             return Json(new
                     {
-                        ffmpegInQueue = EncodeDaemon.TotalAddToQueue - EncodeDaemon.CurrentPositionInQueue,
+                        ffmpegEncodeInQueue = EncodeDaemon.TotalAddToQueue - EncodeDaemon.CurrentPositionInQueue,
+                        ffmpegSpriteInQueue = SpriteDaemon.TotalAddToQueue - SpriteDaemon.CurrentPositionInQueue,
                         ipfsInQueue = IpfsDaemon.TotalAddToQueue - IpfsDaemon.CurrentPositionInQueue,
-                        version = "0.6.4"
+                        version = "0.6.5"
                     });
         }
 
@@ -72,7 +73,7 @@ namespace Uploader.Controllers
                         ipfsAddSourceVideo = IpfsResultJson(fileContainer.SourceFileItem),
                         sprite = fileContainer.SpriteVideoFileItem == null ? null : (new
                         {
-                            spriteCreation = EncodeResultJson(fileContainer.SpriteVideoFileItem),
+                            spriteCreation = SpriteResultJson(fileContainer.SpriteVideoFileItem),
                             ipfsAddSprite = IpfsResultJson(fileContainer.SpriteVideoFileItem)
                         }),
                         encodedVideos = fileContainer.EncodedFileItems
@@ -110,6 +111,21 @@ namespace Uploader.Controllers
                 errorMessage = fileItem.IpfsErrorMessage,
                 positionInQueue = Position(fileItem.IpfsPositionInQueue, IpfsDaemon.CurrentPositionInQueue),
                 fileSize = fileItem.FileSize
+            };
+        }
+
+        private dynamic SpriteResultJson(FileItem fileItem)
+        {
+            if (fileItem == null)
+                return null;
+
+            return new
+            {
+                progress = fileItem.EncodeProgress,
+                encodeSize = fileItem.VideoSize.ToString(),
+                lastTimeProgress = fileItem.EncodeLastTimeProgressChanged,
+                errorMessage = fileItem.EncodeErrorMessage,
+                positionInQueue = Position(fileItem.EncodePositionInQueue, SpriteDaemon.CurrentPositionInQueue)
             };
         }
 

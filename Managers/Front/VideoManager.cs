@@ -45,7 +45,7 @@ namespace Uploader.Managers.Front
             {
                 fileContainer.AddSpriteVideo();
                 // get images from video
-                EncodeDaemon.Queue(fileContainer.SpriteVideoFileItem, "Waiting sprite creation...");
+                SpriteDaemon.Queue(fileContainer.SpriteVideoFileItem, "Waiting sprite creation...");
             }
 
             // si encoding est demandé

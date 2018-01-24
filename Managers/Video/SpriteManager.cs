@@ -1,18 +1,109 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 
 using Uploader.Managers.Common;
+using Uploader.Models;
 
 namespace Uploader.Managers.Video
 {
     public class SpriteManager
     {
-        public static bool CombineBitmap(string[] filesToCombine, string outputFilePath)
+        public static bool Encode(FileItem fileItem)
+        {
+            string newEncodedFilePath = null;
+
+            try
+            {
+                fileItem.EncodeProgress = "0.00%";
+
+                FileItem sourceFile = fileItem.FileContainer.SourceFileItem;
+                string sourceFilePath = sourceFile.FilePath;
+                LogManager.AddSpriteMessage("SourceFilePath " + Path.GetFileName(sourceFilePath), "Start Sprite");             
+
+                // Récupérer la durée totale de la vidéo et sa résolution, autorisation sprite creation
+                if(!VideoSourceManager.CheckAndAnalyseSource(fileItem, false))
+                    return false;
+
+                int nbImages = VideoSettings.NbSpriteImages;
+                int heightSprite = VideoSettings.HeightSpriteImages;
+
+                // Calculer nb image/s
+                //  si < 100s de vidéo -> 1 image/s
+                //  sinon (nb secondes de la vidéo / 100) image/s
+                string frameRate = "1";
+                int duration = sourceFile.VideoDuration.Value;
+                if (duration > nbImages)
+                {
+                    frameRate = $"{nbImages}/{duration}"; //frameRate = inverse de image/s
+                }
+
+                int spriteWidth = SizeHelper.GetWidth(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, heightSprite);
+                string sizeImageMax = $"scale={spriteWidth}:{heightSprite}";
+
+                newEncodedFilePath = Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".sprite");
+
+                // Extract frameRate image/s de la video
+                string pattern = GetPattern(newEncodedFilePath);
+
+                string arguments = $"-y -i {Path.GetFileName(sourceFilePath)} -r {frameRate} -vf \"{sizeImageMax}\" -f image2 {pattern}";
+                var ffmpegProcessManager = new FfmpegProcessManager(fileItem);
+                ffmpegProcessManager.StartProcess(arguments, VideoSettings.EncodeGetImagesTimeout);
+
+                string[] files = GetListImageFrom(newEncodedFilePath); // récupération des images
+                LogManager.AddSpriteMessage((files.Length - 1) + " images", "Start Combine images");
+                string outputFilePath = Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".jpeg"); // nom du fichier sprite
+                bool successSprite = CombineBitmap(files.Skip(files.Length - VideoSettings.NbSpriteImages).ToArray(), outputFilePath); // création du sprite                                
+                TempFileManager.SafeDeleteTempFiles(files); // suppression des images
+                if(successSprite)
+                {
+                    newEncodedFilePath = outputFilePath;
+                    fileItem.FilePath = newEncodedFilePath;
+                    LogManager.AddSpriteMessage("OutputFileName " + Path.GetFileName(outputFilePath) + " / FileSize " + fileItem.FileSize, "End Sprite");
+                }
+                else
+                {
+                    LogManager.AddSpriteMessage("Error while combine images", "Error");
+                    fileItem.EncodeErrorMessage = "Error creation sprite while combine images";
+                    fileItem.CleanFiles();
+                    return false;
+                }
+
+                fileItem.EncodeProgress = "100.00%";
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LogManager.AddSpriteMessage("Video Duration " + fileItem.VideoDuration + " / FileSize " + fileItem.FileSize + " / Progress " + fileItem.EncodeProgress + " / Exception : " + ex, "Exception");
+                fileItem.EncodeErrorMessage = "Exception";
+                string[] files = GetListImageFrom(newEncodedFilePath); // récupération des images
+                TempFileManager.SafeDeleteTempFiles(files); // suppression des images
+                fileItem.CleanFiles();
+                return false;
+            }
+        }
+
+        private static string GetPattern(string filePath)
+        {
+            return Path.GetFileNameWithoutExtension(filePath) + "-%03d.jpeg";
+        }
+
+        private static string[] GetListImageFrom(string filePath)
+        {
+            if(string.IsNullOrWhiteSpace(filePath))
+                return new string[0];
+
+            string directoryName = Path.GetDirectoryName(filePath);
+            if(directoryName == null)
+                return new string[0];
+
+            return Directory.EnumerateFiles(directoryName, Path.GetFileNameWithoutExtension(filePath) + "-*.jpeg").OrderBy(s => s).ToArray();
+        }
+
+        private static bool CombineBitmap(string[] filesToCombine, string outputFilePath)
         {
             if(filesToCombine == null || filesToCombine.Length == 0)
                 return false;

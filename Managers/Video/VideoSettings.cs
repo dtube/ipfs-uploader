@@ -37,5 +37,15 @@ namespace Uploader.Managers.Video
         /// </summary>
         /// <returns></returns>
         public static bool GpuEncodeMode => false;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public static int NbSpriteDaemon => 1;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public static int NbEncodeDaemon => 1;
     }
 }

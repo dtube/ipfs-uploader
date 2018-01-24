@@ -40,12 +40,15 @@ namespace Uploader.Managers.Front
                 IpfsDaemon.Queue(fileContainer.SourceFileItem);
             }
             catch(Exception ex)
-            {
-                TempFileManager.SafeDeleteTempFile(oldFilePath);
+            {                
                 TempFileManager.SafeDeleteTempFile(outputFilePath);
                 LogManager.AddOverlayMessage(ex.ToString(), "Exception");
                 return fileContainer.ProgressToken;
-            }            
+            }
+            finally
+            {
+                TempFileManager.SafeDeleteTempFile(oldFilePath);
+            }
 
             try
             {
@@ -61,7 +64,6 @@ namespace Uploader.Managers.Front
             }
             catch(Exception ex)
             {
-                TempFileManager.SafeDeleteTempFile(fileContainer.SourceFileItem.FilePath);
                 TempFileManager.SafeDeleteTempFile(outputFilePath);
                 LogManager.AddOverlayMessage(ex.ToString(), "Exception");
                 return fileContainer.ProgressToken;

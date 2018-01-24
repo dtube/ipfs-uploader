@@ -12,9 +12,9 @@ using Uploader.Models;
 
 namespace Uploader.Managers.Video
 {
-    public class EncodeDaemon
+    public class SpriteDaemon
     {
-        static EncodeDaemon()
+        static SpriteDaemon()
         {
             Start();
         }
@@ -37,7 +37,7 @@ namespace Uploader.Managers.Video
 
         private static void Start()
         {
-            for (int i = 0; i < VideoSettings.NbEncodeDaemon; i++)
+            for (int i = 0; i < VideoSettings.NbSpriteDaemon; i++)
             {
                 Task daemon = Task.Run(() =>
                 {
@@ -66,19 +66,19 @@ namespace Uploader.Managers.Video
                                 fileItem.IpfsErrorMessage = "Canceled";
                                 fileItem.IpfsProgress = null;
 
-                                LogManager.AddEncodingMessage("SourceFileName " + Path.GetFileName(fileItem.FileContainer.SourceFileItem.FilePath) + " car dernier getProgress a dépassé 20s", "Annulation");
+                                LogManager.AddSpriteMessage("SourceFileName " + Path.GetFileName(fileItem.FileContainer.SourceFileItem.FilePath) + " car dernier getProgress a dépassé 20s", "Annulation");
                                 fileItem.CleanFiles();
                             }
                             else
                             {
-                                // encode video
-                                if (EncodeManager.Encode(fileItem))
+                                // sprite creation video
+                                if (SpriteManager.Encode(fileItem))
                                     IpfsDaemon.Queue(fileItem);
                             }
                         }
                         catch(Exception ex)
                         {
-                            LogManager.AddEncodingMessage(ex.ToString(), "Exception non gérée");                        
+                            LogManager.AddSpriteMessage(ex.ToString(), "Exception non gérée");                        
                             fileItem.EncodeErrorMessage = "Exception non gérée";
                             fileItem.CleanFiles();
                         }
