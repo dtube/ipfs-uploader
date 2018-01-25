@@ -18,7 +18,7 @@ namespace Uploader.Managers.Video
 
             try
             {
-                fileItem.EncodeProgress = "0.00%";
+                fileItem.EncodeProcess.StartProcessDateTime();
 
                 FileItem sourceFile = fileItem.FileContainer.SourceFileItem;
                 string sourceFilePath = sourceFile.FilePath;
@@ -67,21 +67,19 @@ namespace Uploader.Managers.Video
                 else
                 {
                     LogManager.AddSpriteMessage("Error while combine images", "Error");
-                    fileItem.EncodeErrorMessage = "Error creation sprite while combine images";
-                    fileItem.CleanFiles();
+                    fileItem.SetEncodeErrorMessage("Error creation sprite while combine images");
                     return false;
                 }
 
-                fileItem.EncodeProgress = "100.00%";
+                fileItem.EncodeProcess.EndProcessDateTime();
                 return true;
             }
             catch (Exception ex)
             {
-                LogManager.AddSpriteMessage("Video Duration " + fileItem.VideoDuration + " / FileSize " + fileItem.FileSize + " / Progress " + fileItem.EncodeProgress + " / Exception : " + ex, "Exception");
-                fileItem.EncodeErrorMessage = "Exception";
+                LogManager.AddSpriteMessage("Video Duration " + fileItem.FileContainer.SourceFileItem.VideoDuration + " / FileSize " + fileItem.FileSize + " / Progress " + fileItem.EncodeProcess.Progress + " / Exception : " + ex, "Exception");
+                fileItem.SetEncodeErrorMessage("Exception");
                 string[] files = GetListImageFrom(newEncodedFilePath); // récupération des images
                 TempFileManager.SafeDeleteTempFiles(files); // suppression des images
-                fileItem.CleanFiles();
                 return false;
             }
         }

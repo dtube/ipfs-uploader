@@ -77,7 +77,7 @@ namespace Uploader.Managers.Video
             }
 
             // Récupérer la progression toutes les 1s
-            if (_fileItem.EncodeLastTimeProgressChanged.HasValue && (DateTime.UtcNow - _fileItem.EncodeLastTimeProgressChanged.Value).TotalMilliseconds < 1000)
+            if (_fileItem.EncodeProcess.LastTimeProgressChanged.HasValue && (DateTime.UtcNow - _fileItem.EncodeProcess.LastTimeProgressChanged.Value).TotalMilliseconds < 1000)
                 return;
 
             if (!output.Contains(progressMarkup) || output.Length < (output.IndexOf(progressMarkup) + progressMarkup.Length + 8))
@@ -87,7 +87,7 @@ namespace Uploader.Managers.Video
 
             // Récupérer la progression d'encodage avec la durée d'encodage traitée
             int durationDone = GetDurationInSeconds(output.Substring(output.IndexOf(progressMarkup) + progressMarkup.Length, 8))??0;
-            _fileItem.EncodeProgress = string.Format("{0:N2}%", (durationDone * 100.00 / (double) _fileItem.FileContainer.SourceFileItem.VideoDuration.Value)).Replace(',', '.');
+            _fileItem.EncodeProcess.SetProgress(string.Format("{0:N2}%", (durationDone * 100.00 / (double) _fileItem.FileContainer.SourceFileItem.VideoDuration.Value)).Replace(',', '.'));
         }
 
         private static int? GetDurationInSeconds(string durationStr)

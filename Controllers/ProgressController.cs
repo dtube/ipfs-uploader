@@ -22,13 +22,7 @@ namespace Uploader.Controllers
         [Route("/getStatus")]
         public JsonResult GetStatus()
         {
-            return Json(new
-                    {
-                        ffmpegEncodeInQueue = EncodeDaemon.TotalAddToQueue - EncodeDaemon.CurrentPositionInQueue,
-                        ffmpegSpriteInQueue = SpriteDaemon.TotalAddToQueue - SpriteDaemon.CurrentPositionInQueue,
-                        ipfsInQueue = IpfsDaemon.TotalAddToQueue - IpfsDaemon.CurrentPositionInQueue,
-                        version = "0.6.5"
-                    });
+            return Json(ProgressManager.GetStats());
         }
 
         [HttpGet]
@@ -105,11 +99,12 @@ namespace Uploader.Controllers
 
             return new
             {
-                progress = fileItem.IpfsProgress,
+                progress = fileItem.IpfsProcess.Progress,
                 hash = fileItem.IpfsHash,
-                lastTimeProgress = fileItem.IpfsLastTimeProgressChanged,
-                errorMessage = fileItem.IpfsErrorMessage,
-                positionInQueue = Position(fileItem.IpfsPositionInQueue, IpfsDaemon.CurrentPositionInQueue),
+                lastTimeProgress = fileItem.IpfsProcess.LastTimeProgressChanged,
+                errorMessage = fileItem.IpfsProcess.ErrorMessage,
+                step = fileItem.IpfsProcess.CurrentStep.ToString(),
+                positionInQueue = Position(fileItem.IpfsProcess, IpfsDaemon.CurrentPositionInQueue),
                 fileSize = fileItem.FileSize
             };
         }
@@ -121,11 +116,12 @@ namespace Uploader.Controllers
 
             return new
             {
-                progress = fileItem.EncodeProgress,
+                progress = fileItem.EncodeProcess.Progress,
                 encodeSize = fileItem.VideoSize.ToString(),
-                lastTimeProgress = fileItem.EncodeLastTimeProgressChanged,
-                errorMessage = fileItem.EncodeErrorMessage,
-                positionInQueue = Position(fileItem.EncodePositionInQueue, SpriteDaemon.CurrentPositionInQueue)
+                lastTimeProgress = fileItem.EncodeProcess.LastTimeProgressChanged,
+                errorMessage = fileItem.EncodeProcess.ErrorMessage,
+                step = fileItem.EncodeProcess.CurrentStep.ToString(),
+                positionInQueue = Position(fileItem.EncodeProcess, SpriteDaemon.CurrentPositionInQueue)
             };
         }
 
@@ -136,23 +132,21 @@ namespace Uploader.Controllers
 
             return new
             {
-                progress = fileItem.EncodeProgress,
+                progress = fileItem.EncodeProcess.Progress,
                 encodeSize = fileItem.VideoSize.ToString(),
-                lastTimeProgress = fileItem.EncodeLastTimeProgressChanged,
-                errorMessage = fileItem.EncodeErrorMessage,
-                positionInQueue = Position(fileItem.EncodePositionInQueue, EncodeDaemon.CurrentPositionInQueue)
+                lastTimeProgress = fileItem.EncodeProcess.LastTimeProgressChanged,
+                errorMessage = fileItem.EncodeProcess.ErrorMessage,
+                step = fileItem.EncodeProcess.CurrentStep.ToString(),
+                positionInQueue = Position(fileItem.EncodeProcess, EncodeDaemon.CurrentPositionInQueue)
             };
         }
 
-        private static int? Position(int? positionInQueue, int currentPositionInQueue)
+        private static int? Position(ProcessItem processItem, int daemonCurrentPositionInQueue)
         {
-            if (!positionInQueue.HasValue)
+            if (processItem.CurrentStep != ProcessStep.Waiting)
                 return null;
-            if (positionInQueue.Value < currentPositionInQueue)
-                return null;
-            if (positionInQueue.Value == currentPositionInQueue)
-                return null;
-            return positionInQueue.Value - currentPositionInQueue;
+
+            return processItem.PositionInQueue - daemonCurrentPositionInQueue;
         }
     }
 }

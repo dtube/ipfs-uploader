@@ -14,7 +14,7 @@ namespace Uploader.Managers.Video
 
             try
             {
-                fileItem.EncodeProgress = "0.00%";
+                fileItem.EncodeProcess.StartProcessDateTime();
 
                 FileItem sourceFile = fileItem.FileContainer.SourceFileItem;
                 string sourceFilePath = sourceFile.FilePath;
@@ -68,9 +68,9 @@ namespace Uploader.Managers.Video
                 newEncodedFilePath = Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".mp4");
                 string arguments;                
                 if(VideoSettings.GpuEncodeMode)
-                    arguments = $"-y -hwaccel cuvid -vcodec h264_cuvid -vsync 0 -i {Path.GetFileName(sourceFilePath)} -vf \"scale_npp={size},format=yuv420p\" -b:v {maxRate} -maxrate {maxRate} -bufsize {maxRate} -vcodec h264_nvenc -acodec copy {Path.GetFileName(newEncodedFilePath)}";
+                    arguments = $"-y -hwaccel cuvid -vcodec h264_cuvid -vsync 0 -i {Path.GetFileName(sourceFilePath)} -pixel_format yuv420p -vf scale_npp={size} -b:v {maxRate} -maxrate {maxRate} -bufsize {maxRate} -vcodec h264_nvenc -acodec aac -strict -2 {Path.GetFileName(newEncodedFilePath)}";
                 else
-                    arguments = $"-y -i {Path.GetFileName(sourceFilePath)} -vf \"scale={size},format=yuv420p\" -vcodec libx264 -acodec aac {Path.GetFileName(newEncodedFilePath)}";
+                    arguments = $"-y -i {Path.GetFileName(sourceFilePath)} -pixel_format yuv420p -vf scale={size} -vcodec libx264 -acodec aac -strict -2 {Path.GetFileName(newEncodedFilePath)}"; //-strict -2 pour forcer aac sur ubuntu
 
                 var ffmpegProcessManager = new FfmpegProcessManager(fileItem);
                 ffmpegProcessManager.StartProcess(arguments, VideoSettings.EncodeTimeout);
@@ -78,15 +78,14 @@ namespace Uploader.Managers.Video
                 fileItem.FilePath = newEncodedFilePath;
                 LogManager.AddEncodingMessage("OutputFileName " + Path.GetFileName(newEncodedFilePath) + " / FileSize " + fileItem.FileSize + " / Format " + videoSize, "End Encoding");
 
-                fileItem.EncodeProgress = "100.00%";
+                fileItem.EncodeProcess.EndProcessDateTime();
                 return true;
             }
             catch (Exception ex)
             {
-                LogManager.AddEncodingMessage("Video Duration " + fileItem.VideoDuration + " / FileSize " + fileItem.FileSize + " / Progress " + fileItem.EncodeProgress + " / Exception : " + ex, "Exception");
-                fileItem.EncodeErrorMessage = "Exception";
+                LogManager.AddEncodingMessage("Video Duration " + fileItem.VideoDuration + " / FileSize " + fileItem.FileSize + " / Progress " + fileItem.EncodeProcess.Progress + " / Exception : " + ex, "Exception");
+                fileItem.SetEncodeErrorMessage("Exception");
                 TempFileManager.SafeDeleteTempFile(newEncodedFilePath);
-                fileItem.CleanFiles();
                 return false;
             }
         }

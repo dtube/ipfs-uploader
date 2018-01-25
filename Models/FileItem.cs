@@ -10,6 +10,7 @@ namespace Uploader.Models
         {
             FileItem fileItem = new FileItem(fileContainer, sourceFilePath, TypeFile.SourceVideo);
             fileItem.VideoSize = VideoSize.Source;
+            fileItem.IpfsProcess = new ProcessItem();
             return fileItem;
         }
 
@@ -20,6 +21,8 @@ namespace Uploader.Models
 
             FileItem fileItem = new FileItem(fileContainer, null, TypeFile.EncodedVideo);
             fileItem.VideoSize = videoSize;
+            fileItem.EncodeProcess = new ProcessItem();
+            fileItem.IpfsProcess = new ProcessItem();
             return fileItem;
         }
 
@@ -27,18 +30,22 @@ namespace Uploader.Models
         {
             FileItem fileItem = new FileItem(fileContainer, null, TypeFile.SpriteVideo);
             fileItem.VideoSize = VideoSize.Source;
+            fileItem.EncodeProcess = new ProcessItem();
+            fileItem.IpfsProcess = new ProcessItem();
             return fileItem;
         }
 
         public static FileItem NewSourceImageFileItem(FileContainer fileContainer, string sourceFilePath)
         {
             FileItem fileItem = new FileItem(fileContainer, sourceFilePath, TypeFile.SourceImage);
+            fileItem.IpfsProcess = new ProcessItem();
             return fileItem;
         }
 
         public static FileItem NewOverlayImageFileItem(FileContainer fileContainer)
         {
             FileItem fileItem = new FileItem(fileContainer, null, TypeFile.OverlayImage);
+            fileItem.IpfsProcess = new ProcessItem();
             return fileItem;
         }
 
@@ -59,7 +66,7 @@ namespace Uploader.Models
         public long? FileSize
         {
             get;
-            set;
+            private set;
         }
 
         public string FilePath
@@ -83,14 +90,61 @@ namespace Uploader.Models
             get;
         }
 
+        public VideoSize VideoSize
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// in seconds
+        /// </summary>
+        /// <returns></returns>
+        public int? VideoDuration
+        {
+            get;
+            set;
+        }
+
+        public int? VideoHeight
+        {
+            get;
+            set;
+        }
+
+        public int? VideoWidth
+        {
+            get;
+            set;
+        }
+
+        public ProcessItem EncodeProcess
+        {
+            get;
+            private set;
+        }
+
+        public ProcessItem IpfsProcess
+        {
+            get;
+            private set;
+        }
+
+        public string IpfsHash
+        {
+            get;
+            set;
+        }
+        
         public bool WorkInProgress()
         {
-            if (!string.IsNullOrWhiteSpace(IpfsErrorMessage))
-                return false;
-            if (!string.IsNullOrWhiteSpace(EncodeErrorMessage))
+            if (IpfsProcess.CurrentStep == ProcessStep.Canceled || IpfsProcess.CurrentStep == ProcessStep.Error || IpfsProcess.CurrentStep == ProcessStep.Success)
                 return false;
 
-            return string.IsNullOrWhiteSpace(IpfsHash);
+            if (EncodeProcess == null || EncodeProcess.CurrentStep == ProcessStep.Canceled || EncodeProcess.CurrentStep == ProcessStep.Error || EncodeProcess.CurrentStep == ProcessStep.Success)
+                return false;
+
+            return true;
         }
 
         public void CleanFiles()
@@ -109,126 +163,28 @@ namespace Uploader.Models
             catch{}
         }
 
-        public int? IpfsPositionInQueue
+        public void SetEncodeErrorMessage(string message)
         {
-            get;
-            set;
+            EncodeProcess.SetErrorMessage(message);
+            CancelIpfs();
         }
 
-        public string IpfsHash
+        public void SetIpfsErrorMessage(string message)
         {
-            get;
-            set;
+            IpfsProcess.SetErrorMessage(message);
+            CleanFiles();
         }
 
-        private string _ipfsProgress;
-
-        public string IpfsProgress
+        public void CancelEncode()
         {
-            get
-            {
-                return _ipfsProgress;
-            }
-
-            set
-            {
-                bool changeLastTime = value == "0.00%" || _ipfsProgress != null;
-
-                _ipfsProgress = value;
-
-                if(value == null)
-                    IpfsLastTimeProgressChanged = null;
-                else if(changeLastTime)
-                    IpfsLastTimeProgressChanged = DateTime.UtcNow;
-            }
+            EncodeProcess.Cancel();
+            CancelIpfs();
         }
 
-        public DateTime? IpfsLastTimeProgressChanged
+        public void CancelIpfs()
         {
-            get;
-            private set;
-        }
-
-        public string IpfsErrorMessage
-        {
-            get;
-            set;
-        }
-
-        public VideoSize VideoSize
-        {
-            get;
-            private set;
-        }
-
-        public int? EncodePositionInQueue
-        {
-            get;
-            set;
-        }
-
-        private string _encodeProgress;
-
-        public string EncodeProgress
-        {
-            get
-            {
-                return _encodeProgress;
-            }
-
-            set
-            {
-                bool changeLastTime = value == "0.00%" || _encodeProgress != null;
-
-                _encodeProgress = value;
-
-                if(value == null)
-                    EncodeLastTimeProgressChanged = null;
-                else if(changeLastTime)
-                    EncodeLastTimeProgressChanged = DateTime.UtcNow;
-            }
-        }
-
-        public DateTime? EncodeLastTimeProgressChanged
-        {
-            get;
-            private set;
-        }
-
-        public string EncodeErrorMessage
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// in seconds
-        /// </summary>
-        /// <returns></returns>
-        public int? VideoDuration
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// in seconds
-        /// </summary>
-        /// <returns></returns>
-        public int? VideoHeight
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// in seconds
-        /// </summary>
-        /// <returns></returns>
-        public int? VideoWidth
-        {
-            get;
-            set;
-        }
+            IpfsProcess.Cancel();
+            CleanFiles();
+        }        
     }
 }

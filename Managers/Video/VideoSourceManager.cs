@@ -48,8 +48,7 @@ namespace Uploader.Managers.Video
             if ((sourceFile.VideoDuration??0) <= 0 || (sourceFile.VideoWidth??0) <= 0 || (sourceFile.VideoHeight??0) <= 0)
             {
                 Log("Error while getting duration, height or width. FileName : " + Path.GetFileName(sourceFile.FilePath), "Error", spriteMode);                
-                fileItem.EncodeErrorMessage = "Error while getting duration, height or width.";
-                fileItem.CleanFiles();
+                fileItem.SetEncodeErrorMessage("Error while getting duration, height or width.");
                 return false;
             }
 
@@ -60,12 +59,12 @@ namespace Uploader.Managers.Video
             // Désactivation encoding et sprite si dépassement de la durée maximale
             if(duration > VideoSettings.MaxVideoDurationForEncoding)
             {
-                fileItem.EncodeErrorMessage = "Disable because duration reach the max limit.";
                 if(spriteMode)
                     fileItem.FileContainer.DeleteSpriteVideo();
                 else
                     fileItem.FileContainer.EncodedFileItems.Clear();
-                fileItem.CleanFiles();
+
+                fileItem.SetEncodeErrorMessage("Disable because duration reach the max limit.");
                 return false;
             }
 

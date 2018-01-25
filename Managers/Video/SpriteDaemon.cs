@@ -60,14 +60,8 @@ namespace Uploader.Managers.Video
                             // si le client a pas demandé le progress depuis plus de 20s, annuler l'opération
                             if ((DateTime.UtcNow - fileItem.FileContainer.LastTimeProgressRequested).TotalSeconds > FrontSettings.MaxGetProgressCanceled)
                             {
-                                fileItem.EncodeErrorMessage = "Canceled";
-                                fileItem.EncodeProgress = null;
-
-                                fileItem.IpfsErrorMessage = "Canceled";
-                                fileItem.IpfsProgress = null;
-
                                 LogManager.AddSpriteMessage("SourceFileName " + Path.GetFileName(fileItem.FileContainer.SourceFileItem.FilePath) + " car dernier getProgress a dépassé 20s", "Annulation");
-                                fileItem.CleanFiles();
+                                fileItem.CancelEncode();
                             }
                             else
                             {
@@ -79,8 +73,7 @@ namespace Uploader.Managers.Video
                         catch(Exception ex)
                         {
                             LogManager.AddSpriteMessage(ex.ToString(), "Exception non gérée");                        
-                            fileItem.EncodeErrorMessage = "Exception non gérée";
-                            fileItem.CleanFiles();
+                            fileItem.SetEncodeErrorMessage("Exception non gérée");
                         }
                     }
                 });
@@ -92,11 +85,10 @@ namespace Uploader.Managers.Video
         {
             queueFileItems.Enqueue(fileItem);
             TotalAddToQueue++;
-            fileItem.EncodePositionInQueue = TotalAddToQueue;
+            fileItem.EncodeProcess.SavePositionInQueue(TotalAddToQueue, CurrentPositionInQueue);
+            fileItem.EncodeProcess.SetProgress("Waiting in queue...", true);
 
-            fileItem.EncodeProgress = "Waiting in queue...";
-
-            fileItem.IpfsProgress = messageIpfs;
+            fileItem.IpfsProcess.SetProgress(messageIpfs, true);
         }
     }
 }

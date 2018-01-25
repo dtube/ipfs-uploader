@@ -57,23 +57,21 @@ namespace Uploader.Managers.Ipfs
                         // Si le client a pas demandé le progress depuis moins de 20s, annuler l'opération
                         if((DateTime.UtcNow - fileItem.FileContainer.LastTimeProgressRequested).TotalSeconds > FrontSettings.MaxGetProgressCanceled)
                         {                            
-                            fileItem.IpfsErrorMessage = "Canceled";
-                            fileItem.IpfsProgress = null;
                             LogManager.AddIpfsMessage("FileName " + Path.GetFileName(fileItem.FilePath) + " car dernier getProgress a dépassé 20s", "Annulation");
+                            fileItem.CancelIpfs();
                         }
                         else
                         {
                             // Ipfs add file
                             IpfsAddManager.Add(fileItem);
+                            fileItem.CleanFiles();
                         }
                     }
                     catch(Exception ex)
                     {
                         LogManager.AddIpfsMessage(ex.ToString(), "Exception non gérée");
-                        fileItem.IpfsErrorMessage = "Exception non gérée";
+                        fileItem.SetIpfsErrorMessage("Exception non gérée");
                     }
-
-                    fileItem.CleanFiles();
                 }
             });
         }
@@ -82,8 +80,8 @@ namespace Uploader.Managers.Ipfs
         {
             queueFileItems.Enqueue(fileItem);
             TotalAddToQueue++;
-            fileItem.IpfsPositionInQueue = TotalAddToQueue;
-            fileItem.IpfsProgress = "Waiting in queue...";
+            fileItem.IpfsProcess.SavePositionInQueue(TotalAddToQueue, CurrentPositionInQueue);
+            fileItem.IpfsProcess.SetProgress("Waiting in queue...", true);
         }
     }
 }

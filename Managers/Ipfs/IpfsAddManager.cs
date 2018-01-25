@@ -20,7 +20,7 @@ namespace Uploader.Managers.Ipfs
                 LogManager.AddIpfsMessage("FileName " + Path.GetFileName(currentFileItem.FilePath), "Start");
 
                 currentFileItem.IpfsHash = null;
-                currentFileItem.IpfsProgress = "0.00%";
+                currentFileItem.IpfsProcess.StartProcessDateTime();
 
                 // Send to ipfs and return hash from ipfs
                 var processStartInfo = new ProcessStartInfo();
@@ -63,14 +63,13 @@ namespace Uploader.Managers.Ipfs
                     }
                 }
 
-                currentFileItem.IpfsProgress = "100.00%";
+                currentFileItem.IpfsProcess.EndProcessDateTime();
                 LogManager.AddIpfsMessage("Hash " + currentFileItem.IpfsHash + " / FileSize " + currentFileItem.FileSize, "End");
             }
             catch (Exception ex)
             {
-                LogManager.AddIpfsMessage("FileSize " + currentFileItem.FileSize + " / Progress " + currentFileItem.IpfsProgress + " / Exception " + ex, "Exception");
-                currentFileItem.IpfsErrorMessage = "Exception";
-                currentFileItem.CleanFiles();
+                LogManager.AddIpfsMessage("FileSize " + currentFileItem.FileSize + " / Progress " + currentFileItem.IpfsProcess.Progress + " / Exception " + ex, "Exception");
+                currentFileItem.SetIpfsErrorMessage("Exception");
             }
         }
 
@@ -81,14 +80,14 @@ namespace Uploader.Managers.Ipfs
                 return;
 
             // Récupérer la progression toutes les 1s
-            if (currentFileItem.IpfsLastTimeProgressChanged.HasValue && (DateTime.UtcNow - currentFileItem.IpfsLastTimeProgressChanged.Value).TotalMilliseconds < 1000)
+            if (currentFileItem.IpfsProcess.LastTimeProgressChanged.HasValue && (DateTime.UtcNow - currentFileItem.IpfsProcess.LastTimeProgressChanged.Value).TotalMilliseconds < 1000)
                 return;
 
             Debug.WriteLine(Path.GetFileName(currentFileItem.FilePath) + " : " + output);
 
             // Récupérer la progression d'envoi
             string newProgress = output.Substring(output.IndexOf('%') - 6, 7).Trim();
-            currentFileItem.IpfsProgress = newProgress;
+            currentFileItem.IpfsProcess.SetProgress(newProgress);
         }
 
         private static void OutputDataReceived(object sender, DataReceivedEventArgs e)
