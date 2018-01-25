@@ -68,7 +68,7 @@ namespace Uploader.Managers.Video
                 newEncodedFilePath = Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".mp4");
                 string arguments;                
                 if(VideoSettings.GpuEncodeMode)
-                    arguments = $"-y -hwaccel cuvid -vcodec h264_cuvid -vsync 0 -i {Path.GetFileName(sourceFilePath)} -vf \"scale_npp={size},format=yuv420p\" -b:v {maxRate} -maxrate {maxRate} -bufsize {maxRate} -vcodec h264_nvenc -acodec copy {Path.GetFileName(newEncodedFilePath)}";
+                    arguments = $"-y -hwaccel cuvid -vcodec h264_cuvid -vsync 0 -i {Path.GetFileName(sourceFilePath)} -vf \"scale_npp={size}\" -pixel_format yuv420p -b:v {maxRate} -maxrate {maxRate} -bufsize {maxRate} -vcodec h264_nvenc -acodec copy {Path.GetFileName(newEncodedFilePath)}";
                 else
                     arguments = $"-y -i {Path.GetFileName(sourceFilePath)} -vf \"scale={size},format=yuv420p\" -vcodec libx264 -acodec aac {Path.GetFileName(newEncodedFilePath)}";
 
