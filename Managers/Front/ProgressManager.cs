@@ -71,7 +71,7 @@ namespace Uploader.Managers.Front
                     currentWaitingInQueue = GetCurrentWaitingInQueue(),
 
                     videoEncodedLast24h = GetEncodeStats(listVideoEncoded),
-                    striteCreatedLast24h = GetEncodeStats(listSpriteCreated),
+                    spriteCreatedLast24h = GetEncodeStats(listSpriteCreated),
                     ipfsAddedLast24h = GetIpfsStats(listIpfsAdded)
                 };
             }
