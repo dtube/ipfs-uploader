@@ -23,7 +23,7 @@ namespace Uploader.Managers.Front
 
             // Supprimer le suivi progress après 1j
             var now = DateTime.UtcNow;
-            var purgeList = progresses.Values.Where(f => (now - f.LastActivityDateTime).TotalSeconds >= 24).ToList();
+            var purgeList = progresses.Values.Where(f => (now - f.LastActivityDateTime).TotalHours >= 24).ToList();
             foreach (FileContainer toDelete in purgeList)
             {
                 FileContainer thisFileContainer;
