@@ -13,6 +13,8 @@ namespace Uploader.Managers.Front
 {
     public static class ProgressManager
     {
+        public static string Version => "0.6.7";
+
         private static ConcurrentDictionary<Guid, FileContainer> progresses = new ConcurrentDictionary<Guid, FileContainer>();
 
         public static void RegisterProgress(FileContainer fileContainer)
@@ -20,64 +22,56 @@ namespace Uploader.Managers.Front
             progresses.TryAdd(fileContainer.ProgressToken, fileContainer);
 
             // Supprimer le suivi progress après 1j
-            Task taskClean = Task.Run(() =>
+            var now = DateTime.UtcNow;
+            var purgeList = progresses.Values.Where(f => (now - f.LastActivityDateTime).TotalSeconds >= 24).ToList();
+            foreach (FileContainer toDelete in purgeList)
             {
-                Thread.Sleep(24 * 60 * 60 * 1000); // 1j
                 FileContainer thisFileContainer;
-                progresses.TryRemove(fileContainer.ProgressToken, out thisFileContainer);
-            });
+                progresses.TryRemove(toDelete.ProgressToken, out thisFileContainer);
+            }
         }
 
         public static dynamic GetStats()
         {
             try
             {
-                var list = progresses.Values.ToList().FindAll(l => !l.WorkInProgress()).ToList();
+                var list = progresses.Values.ToList();
 
                 var listVideoEncoded = new List<FileItem>();
                 var listSpriteCreated = new List<FileItem>();
                 var listIpfsAdded = new List<FileItem>();
 
-                foreach (FileContainer fileContainer in list)
-                {
-                    if(fileContainer.SourceFileItem.IpfsProcess.CurrentStep == ProcessStep.Success)
-                        listIpfsAdded.Add(fileContainer.SourceFileItem);
+                listIpfsAdded.AddRange(list.Select(l => l.SourceFileItem));
 
-                    if(fileContainer.SpriteVideoFileItem != null)
-                    {
-                        FileItem fileItem = fileContainer.SpriteVideoFileItem;
-                        if(fileItem.EncodeProcess.CurrentStep == ProcessStep.Success)
-                            listSpriteCreated.Add(fileItem);
+                var listSpriteFiles = list.Where(l => l.SpriteVideoFileItem != null).Select(l => l.SpriteVideoFileItem);
+                listSpriteCreated.AddRange(listSpriteFiles);
+                listIpfsAdded.AddRange(listSpriteFiles);
 
-                        if(fileItem.IpfsProcess.CurrentStep == ProcessStep.Success)
-                            listIpfsAdded.Add(fileItem);
-                    }
-
-                    if(fileContainer.EncodedFileItems != null)
-                    {
-                        foreach (FileItem fileItem in fileContainer.EncodedFileItems)
-                        {
-                            if(fileItem.EncodeProcess.CurrentStep == ProcessStep.Success)
-                                listVideoEncoded.Add(fileItem);
-
-                            if(fileItem.IpfsProcess.CurrentStep == ProcessStep.Success)
-                                listIpfsAdded.Add(fileItem);
-                        }
-                    }
-                }
+                var listEncodeFiles = list.Where(l => l.EncodedFileItems != null).SelectMany(l => l.EncodedFileItems);
+                listVideoEncoded.AddRange(listEncodeFiles);
+                listIpfsAdded.AddRange(listEncodeFiles);
 
                 return new
                 {
+                    version = Version,
                     currentWaitingInQueue = GetCurrentWaitingInQueue(),
 
-                    videoEncodedLast24h = GetEncodeStats(listVideoEncoded),
-                    spriteCreatedLast24h = GetEncodeStats(listSpriteCreated),
-                    ipfsAddedLast24h = GetIpfsStats(listIpfsAdded)
+                    Init = GetStatByStep(ProcessStep.Init, listVideoEncoded, listSpriteCreated, listIpfsAdded),
+                    Waiting = GetStatByStep(ProcessStep.Waiting, listVideoEncoded, listSpriteCreated, listIpfsAdded),
+                    Canceled = GetStatByStep(ProcessStep.Canceled, listVideoEncoded, listSpriteCreated, listIpfsAdded),
+                    Started = GetStatByStep(ProcessStep.Started, listVideoEncoded, listSpriteCreated, listIpfsAdded),
+                    Error = GetStatByStep(ProcessStep.Error, listVideoEncoded, listSpriteCreated, listIpfsAdded),
+                    Success = GetStatByStep(ProcessStep.Success, listVideoEncoded, listSpriteCreated, listIpfsAdded)
                 };
             }
-            catch
+            catch(Exception ex)
             {
-                return new { currentWaitingInQueue = GetCurrentWaitingInQueue() };
+                return new 
+                {
+                    version = Version,
+                    currentWaitingInQueue = GetCurrentWaitingInQueue(),
+                    exception = ex.ToString()
+                };
             }
         }
 
@@ -85,11 +79,20 @@ namespace Uploader.Managers.Front
         {
                 return new
                 {
-                    videoToEncodeInQueue = EncodeDaemon.TotalAddToQueue - EncodeDaemon.CurrentPositionInQueue,
-                    spriteToCreateInQueue = SpriteDaemon.TotalAddToQueue - SpriteDaemon.CurrentPositionInQueue,
-                    ipfsToAddInQueue = IpfsDaemon.TotalAddToQueue - IpfsDaemon.CurrentPositionInQueue,
-                    version = "0.6.6",
+                    videoToEncode = EncodeDaemon.TotalAddToQueue - EncodeDaemon.CurrentPositionInQueue,
+                    spriteToCreate = SpriteDaemon.TotalAddToQueue - SpriteDaemon.CurrentPositionInQueue,
+                    ipfsToAdd = IpfsDaemon.TotalAddToQueue - IpfsDaemon.CurrentPositionInQueue
                 };
+        }
+
+        private static dynamic GetStatByStep(ProcessStep step, List<FileItem> listVideoEncoded, List<FileItem> listSpriteCreated, List<FileItem> listIpfsAdded)
+        {
+            return new
+            {
+                videoEncodeLast24h = GetEncodeStats(listVideoEncoded.Where(f => f.EncodeProcess.CurrentStep == step).ToList()),
+                spriteCreationLast24h = GetEncodeStats(listSpriteCreated.Where(f => f.EncodeProcess.CurrentStep == step).ToList()),
+                ipfsAddLast24h = GetIpfsStats(listIpfsAdded.Where(f => f.IpfsProcess.CurrentStep == step).ToList())
+            };
         }
 
         private static dynamic GetEncodeStats(List<FileItem> fileItems)
@@ -97,11 +100,30 @@ namespace Uploader.Managers.Front
             return new
                 {
                     nbSuccess = fileItems.Count,
-                    waitingInQueue = GetInfo(fileItems.Select(f => (long)f.EncodeProcess.OriginWaitingPositionInQueue).ToList()),
-                    fileSize = GetInfo(fileItems.Select(f => f.FileSize.Value).ToList()),
-                    videoDuration = GetInfo(fileItems.Select(f => (long)f.FileContainer.SourceFileItem.VideoDuration.Value).ToList()),
-                    waitingTime = GetInfo(fileItems.Select(f => (long)f.EncodeProcess.WaitingTime.Value).ToList()),
-                    processTime = GetInfo(fileItems.Select(f => (long)f.EncodeProcess.ProcessTime.Value).ToList())
+                    waitingInQueue = GetInfo(fileItems
+                        .Where(f => f.EncodeProcess.OriginWaitingPositionInQueue > 0)
+                        .Select(f => (long)f.EncodeProcess.OriginWaitingPositionInQueue)
+                        .ToList()),
+                    sourceDuration = GetTimeInfo(fileItems
+                        .Where(f => f.FileContainer.SourceFileItem.VideoDuration.HasValue)
+                        .Select(f => (long)f.FileContainer.SourceFileItem.VideoDuration.Value)
+                        .ToList()),
+                    sourceFileSize = GetTimeInfo(fileItems
+                        .Where(f => f.FileContainer.SourceFileItem.FileSize.HasValue)
+                        .Select(f => (long)f.FileContainer.SourceFileItem.FileSize.Value)
+                        .ToList()),                        
+                    fileSize = GetFileSizeInfo(fileItems
+                        .Where(f => f.FileSize.HasValue)
+                        .Select(f => f.FileSize.Value)
+                        .ToList()),
+                    waitingTime = GetTimeInfo(fileItems
+                        .Where(f => f.EncodeProcess.WaitingTime.HasValue)
+                        .Select(f => f.EncodeProcess.WaitingTime.Value)
+                        .ToList()),
+                    processTime = GetTimeInfo(fileItems
+                        .Where(f => f.EncodeProcess.ProcessTime.HasValue)
+                        .Select(f => f.EncodeProcess.ProcessTime.Value)
+                        .ToList())
                 };
         }
 
@@ -109,11 +131,23 @@ namespace Uploader.Managers.Front
         {
             return new
                 {
-                    nbSuccess = fileItems.Count,
-                    waitingInQueue = GetInfo(fileItems.Select(f => (long)f.IpfsProcess.OriginWaitingPositionInQueue).ToList()),
-                    fileSize = GetInfo(fileItems.Select(f => f.FileSize.Value).ToList()),
-                    waitingTime = GetInfo(fileItems.Select(f => (long)f.IpfsProcess.WaitingTime.Value).ToList()),
-                    processTime = GetInfo(fileItems.Select(f => (long)f.IpfsProcess.ProcessTime.Value).ToList())
+                    nb = fileItems.Count,
+                    waitingInQueue = GetInfo(fileItems
+                        .Where(f => f.IpfsProcess.OriginWaitingPositionInQueue > 0)
+                        .Select(f => (long)f.IpfsProcess.OriginWaitingPositionInQueue)
+                        .ToList()),
+                    fileSize = GetFileSizeInfo(fileItems
+                        .Where(f => f.FileSize.HasValue)
+                        .Select(f => f.FileSize.Value)
+                        .ToList()),
+                    waitingTime = GetTimeInfo(fileItems
+                        .Where(f => f.IpfsProcess.WaitingTime.HasValue)
+                        .Select(f => f.IpfsProcess.WaitingTime.Value)
+                        .ToList()),
+                    processTime = GetTimeInfo(fileItems
+                        .Where(f => f.IpfsProcess.ProcessTime.HasValue)
+                        .Select(f => f.IpfsProcess.ProcessTime.Value)
+                        .ToList())
                 };
         }        
 
@@ -121,7 +155,49 @@ namespace Uploader.Managers.Front
         {
             if(!infos.Any())
                 return null;
-            return new { min = infos.Min(), average = infos.Average().ToString("0.00"), max = infos.Max() };
+            return new { nb = infos.Count, min = infos.Min(), average = Math.Round(infos.Average(), 2), max = infos.Max() };
+        }
+
+        private static dynamic GetTimeInfo(List<long> infos)
+        {
+            if(!infos.Any())
+                return null;
+            return new { nb = infos.Count, min = Time(infos.Min()), average = Time((long)infos.Average()), max = Time(infos.Max()) };
+        }
+
+        private static dynamic GetFileSizeInfo(List<long> infos)
+        {
+            if(!infos.Any())
+                return null;
+            return new { nb = infos.Count, min = Filesize(infos.Min()), average = Filesize((long)infos.Average()), max = Filesize(infos.Max()) };
+        }
+
+        private static string Filesize(long octet)
+        {
+            if(octet < 1 * 1000)
+                return octet + " o";
+
+            if(octet < 1 * 1000000)
+                return Math.Round(octet/1000d, 2) + " Ko";
+
+            if(octet < 1 * 1000000000)
+                return Math.Round(octet/1000000d, 2) + " Mo";
+
+            if(octet < 1 * 1000000000000)
+                return Math.Round(octet/1000000000d, 2) + " Go";
+            
+            return Math.Round(octet/1000000000000d, 2) + " To";
+        }
+
+        private static string Time(long seconds)
+        {
+            if(seconds < 1 * 60)
+                return seconds + " second(s)";
+
+            if(seconds < 1 * 3600)
+                return Math.Round(seconds/60d, 2) + " minute(s)";
+
+            return Math.Round(seconds/3600d, 2) + " heure(s)";
         }
 
         public static FileContainer GetFileContainerByToken(Guid progressToken)
@@ -140,22 +216,6 @@ namespace Uploader.Managers.Front
             FileContainer fileContainer = progresses.Values
                 .Where(s => s.SourceFileItem.IpfsHash == sourceHash)
                 .OrderByDescending(s => s.NumInstance)
-                .FirstOrDefault();
-
-            if(fileContainer != null)
-                fileContainer.LastTimeProgressRequested = DateTime.UtcNow;
-            
-            return fileContainer;
-        }
-
-        public static FileContainer GetFileContainerByChildHash(string hash)
-        {
-            FileContainer fileContainer = progresses.Values.Where(s =>
-                    s?.OverlayFileItem?.IpfsHash == hash ||
-                    s?.SpriteVideoFileItem?.IpfsHash == hash ||
-                    (s?.EncodedFileItems.Any(v => v.IpfsHash == hash)??false)
-                )
-                .OrderByDescending(s => s?.NumInstance)
                 .FirstOrDefault();
 
             if(fileContainer != null)

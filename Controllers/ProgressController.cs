@@ -31,11 +31,12 @@ namespace Uploader.Controllers
         {
             FileContainer fileContainer = ProgressManager.GetFileContainerByToken(token);
             if (fileContainer == null)
+            {
                 return BadRequest(new
                 {
                     errorMessage = "token not exist"
                 });
-
+            }
             return GetResult(fileContainer);
         }
 
@@ -46,14 +47,11 @@ namespace Uploader.Controllers
             FileContainer fileContainer = ProgressManager.GetFileContainerBySourceHash(sourceHash);
             if (fileContainer == null)
             {
-                fileContainer = ProgressManager.GetFileContainerByChildHash(sourceHash);
-                if (fileContainer == null)
-                    return BadRequest(new
-                    {
-                        errorMessage = "hash not exist"
-                    });
+                return BadRequest(new
+                {
+                    errorMessage = "hash not exist"
+                });
             }
-
             return GetResult(fileContainer);
         }
 

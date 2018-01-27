@@ -16,6 +16,11 @@ namespace Uploader.Models
             get;
         }
 
+        public DateTime CreationDate
+        {
+            get;
+        }
+
         public static FileContainer NewVideoContainer(string sourceFilePath, params VideoSize[] videoSizes)
         {
             FileContainer fileContainer = new FileContainer(TypeContainer.Video);
@@ -46,7 +51,7 @@ namespace Uploader.Models
             FileContainer fileContainer = new FileContainer(TypeContainer.Overlay);
 
             fileContainer.SourceFileItem = FileItem.NewSourceImageFileItem(fileContainer, sourceFilePath);
-            fileContainer.OverlayFileItem = FileItem.NewOverlayImageFileItem(fileContainer); // TMP cancel overlay
+            fileContainer.OverlayFileItem = FileItem.NewOverlayImageFileItem(fileContainer);
 
             return fileContainer;
         }
@@ -55,6 +60,7 @@ namespace Uploader.Models
         {
             nbInstance++;
             NumInstance = nbInstance;
+            CreationDate = DateTime.UtcNow;
 
             TypeContainer = typeContainer;
 
@@ -108,23 +114,20 @@ namespace Uploader.Models
         {
             if (SourceFileItem.WorkInProgress())
                 return true;
-
-            switch (TypeContainer)
-            {
-                case TypeContainer.Video:
-                    if (SpriteVideoFileItem != null && SpriteVideoFileItem.WorkInProgress())
-                        return true;
-                    return EncodedFileItems.Any(f => f.WorkInProgress());
-
-                case TypeContainer.Overlay:
-                    if (OverlayFileItem != null && OverlayFileItem.WorkInProgress())
-                        return true;
-                    return false;
-
-                default:
-                    Debug.WriteLine("Type container non géré " + TypeContainer);
-                    throw new InvalidOperationException("type container non géré");
-            }
+            if (SpriteVideoFileItem != null && SpriteVideoFileItem.WorkInProgress())
+                return true;
+            if (EncodedFileItems != null && EncodedFileItems.Any(f => f.WorkInProgress()))
+                return true;
+            if (OverlayFileItem != null && OverlayFileItem.WorkInProgress())
+                return true;
+            return false;
         }
+
+        public DateTime LastActivityDateTime => Tools.Max(CreationDate
+            , SourceFileItem?.LastActivityDateTime??DateTime.MinValue
+            , SpriteVideoFileItem?.LastActivityDateTime??DateTime.MinValue
+            , EncodedFileItems?.Max(e => e.LastActivityDateTime)??DateTime.MinValue
+            , OverlayFileItem?.LastActivityDateTime??DateTime.MinValue
+        );
     }
 }

@@ -1,5 +1,7 @@
 using System;
 
+using Uploader.Managers.Common;
+
 namespace Uploader.Models
 {
     public class ProcessItem
@@ -66,6 +68,8 @@ namespace Uploader.Models
                 return (long)(EndProcess - StartProcess).TotalSeconds;
             }
         }
+
+        public DateTime LastActivityDateTime => Tools.Max(DateInQueue, StartProcess, EndProcess);
 
         public DateTime StartProcess
         {

@@ -63,6 +63,8 @@ namespace Uploader.Models
 
         public bool IsSource => TypeFile == TypeFile.SourceVideo || TypeFile == TypeFile.SourceImage;
 
+        public DateTime LastActivityDateTime => Tools.Max(EncodeProcess?.LastActivityDateTime??DateTime.MinValue, IpfsProcess?.LastActivityDateTime??DateTime.MinValue);
+
         public long? FileSize
         {
             get;
