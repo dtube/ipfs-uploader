@@ -31,10 +31,6 @@ namespace Uploader.Managers.Front
                 LogManager.AddSubtitleMessage(ex.ToString(), "Exception");
                 return fileContainer.ProgressToken;
             }
-            finally
-            {
-                TempFileManager.SafeDeleteTempFile(filePath);
-            }
 
             return fileContainer.ProgressToken;
         }
@@ -42,7 +38,7 @@ namespace Uploader.Managers.Front
         private static bool isValidVTT(string text)
         {
             Debug.WriteLine(text);
-            if (!text.StartsWith("VTT"))
+            if (!text.StartsWith("WEBVTT"))
                 return false;
 
             // eventuellement rajouter plus de verifs

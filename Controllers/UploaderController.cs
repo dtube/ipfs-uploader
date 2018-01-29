@@ -65,17 +65,14 @@ namespace Uploader.Controllers
         }
 
         [HttpPost]
-        [DisableRequestSizeLimit]
         [Route("/uploadSubtitle")]
-        public async Task<IActionResult> UploadSubtitle([FromForm] string subtitle)
+        public IActionResult UploadSubtitle([FromForm] string subtitle)
         {
-            // pas de subtitle ??
-            Debug.WriteLine("debug:", subtitle);
             try
             {
                 return Ok(new
                 {
-                    success = true, token = SubtitleManager.ComputeSubtitle("zzz")
+                    success = true, token = SubtitleManager.ComputeSubtitle(subtitle)
                 });
             }
             catch (Exception ex)
