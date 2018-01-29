@@ -49,6 +49,13 @@ namespace Uploader.Models
             return fileItem;
         }
 
+        public static FileItem NewSubtitleFileItem(FileContainer fileContainer)
+        {
+            FileItem fileItem = new FileItem(fileContainer, null, TypeFile.SubtitleText);
+            fileItem.IpfsProcess = new ProcessItem();
+            return fileItem;
+        }
+
         private FileItem(FileContainer fileContainer, string filePath, TypeFile typeFile)
         {
             FileContainer = fileContainer;

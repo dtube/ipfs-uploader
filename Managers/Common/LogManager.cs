@@ -10,6 +10,7 @@ namespace Uploader.Managers.Common
         private static object _lockIpfsFile = new object();
         private static object _lockSpriteFile = new object();
         private static object _lockOverlayFile = new object();
+        private static object _lockSubtitleFile = new object();
 
         private static void AddMessage(string fileName, string message)
         {
@@ -54,6 +55,14 @@ namespace Uploader.Managers.Common
             Debug.WriteLine($"#overlay.log [{typeMessage}] {message}");
             lock(_lockOverlayFile)
                 AddMessage("overlay.log", $"{dateTime} [{typeMessage}] {message}");
+        }
+
+        public static void AddSubtitleMessage(string message, string typeMessage)
+        {
+            string dateTime = DateTime.UtcNow.ToString("o");
+            Debug.WriteLine($"#subtitle.log [{typeMessage}] {message}");
+            lock(_lockOverlayFile)
+                AddMessage("subtitle.log", $"{dateTime} [{typeMessage}] {message}");
         }
     }
 }

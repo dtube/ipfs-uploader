@@ -64,6 +64,30 @@ namespace Uploader.Controllers
             }
         }
 
+        [HttpPost]
+        [DisableRequestSizeLimit]
+        [Route("/uploadSubtitle")]
+        public async Task<IActionResult> UploadSubtitle([FromForm] string subtitle)
+        {
+            // pas de subtitle ??
+            Debug.WriteLine("debug:", subtitle);
+            try
+            {
+                return Ok(new
+                {
+                    success = true, token = SubtitleManager.ComputeSubtitle("zzz")
+                });
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Exception ConvertSubtitle : {0}", ex);
+                return BadRequest(new
+                {
+                    errorMessage = ex.Message
+                });
+            }
+        }
+
         private async Task<string> GetFileToTemp()
         {
             // Copy file to temp location

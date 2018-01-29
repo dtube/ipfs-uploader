@@ -4,6 +4,7 @@ namespace Uploader.Models
     {
         Undefined,
         Video,
-        Overlay
+        Overlay,
+        Subtitle
     }
 }
