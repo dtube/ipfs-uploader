@@ -1,6 +1,6 @@
 namespace Uploader.Managers.Front
 {
-    public class FrontSettings
+    public static class FrontSettings
     {
         /// <summary>
         /// seconds

@@ -45,10 +45,10 @@ namespace Uploader.Models
         {
             get 
             {
-                if(CurrentStep < ProcessStep.Waiting)
+                if(CurrentStep == ProcessStep.Init || CurrentStep == ProcessStep.Canceled)
                     return null;
 
-                if(StartProcess == DateTime.MinValue)
+                if(CurrentStep == ProcessStep.Waiting)
                     return (long)(DateTime.UtcNow - DateInQueue).TotalSeconds;
 
                 return (long)(StartProcess - DateInQueue).TotalSeconds;
@@ -62,7 +62,7 @@ namespace Uploader.Models
                 if(CurrentStep < ProcessStep.Started)
                     return null;
 
-                if(EndProcess == DateTime.MinValue)
+                if(CurrentStep == ProcessStep.Started)
                     return (long)(DateTime.UtcNow - StartProcess).TotalSeconds;
 
                 return (long)(EndProcess - StartProcess).TotalSeconds;

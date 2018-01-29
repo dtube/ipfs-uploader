@@ -43,11 +43,11 @@ namespace Uploader.Managers.Front
 
                 listIpfsAdded.AddRange(list.Select(l => l.SourceFileItem));
 
-                var listSpriteFiles = list.Where(l => l.SpriteVideoFileItem != null).Select(l => l.SpriteVideoFileItem);
+                var listSpriteFiles = list.Where(l => l.SpriteVideoFileItem != null).Select(l => l.SpriteVideoFileItem).ToList();
                 listSpriteCreated.AddRange(listSpriteFiles);
                 listIpfsAdded.AddRange(listSpriteFiles);
 
-                var listEncodeFiles = list.Where(l => l.EncodedFileItems != null).SelectMany(l => l.EncodedFileItems);
+                var listEncodeFiles = list.Where(l => l.EncodedFileItems != null).SelectMany(l => l.EncodedFileItems).ToList();
                 listVideoEncoded.AddRange(listEncodeFiles);
                 listIpfsAdded.AddRange(listEncodeFiles);
 
@@ -79,9 +79,9 @@ namespace Uploader.Managers.Front
         {
                 return new
                 {
-                    videoToEncode = EncodeDaemon.TotalAddToQueue - EncodeDaemon.CurrentPositionInQueue,
-                    spriteToCreate = SpriteDaemon.TotalAddToQueue - SpriteDaemon.CurrentPositionInQueue,
-                    ipfsToAdd = IpfsDaemon.TotalAddToQueue - IpfsDaemon.CurrentPositionInQueue
+                    videoToEncode = EncodeDaemon.Instance.CurrentWaitingInQueue,
+                    spriteToCreate = SpriteDaemon.Instance.CurrentWaitingInQueue,
+                    ipfsToAdd = IpfsDaemon.Instance.CurrentWaitingInQueue
                 };
         }
 
@@ -99,7 +99,7 @@ namespace Uploader.Managers.Front
         {
             return new
                 {
-                    nbSuccess = fileItems.Count,
+                    nb = fileItems.Count,
                     waitingInQueue = GetInfo(fileItems
                         .Where(f => f.EncodeProcess.OriginWaitingPositionInQueue > 0)
                         .Select(f => (long)f.EncodeProcess.OriginWaitingPositionInQueue)
@@ -108,7 +108,7 @@ namespace Uploader.Managers.Front
                         .Where(f => f.FileContainer.SourceFileItem.VideoDuration.HasValue)
                         .Select(f => (long)f.FileContainer.SourceFileItem.VideoDuration.Value)
                         .ToList()),
-                    sourceFileSize = GetTimeInfo(fileItems
+                    sourceFileSize = GetFileSizeInfo(fileItems
                         .Where(f => f.FileContainer.SourceFileItem.FileSize.HasValue)
                         .Select(f => (long)f.FileContainer.SourceFileItem.FileSize.Value)
                         .ToList()),                        

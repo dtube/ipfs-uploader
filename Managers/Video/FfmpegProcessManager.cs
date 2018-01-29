@@ -83,7 +83,7 @@ namespace Uploader.Managers.Video
             if (!output.Contains(progressMarkup) || output.Length < (output.IndexOf(progressMarkup) + progressMarkup.Length + 8))
                 return;
 
-            Debug.WriteLine(Path.GetFileName(_fileItem.FileContainer.SourceFileItem.FilePath) + " : " + output);
+            Debug.WriteLine(Path.GetFileName(_fileItem.SourceFilePath) + " : " + output);
 
             // Récupérer la progression d'encodage avec la durée d'encodage traitée
             int durationDone = GetDurationInSeconds(output.Substring(output.IndexOf(progressMarkup) + progressMarkup.Length, 8))??0;

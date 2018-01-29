@@ -24,7 +24,7 @@ namespace Uploader.Managers.Video
                         try
                         {
                             var ffmpegProcessManager = new FfmpegProcessManager(fileItem);
-                            string argumentsImage = $"-y -i {Path.GetFileName(sourceFile.FilePath)} -vf fps=1 -vframes 1 {Path.GetFileName(imageOutputPath)}";
+                            string argumentsImage = $"-y -i {Path.GetFileName(sourceFile.SourceFilePath)} -vf fps=1 -vframes 1 {Path.GetFileName(imageOutputPath)}";
                             ffmpegProcessManager.StartProcess(argumentsImage, VideoSettings.EncodeGetOneImageTimeout);
 
                             using(Image image = Image.FromFile(imageOutputPath))
@@ -47,14 +47,14 @@ namespace Uploader.Managers.Video
             // Si durée totale de vidéo, largeur hauteur non récupéré, on ne peut pas continuer
             if ((sourceFile.VideoDuration??0) <= 0 || (sourceFile.VideoWidth??0) <= 0 || (sourceFile.VideoHeight??0) <= 0)
             {
-                Log("Error while getting duration, height or width. FileName : " + Path.GetFileName(sourceFile.FilePath), "Error", spriteMode);                
+                Log("Error while getting duration, height or width. FileName : " + Path.GetFileName(sourceFile.SourceFilePath), "Error", spriteMode);                
                 fileItem.SetEncodeErrorMessage("Error while getting duration, height or width.");
                 return false;
             }
 
             int duration = sourceFile.VideoDuration.Value;
 
-            Log("SourceVideoDuration " + duration + " / SourceVideoFileSize " + fileItem.FileContainer.SourceFileItem.FileSize, "Info source", spriteMode);
+            Log("SourceVideoDuration " + duration + " / SourceVideoFileSize " + sourceFile.FileSize, "Info source", spriteMode);
 
             // Désactivation encoding et sprite si dépassement de la durée maximale
             if(duration > VideoSettings.MaxVideoDurationForEncoding)

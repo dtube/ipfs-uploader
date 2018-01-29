@@ -38,20 +38,27 @@ namespace Uploader.Managers.Front
 
             FileContainer fileContainer = FileContainer.NewVideoContainer(sourceFilePath, formats);
 
-            IpfsDaemon.Queue(fileContainer.SourceFileItem);
+            fileContainer.SourceFileItem.OutputFilePath = fileContainer.SourceFileItem.SourceFilePath;
+            IpfsDaemon.Instance.Queue(fileContainer.SourceFileItem);
 
             // si sprite demandé
             if (sprite??false)
             {
                 fileContainer.AddSpriteVideo();
-                // get images from video
-                SpriteDaemon.Queue(fileContainer.SpriteVideoFileItem, "Waiting sprite creation...");
             }
 
-            // si encoding est demandé
-            foreach (FileItem file in fileContainer.EncodedFileItems)
+            if(VideoSettings.GpuEncodeMode)
             {
-                EncodeDaemon.Queue(file, "Waiting encode...");
+                // encoding audio de la source puis ça sera encoding videos puis sprite
+                EncodeDaemon.Instance.Queue(fileContainer.SourceFileItem);
+            }
+            else
+            {
+                // si encoding est demandé, et gpuMode -> encodingAudio
+                foreach (FileItem file in fileContainer.EncodedFileItems)
+                {
+                    EncodeDaemon.Instance.Queue(file, "Waiting encode...");
+                }
             }
 
             return fileContainer.ProgressToken;

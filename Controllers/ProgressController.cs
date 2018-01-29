@@ -62,6 +62,7 @@ namespace Uploader.Controllers
                 case TypeContainer.Video:
                     return Json(new
                     {
+                        encodedAudioSourceVideo = EncodeResultJson(fileContainer.SourceFileItem),
                         ipfsAddSourceVideo = IpfsResultJson(fileContainer.SourceFileItem),
                         sprite = fileContainer.SpriteVideoFileItem == null ? null : (new
                         {
@@ -92,7 +93,7 @@ namespace Uploader.Controllers
 
         private dynamic IpfsResultJson(FileItem fileItem)
         {
-            if (fileItem == null)
+            if (fileItem == null || fileItem.IpfsProcess == null)
                 return null;
 
             return new
@@ -102,14 +103,14 @@ namespace Uploader.Controllers
                 lastTimeProgress = fileItem.IpfsProcess.LastTimeProgressChanged,
                 errorMessage = fileItem.IpfsProcess.ErrorMessage,
                 step = fileItem.IpfsProcess.CurrentStep.ToString(),
-                positionInQueue = Position(fileItem.IpfsProcess, IpfsDaemon.CurrentPositionInQueue),
+                positionInQueue = Position(fileItem.IpfsProcess, IpfsDaemon.Instance.CurrentPositionInQueue),
                 fileSize = fileItem.FileSize
             };
         }
 
         private dynamic SpriteResultJson(FileItem fileItem)
         {
-            if (fileItem == null)
+            if (fileItem == null || fileItem.EncodeProcess == null)
                 return null;
 
             return new
@@ -119,13 +120,13 @@ namespace Uploader.Controllers
                 lastTimeProgress = fileItem.EncodeProcess.LastTimeProgressChanged,
                 errorMessage = fileItem.EncodeProcess.ErrorMessage,
                 step = fileItem.EncodeProcess.CurrentStep.ToString(),
-                positionInQueue = Position(fileItem.EncodeProcess, SpriteDaemon.CurrentPositionInQueue)
+                positionInQueue = Position(fileItem.EncodeProcess, SpriteDaemon.Instance.CurrentPositionInQueue)
             };
         }
 
         private dynamic EncodeResultJson(FileItem fileItem)
         {
-            if (fileItem == null)
+            if (fileItem == null || fileItem.EncodeProcess == null)
                 return null;
 
             return new
@@ -135,7 +136,7 @@ namespace Uploader.Controllers
                 lastTimeProgress = fileItem.EncodeProcess.LastTimeProgressChanged,
                 errorMessage = fileItem.EncodeProcess.ErrorMessage,
                 step = fileItem.EncodeProcess.CurrentStep.ToString(),
-                positionInQueue = Position(fileItem.EncodeProcess, EncodeDaemon.CurrentPositionInQueue)
+                positionInQueue = Position(fileItem.EncodeProcess, EncodeDaemon.Instance.CurrentPositionInQueue)
             };
         }
 

@@ -17,7 +17,7 @@ namespace Uploader.Managers.Ipfs
             {
                 currentFileItem = fileItem;
 
-                LogManager.AddIpfsMessage("FileName " + Path.GetFileName(currentFileItem.FilePath), "Start");
+                LogManager.AddIpfsMessage("FileName " + Path.GetFileName(currentFileItem.OutputFilePath), "Start");
 
                 currentFileItem.IpfsHash = null;
                 currentFileItem.IpfsProcess.StartProcessDateTime();
@@ -25,13 +25,13 @@ namespace Uploader.Managers.Ipfs
                 // Send to ipfs and return hash from ipfs
                 var processStartInfo = new ProcessStartInfo();
                 processStartInfo.FileName = "ipfs";
-                processStartInfo.Arguments = $"add {Path.GetFileName(currentFileItem.FilePath)}";
+                processStartInfo.Arguments = $"add {Path.GetFileName(currentFileItem.OutputFilePath)}";
 
                 if(IpfsSettings.VideoAndSpriteTrickleDag)                
                     if(currentFileItem.TypeFile == TypeFile.SourceVideo || 
                         currentFileItem.TypeFile == TypeFile.EncodedVideo || 
                         currentFileItem.TypeFile == TypeFile.SpriteVideo)
-                        processStartInfo.Arguments = $"add -t {Path.GetFileName(currentFileItem.FilePath)}";
+                        processStartInfo.Arguments = $"add -t {Path.GetFileName(currentFileItem.OutputFilePath)}";
 
                 processStartInfo.RedirectStandardOutput = true;
                 processStartInfo.RedirectStandardError = true;
@@ -83,7 +83,7 @@ namespace Uploader.Managers.Ipfs
             if (currentFileItem.IpfsProcess.LastTimeProgressChanged.HasValue && (DateTime.UtcNow - currentFileItem.IpfsProcess.LastTimeProgressChanged.Value).TotalMilliseconds < 1000)
                 return;
 
-            Debug.WriteLine(Path.GetFileName(currentFileItem.FilePath) + " : " + output);
+            Debug.WriteLine(Path.GetFileName(currentFileItem.OutputFilePath) + " : " + output);
 
             // Récupérer la progression d'envoi
             string newProgress = output.Substring(output.IndexOf('%') - 6, 7).Trim();
@@ -96,7 +96,7 @@ namespace Uploader.Managers.Ipfs
             if (string.IsNullOrWhiteSpace(output))
                 return;
 
-            Debug.WriteLine(Path.GetFileName(currentFileItem.FilePath) + " : " + output);
+            Debug.WriteLine(Path.GetFileName(currentFileItem.OutputFilePath) + " : " + output);
 
             if (output.StartsWith("added "))
             {

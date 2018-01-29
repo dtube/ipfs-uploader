@@ -2,9 +2,10 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-
+using Uploader.Daemons;
 using Uploader.Managers.Common;
 using Uploader.Managers.Front;
 using Uploader.Managers.Ipfs;
@@ -12,81 +13,85 @@ using Uploader.Models;
 
 namespace Uploader.Managers.Video
 {
-    public class EncodeDaemon
+    public class EncodeDaemon : BaseDaemon
     {
+        public static EncodeDaemon Instance { get; private set; }
+
         static EncodeDaemon()
         {
-            Start();
+            Instance = new EncodeDaemon();
+            Instance.Start(VideoSettings.NbEncodeDaemon);
         }
 
-        private static ConcurrentQueue<FileItem> queueFileItems = new ConcurrentQueue<FileItem>();
-
-        private static List<Task> daemons = new List<Task>();
-
-        public static int CurrentPositionInQueue
+        protected override void ProcessItem(FileItem fileItem)
         {
-            get;
-            set;
-        }
-
-        public static int TotalAddToQueue
-        {
-            get;
-            set;
-        }
-
-        private static void Start()
-        {
-            for (int i = 0; i < VideoSettings.NbEncodeDaemon; i++)
+            // si le client a pas demandé le progress depuis plus de 20s, annuler l'opération
+            if ((DateTime.UtcNow - fileItem.FileContainer.LastTimeProgressRequested).TotalSeconds > FrontSettings.MaxGetProgressCanceled)
             {
-                Task daemon = Task.Run(() =>
+                fileItem.CancelEncode();
+                LogManager.AddEncodingMessage("SourceFileName " + Path.GetFileName(fileItem.SourceFilePath) + " car dernier getProgress a dépassé 20s", "Annulation");
+                return;
+
+            }
+
+            // si c'était l'encoding audio, faire l'encoding 1:N video à partir de SourceAudioAacItem
+            if(VideoSettings.GpuEncodeMode)
+            {
+                // si encoding audio de la source
+                if(string.IsNullOrWhiteSpace(fileItem.VideoAacTempFilePath))
                 {
-                    while (true)
-                    {
-                        FileItem fileItem = null;
-                        try
+                    if (EncodeManager.CpuAudioEncodingOnly(fileItem)) // encoding Audio
+                        Instance.Queue(fileItem); // ==> encoding videos
+                }
+                else
+                {
+                    // sinon c'était l'encoding video 1:N format
+                    if (EncodeManager.GpuEncodingVideoOnly(fileItem)) // encoding videos par GPU
+                    {                        
+                        // rechercher le 480p pour le sprite
+                        var video480p = fileItem.FileContainer.EncodedFileItems.FirstOrDefault(v => v.VideoSize == VideoSize.F480p);
+                        if(video480p != null)
                         {
-                            Thread.Sleep(1000);
-
-                            fileItem = null;
-
-                            if (!queueFileItems.TryDequeue(out fileItem))
-                            {
-                                continue;
-                            }
-
-                            CurrentPositionInQueue++;
-
-                            // si le client a pas demandé le progress depuis plus de 20s, annuler l'opération
-                            if ((DateTime.UtcNow - fileItem.FileContainer.LastTimeProgressRequested).TotalSeconds > FrontSettings.MaxGetProgressCanceled)
-                            {
-                                fileItem.CancelEncode();
-                                LogManager.AddEncodingMessage("SourceFileName " + Path.GetFileName(fileItem.FileContainer.SourceFileItem.FilePath) + " car dernier getProgress a dépassé 20s", "Annulation");
-                            }
-                            else
-                            {
-                                // encode video
-                                if (EncodeManager.Encode(fileItem))
-                                    IpfsDaemon.Queue(fileItem);
-                            }
+                            var newSourceFilePath = Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".mp4");
+                            File.Copy(video480p.OutputFilePath, newSourceFilePath);
+                            fileItem.FileContainer.SpriteVideoFileItem.SourceFilePath = newSourceFilePath;
+                            SpriteDaemon.Instance.Queue(fileItem.FileContainer.SpriteVideoFileItem, "Waiting sprite creation...");
                         }
-                        catch(Exception ex)
+
+                        foreach (var item in fileItem.FileContainer.EncodedFileItems)
                         {
-                            LogManager.AddEncodingMessage(ex.ToString(), "Exception non gérée");                        
-                            fileItem.SetEncodeErrorMessage("Exception non gérée");
+                            IpfsDaemon.Instance.Queue(item);
                         }
                     }
-                });
-                daemons.Add(daemon);
+                }
+            }
+            else
+            {
+                if (EncodeManager.CpuEncoding(fileItem))
+                {
+                    // rechercher le 480p pour le sprite
+                    if(fileItem.VideoSize == VideoSize.F480p)
+                        SpriteDaemon.Instance.Queue(fileItem.FileContainer.SpriteVideoFileItem, "Waiting sprite creation...");
+
+                    IpfsDaemon.Instance.Queue(fileItem);
+                }
             }
         }
 
-        public static void Queue(FileItem fileItem, string messageIpfs)
+        protected override void LogException(FileItem fileItem, Exception ex)
         {
-            queueFileItems.Enqueue(fileItem);
-            TotalAddToQueue++;
-            fileItem.EncodeProcess.SavePositionInQueue(TotalAddToQueue, CurrentPositionInQueue);
-            fileItem.EncodeProcess.SetProgress("Waiting in queue...", true);
+            LogManager.AddEncodingMessage(ex.ToString(), "Exception non gérée");                        
+            fileItem.SetEncodeErrorMessage("Exception non gérée");
+        }
+
+        public void Queue(FileItem fileItem)
+        {
+            base.Queue(fileItem, fileItem.EncodeProcess);
+        }
+
+        public void Queue(FileItem fileItem, string messageIpfs)
+        {
+            base.Queue(fileItem, fileItem.EncodeProcess);
 
             fileItem.IpfsProcess.SetProgress(messageIpfs, true);
         }

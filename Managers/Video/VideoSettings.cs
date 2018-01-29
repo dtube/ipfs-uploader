@@ -33,7 +33,7 @@ namespace Uploader.Managers.Video
         public static int HeightSpriteImages => 118;
 
         /// <summary>
-        /// 
+        /// encoding audio puis encoding video 1:N formats
         /// </summary>
         /// <returns></returns>
         public static bool GpuEncodeMode => false;

@@ -21,11 +21,13 @@ namespace Uploader.Models
             get;
         }
 
-        public static FileContainer NewVideoContainer(string sourceFilePath, params VideoSize[] videoSizes)
-        {
-            FileContainer fileContainer = new FileContainer(TypeContainer.Video);
+        public string OriginFilePath { get; }
 
-            fileContainer.SourceFileItem = FileItem.NewSourceVideoFileItem(fileContainer, sourceFilePath);
+        public static FileContainer NewVideoContainer(string originFilePath, params VideoSize[] videoSizes)
+        {
+            FileContainer fileContainer = new FileContainer(TypeContainer.Video, originFilePath);
+
+            fileContainer.SourceFileItem = FileItem.NewSourceVideoFileItem(fileContainer);
 
             fileContainer.EncodedFileItems = new List<FileItem>();
             foreach (VideoSize videoSize in videoSizes)
@@ -46,23 +48,24 @@ namespace Uploader.Models
             SpriteVideoFileItem = null;
         }
 
-        public static FileContainer NewOverlayContainer(string sourceFilePath)
+        public static FileContainer NewOverlayContainer(string originFilePath)
         {
-            FileContainer fileContainer = new FileContainer(TypeContainer.Overlay);
+            FileContainer fileContainer = new FileContainer(TypeContainer.Overlay, originFilePath);
 
-            fileContainer.SourceFileItem = FileItem.NewSourceImageFileItem(fileContainer, sourceFilePath);
+            fileContainer.SourceFileItem = FileItem.NewSourceImageFileItem(fileContainer);
             fileContainer.OverlayFileItem = FileItem.NewOverlayImageFileItem(fileContainer);
 
             return fileContainer;
         }
 
-        private FileContainer(TypeContainer typeContainer)
+        private FileContainer(TypeContainer typeContainer, string originFilePath)
         {
             nbInstance++;
             NumInstance = nbInstance;
             CreationDate = DateTime.UtcNow;
 
             TypeContainer = typeContainer;
+            OriginFilePath = originFilePath;
 
             ProgressToken = Guid.NewGuid();
             ProgressManager.RegisterProgress(this);

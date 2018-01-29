@@ -14,15 +14,12 @@ namespace Uploader.Managers.Video
     {
         public static bool Encode(FileItem fileItem)
         {
-            string newEncodedFilePath = null;
-
+            FileItem sourceFile = fileItem.FileContainer.SourceFileItem;
             try
             {
                 fileItem.EncodeProcess.StartProcessDateTime();
 
-                FileItem sourceFile = fileItem.FileContainer.SourceFileItem;
-                string sourceFilePath = sourceFile.FilePath;
-                LogManager.AddSpriteMessage("SourceFilePath " + Path.GetFileName(sourceFilePath), "Start Sprite");             
+                LogManager.AddSpriteMessage("SourceFilePath " + Path.GetFileName(fileItem.SourceFilePath), "Start Sprite");             
 
                 // Récupérer la durée totale de la vidéo et sa résolution, autorisation sprite creation
                 if(!VideoSourceManager.CheckAndAnalyseSource(fileItem, false))
@@ -44,25 +41,21 @@ namespace Uploader.Managers.Video
                 int spriteWidth = SizeHelper.GetWidth(sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value, heightSprite);
                 string sizeImageMax = $"scale={spriteWidth}:{heightSprite}";
 
-                newEncodedFilePath = Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".sprite");
-
                 // Extract frameRate image/s de la video
-                string pattern = GetPattern(newEncodedFilePath);
-
-                string arguments = $"-y -i {Path.GetFileName(sourceFilePath)} -r {frameRate} -vf \"{sizeImageMax}\" -f image2 {pattern}";
+                string arguments = $"-y -i {Path.GetFileName(fileItem.SourceFilePath)} -r {frameRate} -vf {sizeImageMax} -f image2 {GetPattern(fileItem.TempFilePath)}";
                 var ffmpegProcessManager = new FfmpegProcessManager(fileItem);
                 ffmpegProcessManager.StartProcess(arguments, VideoSettings.EncodeGetImagesTimeout);
+                string[] files = GetListImageFrom(fileItem.TempFilePath); // récupération des images
 
-                string[] files = GetListImageFrom(newEncodedFilePath); // récupération des images
                 LogManager.AddSpriteMessage((files.Length - 1) + " images", "Start Combine images");
-                string outputFilePath = Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".jpeg"); // nom du fichier sprite
-                bool successSprite = CombineBitmap(files.Skip(files.Length - VideoSettings.NbSpriteImages).ToArray(), outputFilePath); // création du sprite                                
+                bool successSprite = CombineBitmap(files.Skip(files.Length - VideoSettings.NbSpriteImages).ToArray(), fileItem.TempFilePath); // création du sprite                                
                 TempFileManager.SafeDeleteTempFiles(files); // suppression des images
+                if(fileItem.SourceFilePath != fileItem.FileContainer.OriginFilePath)
+                    TempFileManager.SafeDeleteTempFile(fileItem.SourceFilePath);
                 if(successSprite)
                 {
-                    newEncodedFilePath = outputFilePath;
-                    fileItem.FilePath = newEncodedFilePath;
-                    LogManager.AddSpriteMessage("OutputFileName " + Path.GetFileName(outputFilePath) + " / FileSize " + fileItem.FileSize, "End Sprite");
+                    fileItem.OutputFilePath = fileItem.TempFilePath;
+                    LogManager.AddSpriteMessage("OutputFileName " + Path.GetFileName(fileItem.OutputFilePath) + " / FileSize " + fileItem.FileSize, "End Sprite");
                 }
                 else
                 {
@@ -76,9 +69,9 @@ namespace Uploader.Managers.Video
             }
             catch (Exception ex)
             {
-                LogManager.AddSpriteMessage("Video Duration " + fileItem.FileContainer.SourceFileItem.VideoDuration + " / FileSize " + fileItem.FileSize + " / Progress " + fileItem.EncodeProcess.Progress + " / Exception : " + ex, "Exception");
+                LogManager.AddSpriteMessage("Video Duration " + sourceFile.VideoDuration + " / FileSize " + fileItem.FileSize + " / Progress " + fileItem.EncodeProcess.Progress + " / Exception : " + ex, "Exception");
                 fileItem.SetEncodeErrorMessage("Exception");
-                string[] files = GetListImageFrom(newEncodedFilePath); // récupération des images
+                string[] files = GetListImageFrom(fileItem.TempFilePath); // récupération des images
                 TempFileManager.SafeDeleteTempFiles(files); // suppression des images
                 return false;
             }
