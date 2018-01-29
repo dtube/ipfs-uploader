@@ -58,6 +58,13 @@ namespace Uploader.Models
             return fileContainer;
         }
 
+        public static FileContainer NewSubtitleContainer()
+        {
+            FileContainer fileContainer = new FileContainer(TypeContainer.Subtitle, null);
+            fileContainer.SubtitleFileItem = FileItem.NewSubtitleFileItem(fileContainer);
+            return fileContainer;
+        }
+
         private FileContainer(TypeContainer typeContainer, string originFilePath)
         {
             nbInstance++;
@@ -113,6 +120,12 @@ namespace Uploader.Models
             private set;
         }
 
+        public FileItem SubtitleFileItem
+        {
+            get;
+            private set;
+        }
+
         public bool WorkInProgress()
         {
             if (SourceFileItem.WorkInProgress())
@@ -123,6 +136,8 @@ namespace Uploader.Models
                 return true;
             if (OverlayFileItem != null && OverlayFileItem.WorkInProgress())
                 return true;
+            if (SubtitleFileItem != null && SubtitleFileItem.WorkInProgress())
+                return true;
             return false;
         }
 
@@ -131,6 +146,7 @@ namespace Uploader.Models
             , SpriteVideoFileItem?.LastActivityDateTime??DateTime.MinValue
             , EncodedFileItems?.Max(e => e.LastActivityDateTime)??DateTime.MinValue
             , OverlayFileItem?.LastActivityDateTime??DateTime.MinValue
+            , SubtitleFileItem?.LastActivityDateTime??DateTime.MinValue
         );
     }
 }

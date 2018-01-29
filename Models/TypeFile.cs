@@ -7,6 +7,7 @@ namespace Uploader.Models
         EncodedVideo,
         SpriteVideo,
         SourceImage,
-        OverlayImage
+        OverlayImage,
+        SubtitleText
     }
 }
