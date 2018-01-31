@@ -66,13 +66,13 @@ namespace Uploader.Controllers
 
         [HttpPost]
         [Route("/uploadSubtitle")]
-        public IActionResult UploadSubtitle([FromForm] string subtitle)
+        public async Task<IActionResult> UploadSubtitle(string subtitle)
         {
             try
             {
                 return Ok(new
                 {
-                    success = true, token = SubtitleManager.ComputeSubtitle(subtitle)
+                    success = true, token = await SubtitleManager.ComputeSubtitle(subtitle)
                 });
             }
             catch (Exception ex)

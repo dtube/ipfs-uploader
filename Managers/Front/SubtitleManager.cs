@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 
 using Uploader.Managers.Common;
 using Uploader.Managers.Ipfs;
@@ -10,21 +11,19 @@ namespace Uploader.Managers.Front
 {
     public static class SubtitleManager
     {
-        private static int _maxLength = 262144; // 256KB
-
-        public static Guid ComputeSubtitle(string text)
+        public static async Task<Guid> ComputeSubtitle(string text)
         {
             FileContainer fileContainer = FileContainer.NewSubtitleContainer();
-            string filePath = Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".vtt");
+            string outputfilePath = Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".vtt");
 
             if (!isValidVTT(text))
                 return fileContainer.ProgressToken;
 
             try
             {
-                System.IO.File.WriteAllText(filePath, text);
-                fileContainer.SubtitleFileItem.FilePath = filePath;
-                IpfsDaemon.Queue(fileContainer.SubtitleFileItem);
+                await System.IO.File.WriteAllTextAsync(outputfilePath, text);
+                fileContainer.SubtitleFileItem.OutputFilePath = outputfilePath;
+                IpfsDaemon.Instance.Queue(fileContainer.SubtitleFileItem);
             }
             catch(Exception ex)
             {                
