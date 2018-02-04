@@ -271,22 +271,22 @@ namespace Uploader.Models
             }
         }
 
-        public void Cancel()
+        public void Cancel(string message)
         {
             if (IpfsProcess != null && IpfsProcess.Unstarted() && !IpfsProcess.CantCascadeCancel)
-                IpfsProcess.CancelUnstarted();
+                IpfsProcess.CancelUnstarted(message);
 
             if (AudioCpuEncodeProcess != null && AudioCpuEncodeProcess.Unstarted() && !AudioCpuEncodeProcess.CantCascadeCancel)
-                AudioCpuEncodeProcess.CancelUnstarted();
+                AudioCpuEncodeProcess.CancelUnstarted(message);
 
             if (AudioVideoCpuEncodeProcess != null && AudioVideoCpuEncodeProcess.Unstarted() && !AudioVideoCpuEncodeProcess.CantCascadeCancel)
-                AudioVideoCpuEncodeProcess.CancelUnstarted();
+                AudioVideoCpuEncodeProcess.CancelUnstarted(message);
 
             if (VideoGpuEncodeProcess != null && VideoGpuEncodeProcess.Unstarted() && !VideoGpuEncodeProcess.CantCascadeCancel)
-                VideoGpuEncodeProcess.CancelUnstarted();
+                VideoGpuEncodeProcess.CancelUnstarted(message);
 
             if (SpriteEncodeProcess != null && SpriteEncodeProcess.Unstarted() && !SpriteEncodeProcess.CantCascadeCancel)
-                SpriteEncodeProcess.CancelUnstarted();
+                SpriteEncodeProcess.CancelUnstarted(message);
         }
 
         public void CleanFiles()

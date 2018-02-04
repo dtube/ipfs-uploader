@@ -150,33 +150,33 @@ namespace Uploader.Models
             return !FileItem.FileContainer.MustAbort() && CurrentStep == ProcessStep.Waiting;
         }
 
-        public void CancelCascade()
+        public void CancelCascade(string message)
         {
-            CancelStarted();
-            FileItem.FileContainer.CancelAll();
+            CancelStarted(message);
+            FileItem.FileContainer.CancelAll(message);
         }
 
-        public void CancelStarted()
+        public void CancelStarted(string message)
         {
             if(CurrentStep != ProcessStep.Started)
                 return;
                 
-            Cancel();
+            Cancel(message);
         }
 
-        public void CancelUnstarted()
+        public void CancelUnstarted(string message)
         {
             if(!Unstarted())
                 return;
                 
-            Cancel();
+            Cancel(message);
         }
 
-        private void Cancel()
+        private void Cancel(string message)
         {               
             Progress = null;
             LastTimeProgressChanged = null;
-            
+            ErrorMessage = message;
             CurrentStep = ProcessStep.Canceled;
         }
 
@@ -203,7 +203,7 @@ namespace Uploader.Models
             EndProcess = DateTime.UtcNow;
             CurrentStep = ProcessStep.Error;
 
-            FileItem.FileContainer.CancelAll();
+            FileItem.FileContainer.CancelAll(message);
         }
         
         public void EndProcessDateTime()

@@ -75,7 +75,7 @@ namespace Uploader.Managers.Video
                     IpfsDaemon.Instance.Queue(sourceFile);
                 }
 
-                processItem.CancelCascade();
+                processItem.CancelCascade("Dépassement de la durée limite de la vidéo atteinte.");
 
                 return false;
             }

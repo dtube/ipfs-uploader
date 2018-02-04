@@ -28,10 +28,10 @@ namespace Uploader.Managers.Video
             // si le client a pas demandé le progress depuis plus de 20s, annuler l'opération
             if (!fileItem.AudioCpuEncodeProcess.CanProcess())
             {
-                LogManager.AddEncodingMessage("SourceFileName " + Path.GetFileName(fileItem.SourceFilePath) + " car dernier getProgress a dépassé 20s", "Annulation");
-                fileItem.AudioCpuEncodeProcess.CancelCascade();
+                string message = "FileName " + Path.GetFileName(fileItem.OutputFilePath) + " car le client est déconnecté";
+                LogManager.AddEncodingMessage(message, "Annulation");
+                fileItem.AudioCpuEncodeProcess.CancelCascade("Le client est déconnecté.");
                 return;
-
             }
 
             if (EncodeManager.AudioCpuEncoding(fileItem))

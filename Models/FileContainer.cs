@@ -133,19 +133,19 @@ namespace Uploader.Models
             return (DateTime.UtcNow - LastTimeProgressRequested).TotalSeconds > FrontSettings.MaxGetProgressCanceled;
         }
         
-        public void CancelAll()
+        public void CancelAll(string message)
         {
-            SourceFileItem.Cancel();
-            SpriteVideoFileItem?.Cancel();
+            SourceFileItem.Cancel(message);
+            SpriteVideoFileItem?.Cancel(message);
             if(EncodedFileItems != null)
             {
                 foreach (FileItem fileItem in EncodedFileItems)
                 {
-                    fileItem.Cancel();
+                    fileItem.Cancel(message);
                 }
             }
-            OverlayFileItem?.Cancel();
-            SubtitleFileItem?.Cancel();
+            OverlayFileItem?.Cancel(message);
+            SubtitleFileItem?.Cancel(message);
         }
 
         public void CleanFilesIfEnd()

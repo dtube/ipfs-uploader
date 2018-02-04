@@ -25,9 +25,10 @@ namespace Uploader.Managers.Ipfs
         {
             // Si le client a pas demandé le progress depuis moins de 20s, annuler l'opération
             if (!fileItem.IpfsProcess.CanProcess())
-            {                            
-                LogManager.AddIpfsMessage("FileName " + Path.GetFileName(fileItem.OutputFilePath) + " car dernier getProgress a dépassé 20s", "Annulation");
-                fileItem.IpfsProcess.CancelStarted();
+            {
+                string message = "FileName " + Path.GetFileName(fileItem.OutputFilePath) + " car le client est déconnecté";
+                LogManager.AddIpfsMessage(message, "Annulation");
+                fileItem.IpfsProcess.CancelStarted("Le client est déconnecté.");
                 return;                
             }
 
