@@ -11,6 +11,7 @@ namespace Uploader.Models
         {
             CurrentStep = ProcessStep.Init;
             FileItem = fileItem;
+            CreationDate = DateTime.UtcNow;
         }
 
         public FileItem FileItem
@@ -25,6 +26,11 @@ namespace Uploader.Models
             set;
         }
         
+        public DateTime CreationDate
+        {
+            get;
+        }
+
         /// <summary>
         /// Date d'inscription dans la queue à son enregistrement
         /// </summary>
@@ -83,7 +89,7 @@ namespace Uploader.Models
             }
         }
 
-        public DateTime LastActivityDateTime => Tools.Max(DateInQueue, StartProcess, EndProcess);
+        public DateTime LastActivityDateTime => Tools.Max(CreationDate, DateInQueue, StartProcess, EndProcess);
 
         public DateTime StartProcess
         {

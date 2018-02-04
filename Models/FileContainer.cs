@@ -42,6 +42,7 @@ namespace Uploader.Models
             }
             fileContainer.EncodedFileItems = list;
 
+            ProgressManager.RegisterProgress(fileContainer);
             return fileContainer;
         }
 
@@ -52,6 +53,7 @@ namespace Uploader.Models
             fileContainer.SourceFileItem = FileItem.NewSourceImageFileItem(fileContainer);
             fileContainer.OverlayFileItem = FileItem.NewOverlayImageFileItem(fileContainer);
 
+            ProgressManager.RegisterProgress(fileContainer);
             return fileContainer;
         }
 
@@ -59,6 +61,8 @@ namespace Uploader.Models
         {
             FileContainer fileContainer = new FileContainer(TypeContainer.Subtitle, null);
             fileContainer.SubtitleFileItem = FileItem.NewSubtitleFileItem(fileContainer);
+
+            ProgressManager.RegisterProgress(fileContainer);
             return fileContainer;
         }
 
@@ -72,7 +76,6 @@ namespace Uploader.Models
             OriginFilePath = originFilePath;
 
             ProgressToken = Guid.NewGuid();
-            ProgressManager.RegisterProgress(this);
 
             UpdateLastTimeProgressRequest();
         }
@@ -133,19 +136,31 @@ namespace Uploader.Models
             return (DateTime.UtcNow - LastTimeProgressRequested).TotalSeconds > FrontSettings.MaxGetProgressCanceled;
         }
         
+        private IEnumerable<FileItem> GetAllFile()
+        {
+            if(SourceFileItem != null)
+                yield return SourceFileItem;
+
+            if(SpriteVideoFileItem != null)
+                yield return SpriteVideoFileItem;
+
+            if(EncodedFileItems != null)
+                foreach (FileItem fileItem in EncodedFileItems)
+                    yield return fileItem;
+
+            if(OverlayFileItem != null)
+                yield return OverlayFileItem;
+
+            if(SubtitleFileItem != null)
+                yield return SubtitleFileItem;
+        }
+
         public void CancelAll(string message)
         {
-            SourceFileItem.Cancel(message);
-            SpriteVideoFileItem?.Cancel(message);
-            if(EncodedFileItems != null)
+            foreach (var item in GetAllFile())
             {
-                foreach (FileItem fileItem in EncodedFileItems)
-                {
-                    fileItem.Cancel(message);
-                }
+                item.Cancel(message);
             }
-            OverlayFileItem?.Cancel(message);
-            SubtitleFileItem?.Cancel(message);
         }
 
         public void CleanFilesIfEnd()
@@ -153,42 +168,19 @@ namespace Uploader.Models
             if(!Finished())
                 return;
 
-            SourceFileItem.CleanFiles();
-            SpriteVideoFileItem?.CleanFiles();
-            if(EncodedFileItems != null)
+            foreach (var item in GetAllFile())
             {
-                foreach (FileItem fileItem in EncodedFileItems)
-                {
-                    fileItem.CleanFiles();
-                }
+                TempFileManager.SafeDeleteTempFiles(item.FilesToDelete.ToArray());
             }
-            OverlayFileItem?.CleanFiles();
-            SubtitleFileItem?.CleanFiles();
 
             TempFileManager.SafeDeleteTempFile(OriginFilePath);
         }
 
         public bool Finished()
         {
-            if (!SourceFileItem.Finished())
-                return false;
-            if (SpriteVideoFileItem != null && !SpriteVideoFileItem.Finished())
-                return false;
-            if (EncodedFileItems != null && EncodedFileItems.Any(f => !f.Finished()))
-                return false;
-            if (OverlayFileItem != null && !OverlayFileItem.Finished())
-                return false;
-            if (SubtitleFileItem != null && !SubtitleFileItem.Finished())
-                return false;
-            return true;
+            return GetAllFile().All(f => f.Finished());
         }
 
-        public DateTime LastActivityDateTime => Tools.Max(CreationDate
-            , SourceFileItem?.LastActivityDateTime??DateTime.MinValue
-            , SpriteVideoFileItem?.LastActivityDateTime??DateTime.MinValue
-            , EncodedFileItems?.Max(e => e.LastActivityDateTime)??DateTime.MinValue
-            , OverlayFileItem?.LastActivityDateTime??DateTime.MinValue
-            , SubtitleFileItem?.LastActivityDateTime??DateTime.MinValue
-        );
+        public DateTime LastActivityDateTime => Tools.Max(CreationDate, GetAllFile().Max(f => f.LastActivityDateTime));
     }
 }

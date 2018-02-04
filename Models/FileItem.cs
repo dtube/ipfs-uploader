@@ -80,6 +80,7 @@ namespace Uploader.Models
         {
             FileContainer = fileContainer;
             FilesToDelete = new List<string>();
+            CreationDate = DateTime.UtcNow;
             SetSourceFilePath(sourceFilePath);
             TypeFile = typeFile;
             switch(typeFile){
@@ -99,6 +100,11 @@ namespace Uploader.Models
             }
         }
 
+        public DateTime CreationDate
+        {
+            get;
+        }
+
         public TypeFile TypeFile
         {
             get;
@@ -106,12 +112,7 @@ namespace Uploader.Models
 
         public bool IsSource => TypeFile == TypeFile.SourceVideo || TypeFile == TypeFile.SourceImage;
 
-        public DateTime LastActivityDateTime => Tools.Max(
-            AudioCpuEncodeProcess?.LastActivityDateTime??DateTime.MinValue,
-            VideoGpuEncodeProcess?.LastActivityDateTime??DateTime.MinValue,
-            AudioVideoCpuEncodeProcess?.LastActivityDateTime??DateTime.MinValue,
-            SpriteEncodeProcess?.LastActivityDateTime??DateTime.MinValue,
-            IpfsProcess?.LastActivityDateTime??DateTime.MinValue);
+        public DateTime LastActivityDateTime => Tools.Max(CreationDate, GetAllProcess().Max(p => p.LastActivityDateTime));
 
         public long? FileSize { get; private set; }
 
@@ -271,47 +272,35 @@ namespace Uploader.Models
             }
         }
 
-        public void Cancel(string message)
+        private IEnumerable<ProcessItem> GetAllProcess()
         {
-            if (IpfsProcess != null && IpfsProcess.Unstarted() && !IpfsProcess.CantCascadeCancel)
-                IpfsProcess.CancelUnstarted(message);
+            if(IpfsProcess != null)
+                yield return IpfsProcess;
 
-            if (AudioCpuEncodeProcess != null && AudioCpuEncodeProcess.Unstarted() && !AudioCpuEncodeProcess.CantCascadeCancel)
-                AudioCpuEncodeProcess.CancelUnstarted(message);
+            if(AudioCpuEncodeProcess != null)
+                yield return AudioCpuEncodeProcess;
 
-            if (AudioVideoCpuEncodeProcess != null && AudioVideoCpuEncodeProcess.Unstarted() && !AudioVideoCpuEncodeProcess.CantCascadeCancel)
-                AudioVideoCpuEncodeProcess.CancelUnstarted(message);
+            if(AudioVideoCpuEncodeProcess != null)
+                yield return AudioVideoCpuEncodeProcess;
 
-            if (VideoGpuEncodeProcess != null && VideoGpuEncodeProcess.Unstarted() && !VideoGpuEncodeProcess.CantCascadeCancel)
-                VideoGpuEncodeProcess.CancelUnstarted(message);
+            if(VideoGpuEncodeProcess != null)
+                yield return VideoGpuEncodeProcess;
 
-            if (SpriteEncodeProcess != null && SpriteEncodeProcess.Unstarted() && !SpriteEncodeProcess.CantCascadeCancel)
-                SpriteEncodeProcess.CancelUnstarted(message);
+            if(SpriteEncodeProcess != null)
+                yield return SpriteEncodeProcess;
         }
 
-        public void CleanFiles()
+        public void Cancel(string message)
         {
-            TempFileManager.SafeDeleteTempFiles(FilesToDelete.ToArray());
+            foreach (ProcessItem item in GetAllProcess().Where(p => p.Unstarted() && !p.CantCascadeCancel))
+            {
+                item.CancelUnstarted(message);
+            }
         }
 
         public bool Finished()
         {
-            if (IpfsProcess != null && !IpfsProcess.Finished())
-                return false;
-
-            if (AudioCpuEncodeProcess != null && !AudioCpuEncodeProcess.Finished())
-                return false;
-
-            if (AudioVideoCpuEncodeProcess != null && !AudioVideoCpuEncodeProcess.Finished())
-                return false;
-
-            if (VideoGpuEncodeProcess != null && !VideoGpuEncodeProcess.Finished())
-                return false;
-
-            if (SpriteEncodeProcess != null && !SpriteEncodeProcess.Finished())
-                return false;
-
-            return true;
+            return GetAllProcess().All(p => p.Finished());
         }
     }
 }
