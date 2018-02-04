@@ -16,17 +16,18 @@ namespace Uploader.Managers.Front
             FileContainer fileContainer = FileContainer.NewSubtitleContainer();
             string outputfilePath = Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".vtt");
 
-            if (!isValidVTT(text))
+            if (!IsValidVTT(text))
                 return fileContainer.ProgressToken;
 
             try
             {
                 await System.IO.File.WriteAllTextAsync(outputfilePath, text);
-                fileContainer.SubtitleFileItem.OutputFilePath = outputfilePath;
+                fileContainer.SubtitleFileItem.SetOutputFilePath(outputfilePath);
                 IpfsDaemon.Instance.Queue(fileContainer.SubtitleFileItem);
             }
             catch(Exception ex)
-            {                
+            {
+                TempFileManager.SafeDeleteTempFile(outputfilePath);
                 LogManager.AddSubtitleMessage(ex.ToString(), "Exception");
                 return fileContainer.ProgressToken;
             }
@@ -34,7 +35,7 @@ namespace Uploader.Managers.Front
             return fileContainer.ProgressToken;
         }
 
-        private static bool isValidVTT(string text)
+        private static bool IsValidVTT(string text)
         {
             Debug.WriteLine(text);
             if (!text.StartsWith("WEBVTT"))

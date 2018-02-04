@@ -13,7 +13,7 @@ namespace Uploader.Managers.Front
 {
     public static class ProgressManager
     {
-        public static string Version => "0.6.7";
+        public static string Version => "0.6.8";
 
         private static ConcurrentDictionary<Guid, FileContainer> progresses = new ConcurrentDictionary<Guid, FileContainer>();
 
@@ -41,6 +41,7 @@ namespace Uploader.Managers.Front
                 var listSpriteCreated = new List<FileItem>();
                 var listIpfsAdded = new List<FileItem>();
 
+                listVideoEncoded.AddRange(list.Select(l => l.SourceFileItem));
                 listIpfsAdded.AddRange(list.Select(l => l.SourceFileItem));
 
                 var listSpriteFiles = list.Where(l => l.SpriteVideoFileItem != null).Select(l => l.SpriteVideoFileItem).ToList();
@@ -79,7 +80,9 @@ namespace Uploader.Managers.Front
         {
                 return new
                 {
-                    videoToEncode = EncodeDaemon.Instance.CurrentWaitingInQueue,
+                    audioCpuToEncode = AudioCpuEncodeDaemon.Instance.CurrentWaitingInQueue,
+                    videoGpuToEncode = VideoGpuEncodeDaemon.Instance.CurrentWaitingInQueue,
+                    audioVideoCpuToEncode = AudioVideoCpuEncodeDaemon.Instance.CurrentWaitingInQueue,
                     spriteToCreate = SpriteDaemon.Instance.CurrentWaitingInQueue,
                     ipfsToAdd = IpfsDaemon.Instance.CurrentWaitingInQueue
                 };
@@ -89,20 +92,22 @@ namespace Uploader.Managers.Front
         {
             return new
             {
-                videoEncodeLast24h = GetEncodeStats(listVideoEncoded.Where(f => f.EncodeProcess.CurrentStep == step).ToList()),
-                spriteCreationLast24h = GetEncodeStats(listSpriteCreated.Where(f => f.EncodeProcess.CurrentStep == step).ToList()),
+                audioCpuEncodeLast24h = GetAudioCpuEncodeStats(listVideoEncoded.Where(f => f.AudioCpuEncodeProcess.CurrentStep == step).ToList()),
+                videoGpuEncodeLast24h = GetVideoGpuEncodeStats(listVideoEncoded.Where(f => f.VideoGpuEncodeProcess.CurrentStep == step).ToList()),
+                audioVideoCpuEncodeLast24h = GetAudioVideoCpuEncodeStats(listVideoEncoded.Where(f => f.AudioVideoCpuEncodeProcess.CurrentStep == step).ToList()),
+                spriteCreationLast24h = GetSpriteEncodeStats(listSpriteCreated.Where(f => f.SpriteEncodeProcess.CurrentStep == step).ToList()),
                 ipfsAddLast24h = GetIpfsStats(listIpfsAdded.Where(f => f.IpfsProcess.CurrentStep == step).ToList())
             };
         }
 
-        private static dynamic GetEncodeStats(List<FileItem> fileItems)
+        private static dynamic GetAudioCpuEncodeStats(List<FileItem> fileItems)
         {
             return new
                 {
                     nb = fileItems.Count,
                     waitingInQueue = GetInfo(fileItems
-                        .Where(f => f.EncodeProcess.OriginWaitingPositionInQueue > 0)
-                        .Select(f => (long)f.EncodeProcess.OriginWaitingPositionInQueue)
+                        .Where(f => f.AudioCpuEncodeProcess.OriginWaitingPositionInQueue > 0)
+                        .Select(f => (long)f.AudioCpuEncodeProcess.OriginWaitingPositionInQueue)
                         .ToList()),
                     sourceDuration = GetTimeInfo(fileItems
                         .Where(f => f.FileContainer.SourceFileItem.VideoDuration.HasValue)
@@ -117,12 +122,108 @@ namespace Uploader.Managers.Front
                         .Select(f => f.FileSize.Value)
                         .ToList()),
                     waitingTime = GetTimeInfo(fileItems
-                        .Where(f => f.EncodeProcess.WaitingTime.HasValue)
-                        .Select(f => f.EncodeProcess.WaitingTime.Value)
+                        .Where(f => f.AudioCpuEncodeProcess.WaitingTime.HasValue)
+                        .Select(f => f.AudioCpuEncodeProcess.WaitingTime.Value)
                         .ToList()),
                     processTime = GetTimeInfo(fileItems
-                        .Where(f => f.EncodeProcess.ProcessTime.HasValue)
-                        .Select(f => f.EncodeProcess.ProcessTime.Value)
+                        .Where(f => f.AudioCpuEncodeProcess.ProcessTime.HasValue)
+                        .Select(f => f.AudioCpuEncodeProcess.ProcessTime.Value)
+                        .ToList())
+                };
+        }
+
+        private static dynamic GetVideoGpuEncodeStats(List<FileItem> fileItems)
+        {
+            return new
+                {
+                    nb = fileItems.Count,
+                    waitingInQueue = GetInfo(fileItems
+                        .Where(f => f.VideoGpuEncodeProcess.OriginWaitingPositionInQueue > 0)
+                        .Select(f => (long)f.VideoGpuEncodeProcess.OriginWaitingPositionInQueue)
+                        .ToList()),
+                    sourceDuration = GetTimeInfo(fileItems
+                        .Where(f => f.FileContainer.SourceFileItem.VideoDuration.HasValue)
+                        .Select(f => (long)f.FileContainer.SourceFileItem.VideoDuration.Value)
+                        .ToList()),
+                    sourceFileSize = GetFileSizeInfo(fileItems
+                        .Where(f => f.FileContainer.SourceFileItem.FileSize.HasValue)
+                        .Select(f => (long)f.FileContainer.SourceFileItem.FileSize.Value)
+                        .ToList()),                        
+                    fileSize = GetFileSizeInfo(fileItems
+                        .Where(f => f.FileSize.HasValue)
+                        .Select(f => f.FileSize.Value)
+                        .ToList()),
+                    waitingTime = GetTimeInfo(fileItems
+                        .Where(f => f.VideoGpuEncodeProcess.WaitingTime.HasValue)
+                        .Select(f => f.VideoGpuEncodeProcess.WaitingTime.Value)
+                        .ToList()),
+                    processTime = GetTimeInfo(fileItems
+                        .Where(f => f.VideoGpuEncodeProcess.ProcessTime.HasValue)
+                        .Select(f => f.VideoGpuEncodeProcess.ProcessTime.Value)
+                        .ToList())
+                };
+        }
+
+        private static dynamic GetAudioVideoCpuEncodeStats(List<FileItem> fileItems)
+        {
+            return new
+                {
+                    nb = fileItems.Count,
+                    waitingInQueue = GetInfo(fileItems
+                        .Where(f => f.AudioVideoCpuEncodeProcess.OriginWaitingPositionInQueue > 0)
+                        .Select(f => (long)f.AudioVideoCpuEncodeProcess.OriginWaitingPositionInQueue)
+                        .ToList()),
+                    sourceDuration = GetTimeInfo(fileItems
+                        .Where(f => f.FileContainer.SourceFileItem.VideoDuration.HasValue)
+                        .Select(f => (long)f.FileContainer.SourceFileItem.VideoDuration.Value)
+                        .ToList()),
+                    sourceFileSize = GetFileSizeInfo(fileItems
+                        .Where(f => f.FileContainer.SourceFileItem.FileSize.HasValue)
+                        .Select(f => (long)f.FileContainer.SourceFileItem.FileSize.Value)
+                        .ToList()),                        
+                    fileSize = GetFileSizeInfo(fileItems
+                        .Where(f => f.FileSize.HasValue)
+                        .Select(f => f.FileSize.Value)
+                        .ToList()),
+                    waitingTime = GetTimeInfo(fileItems
+                        .Where(f => f.AudioVideoCpuEncodeProcess.WaitingTime.HasValue)
+                        .Select(f => f.AudioVideoCpuEncodeProcess.WaitingTime.Value)
+                        .ToList()),
+                    processTime = GetTimeInfo(fileItems
+                        .Where(f => f.AudioVideoCpuEncodeProcess.ProcessTime.HasValue)
+                        .Select(f => f.AudioVideoCpuEncodeProcess.ProcessTime.Value)
+                        .ToList())
+                };
+        }
+
+        private static dynamic GetSpriteEncodeStats(List<FileItem> fileItems)
+        {
+            return new
+                {
+                    nb = fileItems.Count,
+                    waitingInQueue = GetInfo(fileItems
+                        .Where(f => f.SpriteEncodeProcess.OriginWaitingPositionInQueue > 0)
+                        .Select(f => (long)f.SpriteEncodeProcess.OriginWaitingPositionInQueue)
+                        .ToList()),
+                    sourceDuration = GetTimeInfo(fileItems
+                        .Where(f => f.FileContainer.SourceFileItem.VideoDuration.HasValue)
+                        .Select(f => (long)f.FileContainer.SourceFileItem.VideoDuration.Value)
+                        .ToList()),
+                    sourceFileSize = GetFileSizeInfo(fileItems
+                        .Where(f => f.FileContainer.SourceFileItem.FileSize.HasValue)
+                        .Select(f => (long)f.FileContainer.SourceFileItem.FileSize.Value)
+                        .ToList()),                        
+                    fileSize = GetFileSizeInfo(fileItems
+                        .Where(f => f.FileSize.HasValue)
+                        .Select(f => f.FileSize.Value)
+                        .ToList()),
+                    waitingTime = GetTimeInfo(fileItems
+                        .Where(f => f.SpriteEncodeProcess.WaitingTime.HasValue)
+                        .Select(f => f.SpriteEncodeProcess.WaitingTime.Value)
+                        .ToList()),
+                    processTime = GetTimeInfo(fileItems
+                        .Where(f => f.SpriteEncodeProcess.ProcessTime.HasValue)
+                        .Select(f => f.SpriteEncodeProcess.ProcessTime.Value)
                         .ToList())
                 };
         }
@@ -206,7 +307,7 @@ namespace Uploader.Managers.Front
             progresses.TryGetValue(progressToken, out fileContainer);
 
             if(fileContainer != null)
-                fileContainer.LastTimeProgressRequested = DateTime.UtcNow;
+                fileContainer.UpdateLastTimeProgressRequest();
 
             return fileContainer;
         }
@@ -219,7 +320,7 @@ namespace Uploader.Managers.Front
                 .FirstOrDefault();
 
             if(fileContainer != null)
-                fileContainer.LastTimeProgressRequested = DateTime.UtcNow;
+                fileContainer.UpdateLastTimeProgressRequest();
             
             return fileContainer;
         }

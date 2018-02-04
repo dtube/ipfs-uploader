@@ -9,7 +9,7 @@ namespace Uploader.Managers.Front
 {
     public static class VideoManager
     {
-        public static Guid ComputeVideo(string sourceFilePath, string videoEncodingFormats, bool? sprite)
+        public static Guid ComputeVideo(string originFilePath, string videoEncodingFormats, bool? sprite)
         {
             VideoSize[] formats = new VideoSize[0];
 
@@ -36,28 +36,24 @@ namespace Uploader.Managers.Front
                     .ToArray();
             }
 
-            FileContainer fileContainer = FileContainer.NewVideoContainer(sourceFilePath, formats);
+            FileContainer fileContainer = FileContainer.NewVideoContainer(originFilePath, sprite??false, formats);
 
-            fileContainer.SourceFileItem.OutputFilePath = fileContainer.SourceFileItem.SourceFilePath;
-            IpfsDaemon.Instance.Queue(fileContainer.SourceFileItem);
-
-            // si sprite demandé
-            if (sprite??false)
+            if(IpfsSettings.AddVideoSource)
             {
-                fileContainer.AddSpriteVideo();
+                IpfsDaemon.Instance.Queue(fileContainer.SourceFileItem);
             }
 
             if(VideoSettings.GpuEncodeMode)
             {
-                // encoding audio de la source puis ça sera encoding videos puis sprite
-                EncodeDaemon.Instance.Queue(fileContainer.SourceFileItem);
+                // encoding audio de la source puis ça sera encoding videos Gpu
+                AudioCpuEncodeDaemon.Instance.Queue(fileContainer.SourceFileItem, "waiting audio encoding...");
             }
             else
             {
                 // si encoding est demandé, et gpuMode -> encodingAudio
                 foreach (FileItem file in fileContainer.EncodedFileItems)
                 {
-                    EncodeDaemon.Instance.Queue(file, "Waiting encode...");
+                    AudioVideoCpuEncodeDaemon.Instance.Queue(file, "Waiting encode...");
                 }
             }
 

@@ -25,10 +25,10 @@ namespace Uploader.Managers.Video
         protected override void ProcessItem(FileItem fileItem)
         {
             // si le client a pas demandé le progress depuis plus de 20s, annuler l'opération
-            if ((DateTime.UtcNow - fileItem.FileContainer.LastTimeProgressRequested).TotalSeconds > FrontSettings.MaxGetProgressCanceled)
+            if (!fileItem.SpriteEncodeProcess.CanProcess())
             {
                 LogManager.AddSpriteMessage("SourceFileName " + Path.GetFileName(fileItem.SourceFilePath) + " car dernier getProgress a dépassé 20s", "Annulation");
-                fileItem.CancelEncode();
+                fileItem.SpriteEncodeProcess.CancelCascade();
                 return;
             }
 
@@ -40,12 +40,12 @@ namespace Uploader.Managers.Video
         protected override void LogException(FileItem fileItem, Exception ex)
         {
             LogManager.AddSpriteMessage(ex.ToString(), "Exception non gérée");                        
-            fileItem.SetEncodeErrorMessage("Exception non gérée");
+            fileItem.SpriteEncodeProcess.SetErrorMessage("Exception non gérée");
         }
 
         public void Queue(FileItem fileItem, string messageIpfs)
         {
-            base.Queue(fileItem, fileItem.EncodeProcess);
+            base.Queue(fileItem, fileItem.SpriteEncodeProcess);
 
             fileItem.IpfsProcess.SetProgress(messageIpfs, true);
         }

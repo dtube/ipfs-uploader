@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 using Uploader.Managers.Common;
 
@@ -6,11 +7,24 @@ namespace Uploader.Models
 {
     public class ProcessItem
     {
-        public ProcessItem()
+        public ProcessItem(FileItem fileItem)
         {
             CurrentStep = ProcessStep.Init;
+            FileItem = fileItem;
         }
 
+        public FileItem FileItem
+        {
+            get;
+            private set;
+        }
+
+        public bool CantCascadeCancel
+        {
+            get;
+            set;
+        }
+        
         /// <summary>
         /// Date d'inscription dans la queue à son enregistrement
         /// </summary>
@@ -116,8 +130,50 @@ namespace Uploader.Models
             CurrentStep = ProcessStep.Waiting;
         }
 
-        public void Cancel()
+        public bool WorkInProgress()
         {
+            return CurrentStep == ProcessStep.Waiting || CurrentStep == ProcessStep.Started;
+        }
+
+        public bool Unstarted()
+        {
+            return CurrentStep == ProcessStep.Init || CurrentStep == ProcessStep.Waiting;
+        }
+
+        public bool Finished()
+        {
+            return CurrentStep == ProcessStep.Success || CurrentStep == ProcessStep.Error || CurrentStep == ProcessStep.Canceled;
+        }
+
+        public bool CanProcess()
+        {
+            return !FileItem.FileContainer.MustAbort() && CurrentStep == ProcessStep.Waiting;
+        }
+
+        public void CancelCascade()
+        {
+            CancelStarted();
+            FileItem.FileContainer.CancelAll();
+        }
+
+        public void CancelStarted()
+        {
+            if(CurrentStep != ProcessStep.Started)
+                return;
+                
+            Cancel();
+        }
+
+        public void CancelUnstarted()
+        {
+            if(!Unstarted())
+                return;
+                
+            Cancel();
+        }
+
+        private void Cancel()
+        {               
             Progress = null;
             LastTimeProgressChanged = null;
             
@@ -146,6 +202,8 @@ namespace Uploader.Models
 
             EndProcess = DateTime.UtcNow;
             CurrentStep = ProcessStep.Error;
+
+            FileItem.FileContainer.CancelAll();
         }
         
         public void EndProcessDateTime()

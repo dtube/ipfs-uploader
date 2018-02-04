@@ -33,7 +33,7 @@ namespace Uploader.Managers.Front
                 processStartInfo.FileName = Path.Combine(FrontSettings.ImageMagickPath, "convert");
                 processStartInfo.Arguments = $"{Path.GetFileName(sourceFile.SourceFilePath)} -resize \"{_finalWidth}x{_finalHeight}^\" -gravity Center -crop {_finalWidth}x{_finalHeight}+0+0 {Path.GetFileName(sourceFile.TempFilePath)}";
                 StartProcess(processStartInfo, 5000);                
-                sourceFile.OutputFilePath = sourceFile.TempFilePath;
+                sourceFile.SetOutputFilePath(sourceFile.TempFilePath);
                 LogManager.AddOverlayMessage("OutputFileName " + Path.GetFileName(sourceFile.OutputFilePath), "End Crop");
                 IpfsDaemon.Instance.Queue(sourceFile);
             }
@@ -48,10 +48,10 @@ namespace Uploader.Managers.Front
             // remplacement de l'image source
             string oldSourceFilePath = sourceFile.SourceFilePath;
             TempFileManager.SafeDeleteTempFile(oldSourceFilePath);
-            sourceFile.SourceFilePath = sourceFile.TempFilePath;
+            sourceFile.SetSourceFilePath(sourceFile.TempFilePath);
 
             // changement de la source de OverlayFileItem
-            fileContainer.OverlayFileItem.SourceFilePath = sourceFile.SourceFilePath;
+            fileContainer.OverlayFileItem.SetSourceFilePath(sourceFile.SourceFilePath);
 
             try
             {
@@ -60,7 +60,7 @@ namespace Uploader.Managers.Front
                 processStartInfo.FileName = Path.Combine(FrontSettings.ImageMagickPath, "composite");
                 processStartInfo.Arguments = $"-gravity NorthEast {_overlayImagePath} {Path.GetFileName(fileContainer.OverlayFileItem.SourceFilePath)} {Path.GetFileName(fileContainer.OverlayFileItem.TempFilePath)}";
                 StartProcess(processStartInfo, 5000);
-                fileContainer.OverlayFileItem.OutputFilePath = fileContainer.OverlayFileItem.TempFilePath;
+                fileContainer.OverlayFileItem.SetOutputFilePath(fileContainer.OverlayFileItem.TempFilePath);
                 LogManager.AddOverlayMessage("OutputFileName " + Path.GetFileName(fileContainer.OverlayFileItem.OutputFilePath), "End Overlay");
                 IpfsDaemon.Instance.Queue(fileContainer.OverlayFileItem);
             }

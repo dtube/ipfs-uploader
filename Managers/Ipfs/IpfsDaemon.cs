@@ -24,22 +24,21 @@ namespace Uploader.Managers.Ipfs
         protected override void ProcessItem(FileItem fileItem)
         {
             // Si le client a pas demandé le progress depuis moins de 20s, annuler l'opération
-            if((DateTime.UtcNow - fileItem.FileContainer.LastTimeProgressRequested).TotalSeconds > FrontSettings.MaxGetProgressCanceled)
+            if (!fileItem.IpfsProcess.CanProcess())
             {                            
                 LogManager.AddIpfsMessage("FileName " + Path.GetFileName(fileItem.OutputFilePath) + " car dernier getProgress a dépassé 20s", "Annulation");
-                fileItem.CancelIpfs();
+                fileItem.IpfsProcess.CancelStarted();
                 return;                
             }
 
             // Ipfs add file
             IpfsAddManager.Add(fileItem);
-            fileItem.CleanFiles();
         }
 
         protected override void LogException(FileItem fileItem, Exception ex)
         {
             LogManager.AddIpfsMessage(ex.ToString(), "Exception non gérée");
-            fileItem.SetIpfsErrorMessage("Exception non gérée");
+            fileItem.IpfsProcess.SetErrorMessage("Exception non gérée");
         }
 
         public void Queue(FileItem fileItem)

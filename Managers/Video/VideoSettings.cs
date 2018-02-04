@@ -20,7 +20,7 @@ namespace Uploader.Managers.Video
         /// <summary>
         /// minutes
         /// </summary>
-        public static int MaxVideoDurationForEncoding => 20 * 60; // 20 minutes max pour encoder une vidéo
+        public static int MaxVideoDurationForEncoding => 30 * 60; // 30 minutes max pour encoder une vidéo
 
         /// <summary>
         /// 
@@ -36,7 +36,7 @@ namespace Uploader.Managers.Video
         /// encoding audio puis encoding video 1:N formats
         /// </summary>
         /// <returns></returns>
-        public static bool GpuEncodeMode => false;
+        public static bool GpuEncodeMode => true;
 
         /// <summary>
         /// 
@@ -46,6 +46,16 @@ namespace Uploader.Managers.Video
         /// <summary>
         /// 
         /// </summary>
-        public static int NbEncodeDaemon => 1;
+        public static int NbAudioCpuEncodeDaemon => 1;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public static int NbVideoGpuEncodeDaemon => 1;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public static int NbAudioVideoCpuEncodeDaemon => 1;
     }
 }

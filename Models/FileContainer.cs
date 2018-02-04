@@ -23,29 +23,26 @@ namespace Uploader.Models
 
         public string OriginFilePath { get; }
 
-        public static FileContainer NewVideoContainer(string originFilePath, params VideoSize[] videoSizes)
+        public static FileContainer NewVideoContainer(string originFilePath, bool sprite, params VideoSize[] videoSizes)
         {
             FileContainer fileContainer = new FileContainer(TypeContainer.Video, originFilePath);
 
             fileContainer.SourceFileItem = FileItem.NewSourceVideoFileItem(fileContainer);
 
-            fileContainer.EncodedFileItems = new List<FileItem>();
-            foreach (VideoSize videoSize in videoSizes)
+            // si sprite demandé
+            if (sprite)
             {
-                fileContainer.EncodedFileItems.Add(FileItem.NewEncodedVideoFileItem(fileContainer, videoSize));
+                fileContainer.SpriteVideoFileItem = FileItem.NewSpriteVideoFileItem(fileContainer);
             }
 
+            var list = new List<FileItem>();
+            foreach (VideoSize videoSize in videoSizes)
+            {
+                list.Add(FileItem.NewEncodedVideoFileItem(fileContainer, videoSize));
+            }
+            fileContainer.EncodedFileItems = list;
+
             return fileContainer;
-        }
-
-        public void AddSpriteVideo()
-        {
-            SpriteVideoFileItem = FileItem.NewSpriteVideoFileItem(this);
-        }
-
-        public void DeleteSpriteVideo()
-        {
-            SpriteVideoFileItem = null;
         }
 
         public static FileContainer NewOverlayContainer(string originFilePath)
@@ -77,7 +74,7 @@ namespace Uploader.Models
             ProgressToken = Guid.NewGuid();
             ProgressManager.RegisterProgress(this);
 
-            LastTimeProgressRequested = DateTime.UtcNow;
+            UpdateLastTimeProgressRequest();
         }
 
         public Guid ProgressToken
@@ -88,7 +85,12 @@ namespace Uploader.Models
         public DateTime LastTimeProgressRequested
         {
             get;
-            set;
+            private set;
+        }
+
+        public void UpdateLastTimeProgressRequest()
+        {
+            LastTimeProgressRequested = DateTime.UtcNow;
         }
 
         public TypeContainer TypeContainer
@@ -108,7 +110,7 @@ namespace Uploader.Models
             private set;
         }
 
-        public IList<FileItem> EncodedFileItems
+        public IReadOnlyList<FileItem> EncodedFileItems
         {
             get;
             private set;
@@ -126,19 +128,59 @@ namespace Uploader.Models
             private set;
         }
 
-        public bool WorkInProgress()
+        public bool MustAbort()
         {
-            if (SourceFileItem.WorkInProgress())
-                return true;
-            if (SpriteVideoFileItem != null && SpriteVideoFileItem.WorkInProgress())
-                return true;
-            if (EncodedFileItems != null && EncodedFileItems.Any(f => f.WorkInProgress()))
-                return true;
-            if (OverlayFileItem != null && OverlayFileItem.WorkInProgress())
-                return true;
-            if (SubtitleFileItem != null && SubtitleFileItem.WorkInProgress())
-                return true;
-            return false;
+            return (DateTime.UtcNow - LastTimeProgressRequested).TotalSeconds > FrontSettings.MaxGetProgressCanceled;
+        }
+        
+        public void CancelAll()
+        {
+            SourceFileItem.Cancel();
+            SpriteVideoFileItem?.Cancel();
+            if(EncodedFileItems != null)
+            {
+                foreach (FileItem fileItem in EncodedFileItems)
+                {
+                    fileItem.Cancel();
+                }
+            }
+            OverlayFileItem?.Cancel();
+            SubtitleFileItem?.Cancel();
+        }
+
+        public void CleanFilesIfEnd()
+        {
+            if(!Finished())
+                return;
+
+            SourceFileItem.CleanFiles();
+            SpriteVideoFileItem?.CleanFiles();
+            if(EncodedFileItems != null)
+            {
+                foreach (FileItem fileItem in EncodedFileItems)
+                {
+                    fileItem.CleanFiles();
+                }
+            }
+            OverlayFileItem?.CleanFiles();
+            SubtitleFileItem?.CleanFiles();
+
+            TempFileManager.SafeDeleteTempFile(OriginFilePath);
+        }
+
+        public bool Finished()
+        {
+            if (!SourceFileItem.Finished())
+                return false;
+            if (SpriteVideoFileItem != null && !SpriteVideoFileItem.Finished())
+                return false;
+            if (EncodedFileItems != null && EncodedFileItems.Any(f => !f.Finished()))
+                return false;
+            if (OverlayFileItem != null && !OverlayFileItem.Finished())
+                return false;
+            if (SubtitleFileItem != null && !SubtitleFileItem.Finished())
+                return false;
+            return true;
         }
 
         public DateTime LastActivityDateTime => Tools.Max(CreationDate

@@ -1,7 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 using Uploader.Managers.Common;
+using Uploader.Managers.Ipfs;
 using Uploader.Managers.Video;
 
 namespace Uploader.Models
@@ -12,9 +15,19 @@ namespace Uploader.Models
         {
             FileItem fileItem = new FileItem(fileContainer, fileContainer.OriginFilePath, TypeFile.SourceVideo);
             fileItem.VideoSize = VideoSize.Source;
+            fileItem.InfoSourceProcess = new ProcessItem(fileItem);
+
             if(VideoSettings.GpuEncodeMode)
-                fileItem.EncodeProcess = new ProcessItem();
-            fileItem.IpfsProcess = new ProcessItem();
+            {
+                fileItem.AudioCpuEncodeProcess = new ProcessItem(fileItem);
+                fileItem.VideoGpuEncodeProcess = new ProcessItem(fileItem);
+            }
+
+            if(IpfsSettings.AddVideoSource)
+            {
+                fileItem.AddIpfsProcess(fileItem.SourceFilePath);
+            }
+
             return fileItem;
         }
 
@@ -25,8 +38,11 @@ namespace Uploader.Models
 
             FileItem fileItem = new FileItem(fileContainer, fileContainer.SourceFileItem.SourceFilePath, TypeFile.EncodedVideo);
             fileItem.VideoSize = videoSize;
-            fileItem.EncodeProcess = new ProcessItem();
-            fileItem.IpfsProcess = new ProcessItem();
+            if(!VideoSettings.GpuEncodeMode)
+            {
+                fileItem.AudioVideoCpuEncodeProcess = new ProcessItem(fileItem);                
+            }
+            fileItem.IpfsProcess = new ProcessItem(fileItem);
             return fileItem;
         }
 
@@ -34,50 +50,51 @@ namespace Uploader.Models
         {
             FileItem fileItem = new FileItem(fileContainer, fileContainer.OriginFilePath, TypeFile.SpriteVideo);
             fileItem.VideoSize = VideoSize.Source;
-            fileItem.EncodeProcess = new ProcessItem();
-            fileItem.IpfsProcess = new ProcessItem();
+            fileItem.SpriteEncodeProcess = new ProcessItem(fileItem);
+            fileItem.IpfsProcess = new ProcessItem(fileItem);
             return fileItem;
         }
 
         public static FileItem NewSourceImageFileItem(FileContainer fileContainer)
         {
             FileItem fileItem = new FileItem(fileContainer, fileContainer.OriginFilePath, TypeFile.SourceImage);
-            fileItem.IpfsProcess = new ProcessItem();
+            fileItem.IpfsProcess = new ProcessItem(fileItem);
             return fileItem;
         }
 
         public static FileItem NewOverlayImageFileItem(FileContainer fileContainer)
         {
             FileItem fileItem = new FileItem(fileContainer, fileContainer.SourceFileItem.SourceFilePath, TypeFile.OverlayImage);
-            fileItem.IpfsProcess = new ProcessItem();
+            fileItem.IpfsProcess = new ProcessItem(fileItem);
             return fileItem;
         }
 
         public static FileItem NewSubtitleFileItem(FileContainer fileContainer)
         {
             FileItem fileItem = new FileItem(fileContainer, null, TypeFile.SubtitleText);
-            fileItem.IpfsProcess = new ProcessItem();
+            fileItem.IpfsProcess = new ProcessItem(fileItem);
             return fileItem;
         }
 
         private FileItem(FileContainer fileContainer, string sourceFilePath, TypeFile typeFile)
         {
             FileContainer = fileContainer;
-            SourceFilePath = sourceFilePath;
+            FilesToDelete = new List<string>();
+            SetSourceFilePath(sourceFilePath);
             TypeFile = typeFile;
             switch(typeFile){
                 case TypeFile.EncodedVideo:
                 case TypeFile.SourceVideo:
-                    TempFilePath = Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".mp4");
+                    SetTempFilePath(Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".mp4"));
                 break;
 
                 case TypeFile.SpriteVideo:
-                    TempFilePath = Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".jpeg");
+                    SetTempFilePath(Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".jpeg"));
                     break;
 
                 case TypeFile.SourceImage:
                 case TypeFile.OverlayImage:
-                    TempFilePath = Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".png");
+                    SetTempFilePath(Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".png"));
                 break;
             }
         }
@@ -89,35 +106,53 @@ namespace Uploader.Models
 
         public bool IsSource => TypeFile == TypeFile.SourceVideo || TypeFile == TypeFile.SourceImage;
 
-        public DateTime LastActivityDateTime => Tools.Max(EncodeProcess?.LastActivityDateTime??DateTime.MinValue, IpfsProcess?.LastActivityDateTime??DateTime.MinValue);
+        public DateTime LastActivityDateTime => Tools.Max(
+            AudioCpuEncodeProcess?.LastActivityDateTime??DateTime.MinValue,
+            VideoGpuEncodeProcess?.LastActivityDateTime??DateTime.MinValue,
+            AudioVideoCpuEncodeProcess?.LastActivityDateTime??DateTime.MinValue,
+            SpriteEncodeProcess?.LastActivityDateTime??DateTime.MinValue,
+            IpfsProcess?.LastActivityDateTime??DateTime.MinValue);
 
-        public long? FileSize
+        public long? FileSize { get; private set; }
+
+        public string OutputFilePath { get { return _outputFilePath; } }
+        private string _outputFilePath;
+
+        public void SetOutputFilePath(string path)
         {
-            get;
-            private set;
+            _outputFilePath = path;
+            FilesToDelete.Add(path);
+
+            if (OutputFilePath != null && File.Exists(OutputFilePath))
+                FileSize = new FileInfo(OutputFilePath).Length;
         }
 
-        public string OutputFilePath
+        public string SourceFilePath { get { return _sourceFilePath; } }
+        private string _sourceFilePath;
+
+        public void SetSourceFilePath(string path)
         {
-            get
-            {
-                return _filePath;
-            }
-            set
-            {
-                _filePath = value;
-
-                if (_filePath != null && File.Exists(_filePath))
-                    FileSize = new FileInfo(_filePath).Length;
-            }
+            _sourceFilePath = path;
+            FilesToDelete.Add(path);
         }
-        private string _filePath;
 
-        public string SourceFilePath { get; set; }
+        public string TempFilePath { get { return _tempFilePath; } }
+        private string _tempFilePath;
 
-        public string TempFilePath { get; set; }
+        public void SetTempFilePath(string path)
+        {
+            _tempFilePath = path;
+            FilesToDelete.Add(path);
+        }
 
-        public string VideoAacTempFilePath { get; set; }
+        public string VideoAacTempFilePath { get { return _videoAacTempFilePath; } }
+        private string _videoAacTempFilePath;
+
+        public void SetVideoAacTempFilePath(string path)
+        {
+            _videoAacTempFilePath = path;
+            FilesToDelete.Add(path);
+        }
 
         public FileContainer FileContainer
         {
@@ -153,12 +188,50 @@ namespace Uploader.Models
         }
 
         /// <summary>
-        /// Encode audio de la source GPUMode
-        /// Encode video des formats demandés (et audio pour CPU mode)
+        /// Récupération durée et résolution de la vidéo source
+        /// </summary>
+        /// <returns></returns>
+        public ProcessItem InfoSourceProcess
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// Encode audio de la source
+        /// </summary>
+        /// <returns></returns>
+        public ProcessItem AudioCpuEncodeProcess
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// Encode video et audi des formats demandés par CPU
+        /// </summary>
+        /// <returns></returns>
+        public ProcessItem AudioVideoCpuEncodeProcess
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// Encode video des formats demandés sans l'audio par GPU
+        /// </summary>
+        /// <returns></returns>
+        public ProcessItem VideoGpuEncodeProcess
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
         /// Sprite création d'une video
         /// </summary>
         /// <returns></returns>
-        public ProcessItem EncodeProcess
+        public ProcessItem SpriteEncodeProcess
         {
             get;
             private set;
@@ -175,65 +248,70 @@ namespace Uploader.Models
             get;
             set;
         }
-        
-        public bool WorkInProgress()
+
+        public IList<string> FilesToDelete { get; private set; }
+
+        public bool SuccessGetSourceInfo()
         {
-            if (IpfsProcess != null)
-                if (IpfsProcess.CurrentStep == ProcessStep.Waiting || IpfsProcess.CurrentStep == ProcessStep.Started)
-                    return true;
+            return (VideoDuration??0) > 0 && (VideoWidth??0) > 0 && (VideoHeight??0) > 0;
+        }
 
-            if (EncodeProcess != null)
-                if(EncodeProcess.CurrentStep == ProcessStep.Waiting || EncodeProcess.CurrentStep == ProcessStep.Started)
-                    return true;
+        public bool HasReachMaxVideoDurationForEncoding()
+        {
+            return VideoDuration.HasValue ? VideoDuration.Value > VideoSettings.MaxVideoDurationForEncoding : false;
+        }
 
-            return false;
+        public void AddIpfsProcess(string sourceFilePath)
+        {
+            if(IpfsProcess == null)
+            {
+                IpfsProcess = new ProcessItem(this);
+                IpfsProcess.CantCascadeCancel = true;
+                SetOutputFilePath(sourceFilePath);
+            }
+        }
+
+        public void Cancel()
+        {
+            if (IpfsProcess != null && IpfsProcess.Unstarted() && !IpfsProcess.CantCascadeCancel)
+                IpfsProcess.CancelUnstarted();
+
+            if (AudioCpuEncodeProcess != null && AudioCpuEncodeProcess.Unstarted() && !AudioCpuEncodeProcess.CantCascadeCancel)
+                AudioCpuEncodeProcess.CancelUnstarted();
+
+            if (AudioVideoCpuEncodeProcess != null && AudioVideoCpuEncodeProcess.Unstarted() && !AudioVideoCpuEncodeProcess.CantCascadeCancel)
+                AudioVideoCpuEncodeProcess.CancelUnstarted();
+
+            if (VideoGpuEncodeProcess != null && VideoGpuEncodeProcess.Unstarted() && !VideoGpuEncodeProcess.CantCascadeCancel)
+                VideoGpuEncodeProcess.CancelUnstarted();
+
+            if (SpriteEncodeProcess != null && SpriteEncodeProcess.Unstarted() && !SpriteEncodeProcess.CantCascadeCancel)
+                SpriteEncodeProcess.CancelUnstarted();
         }
 
         public void CleanFiles()
         {
-            try
-            {
-                if(!IsSource)
-                {
-                    TempFileManager.SafeDeleteTempFile(TempFilePath);
-                    TempFileManager.SafeDeleteTempFile(OutputFilePath);
-                }
-
-                // vérification si on peut supprimer le fichier source
-                if (!FileContainer.WorkInProgress())
-                {
-                    TempFileManager.SafeDeleteTempFile(FileContainer.OriginFilePath);
-                    TempFileManager.SafeDeleteTempFile(FileContainer.SourceFileItem.SourceFilePath);
-                    TempFileManager.SafeDeleteTempFile(FileContainer.SourceFileItem.VideoAacTempFilePath);
-                    TempFileManager.SafeDeleteTempFile(FileContainer.SourceFileItem.TempFilePath);
-                    TempFileManager.SafeDeleteTempFile(FileContainer.SourceFileItem.OutputFilePath);
-                }
-            }
-            catch{}
+            TempFileManager.SafeDeleteTempFiles(FilesToDelete.ToArray());
         }
 
-        public void SetEncodeErrorMessage(string message)
+        public bool Finished()
         {
-            EncodeProcess.SetErrorMessage(message);
-            CancelIpfs();
-        }
+            if (IpfsProcess != null && !IpfsProcess.Finished())
+                return false;
 
-        public void SetIpfsErrorMessage(string message)
-        {
-            IpfsProcess.SetErrorMessage(message);
-            CleanFiles();
-        }
+            if (AudioCpuEncodeProcess != null && !AudioCpuEncodeProcess.Finished())
+                return false;
 
-        public void CancelEncode()
-        {
-            EncodeProcess.Cancel();
-            CancelIpfs();
-        }
+            if (AudioVideoCpuEncodeProcess != null && !AudioVideoCpuEncodeProcess.Finished())
+                return false;
 
-        public void CancelIpfs()
-        {
-            IpfsProcess.Cancel();
-            CleanFiles();
-        }        
+            if (VideoGpuEncodeProcess != null && !VideoGpuEncodeProcess.Finished())
+                return false;
+
+            if (SpriteEncodeProcess != null && !SpriteEncodeProcess.Finished())
+                return false;
+
+            return true;
+        }
     }
 }

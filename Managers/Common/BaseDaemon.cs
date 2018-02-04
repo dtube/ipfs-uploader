@@ -59,6 +59,9 @@ namespace Uploader.Daemons
                         {
                             LogException(fileItem, ex);
                         }
+
+                        // Nettoyer les fichiers au besoin
+                        fileItem.FileContainer.CleanFilesIfEnd();
                     }
                 });
                 daemons.Add(daemon);

@@ -17,13 +17,15 @@ namespace Uploader.Managers.Video
             FileItem sourceFile = fileItem.FileContainer.SourceFileItem;
             try
             {
-                fileItem.EncodeProcess.StartProcessDateTime();
+                fileItem.SpriteEncodeProcess.StartProcessDateTime();
 
                 LogManager.AddSpriteMessage("SourceFilePath " + Path.GetFileName(fileItem.SourceFilePath), "Start Sprite");             
 
                 // Récupérer la durée totale de la vidéo et sa résolution, autorisation sprite creation
-                if(!VideoSourceManager.CheckAndAnalyseSource(fileItem, false))
+                if(!VideoSourceManager.SuccessAnalyseSource(fileItem, true, fileItem.SpriteEncodeProcess))
+                {
                     return false;
+                }
 
                 int nbImages = VideoSettings.NbSpriteImages;
                 int heightSprite = VideoSettings.HeightSpriteImages;
@@ -43,34 +45,32 @@ namespace Uploader.Managers.Video
 
                 // Extract frameRate image/s de la video
                 string arguments = $"-y -i {Path.GetFileName(fileItem.SourceFilePath)} -r {frameRate} -vf {sizeImageMax} -f image2 {GetPattern(fileItem.TempFilePath)}";
-                var ffmpegProcessManager = new FfmpegProcessManager(fileItem);
+                var ffmpegProcessManager = new FfmpegProcessManager(fileItem, fileItem.SpriteEncodeProcess);
                 ffmpegProcessManager.StartProcess(arguments, VideoSettings.EncodeGetImagesTimeout);
                 string[] files = GetListImageFrom(fileItem.TempFilePath); // récupération des images
 
                 LogManager.AddSpriteMessage((files.Length - 1) + " images", "Start Combine images");
                 bool successSprite = CombineBitmap(files.Skip(files.Length - VideoSettings.NbSpriteImages).ToArray(), fileItem.TempFilePath); // création du sprite                                
                 TempFileManager.SafeDeleteTempFiles(files); // suppression des images
-                if(fileItem.SourceFilePath != fileItem.FileContainer.OriginFilePath)
-                    TempFileManager.SafeDeleteTempFile(fileItem.SourceFilePath);
                 if(successSprite)
                 {
-                    fileItem.OutputFilePath = fileItem.TempFilePath;
+                    fileItem.SetOutputFilePath(fileItem.TempFilePath);
                     LogManager.AddSpriteMessage("OutputFileName " + Path.GetFileName(fileItem.OutputFilePath) + " / FileSize " + fileItem.FileSize, "End Sprite");
                 }
                 else
                 {
                     LogManager.AddSpriteMessage("Error while combine images", "Error");
-                    fileItem.SetEncodeErrorMessage("Error creation sprite while combine images");
+                    fileItem.SpriteEncodeProcess.SetErrorMessage("Error creation sprite while combine images");
                     return false;
                 }
 
-                fileItem.EncodeProcess.EndProcessDateTime();
+                fileItem.SpriteEncodeProcess.EndProcessDateTime();
                 return true;
             }
             catch (Exception ex)
             {
-                LogManager.AddSpriteMessage("Video Duration " + sourceFile.VideoDuration + " / FileSize " + fileItem.FileSize + " / Progress " + fileItem.EncodeProcess.Progress + " / Exception : " + ex, "Exception");
-                fileItem.SetEncodeErrorMessage("Exception");
+                LogManager.AddSpriteMessage("Video Duration " + sourceFile.VideoDuration + " / FileSize " + fileItem.FileSize + " / Progress " + fileItem.SpriteEncodeProcess.Progress + " / Exception : " + ex, "Exception");
+                fileItem.SpriteEncodeProcess.SetErrorMessage("Exception");
                 string[] files = GetListImageFrom(fileItem.TempFilePath); // récupération des images
                 TempFileManager.SafeDeleteTempFiles(files); // suppression des images
                 return false;
