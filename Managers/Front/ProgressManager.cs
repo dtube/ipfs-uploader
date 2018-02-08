@@ -13,7 +13,7 @@ namespace Uploader.Managers.Front
 {
     public static class ProgressManager
     {
-        public static string Version => "0.6.8";
+        public static string Version => "0.6.9";
 
         private static ConcurrentDictionary<Guid, FileContainer> progresses = new ConcurrentDictionary<Guid, FileContainer>();
 
@@ -31,7 +31,21 @@ namespace Uploader.Managers.Front
             }
         }
 
-        public static dynamic GetStats()
+        public static dynamic GetStats(bool details)
+        {
+            return details ? GetDetailStats() : GetLightStats();
+        }
+
+        public static dynamic GetLightStats()
+        {
+            return new
+                {
+                    version = Version,
+                    currentWaitingInQueue = GetCurrentWaitingInQueue()
+                };
+        }
+
+        public static dynamic GetDetailStats()
         {
             try
             {
@@ -92,9 +106,9 @@ namespace Uploader.Managers.Front
         {
             return new
             {
-                audioCpuEncodeLast24h = GetAudioCpuEncodeStats(listVideoEncoded.Where(f => f.AudioCpuEncodeProcess.CurrentStep == step).ToList()),
-                videoGpuEncodeLast24h = GetVideoGpuEncodeStats(listVideoEncoded.Where(f => f.VideoGpuEncodeProcess.CurrentStep == step).ToList()),
-                audioVideoCpuEncodeLast24h = GetAudioVideoCpuEncodeStats(listVideoEncoded.Where(f => f.AudioVideoCpuEncodeProcess.CurrentStep == step).ToList()),
+                audioCpuEncodeLast24h = GetAudioCpuEncodeStats(listVideoEncoded.Where(f => f.AudioCpuEncodeProcess != null && f.AudioCpuEncodeProcess.CurrentStep == step).ToList()),
+                videoGpuEncodeLast24h = GetVideoGpuEncodeStats(listVideoEncoded.Where(f => f.VideoGpuEncodeProcess != null && f.VideoGpuEncodeProcess.CurrentStep == step).ToList()),
+                audioVideoCpuEncodeLast24h = GetAudioVideoCpuEncodeStats(listVideoEncoded.Where(f => f.AudioVideoCpuEncodeProcess != null && f.AudioVideoCpuEncodeProcess.CurrentStep == step).ToList()),
                 spriteCreationLast24h = GetSpriteEncodeStats(listSpriteCreated.Where(f => f.SpriteEncodeProcess.CurrentStep == step).ToList()),
                 ipfsAddLast24h = GetIpfsStats(listIpfsAdded.Where(f => f.IpfsProcess.CurrentStep == step).ToList())
             };

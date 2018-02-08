@@ -20,9 +20,9 @@ namespace Uploader.Controllers
     {
         [HttpGet]
         [Route("/getStatus")]
-        public JsonResult GetStatus()
+        public JsonResult GetStatus(bool details = false)
         {
-            return Json(ProgressManager.GetStats());
+            return Json(ProgressManager.GetStats(details));
         }
 
         [HttpGet]
@@ -100,6 +100,7 @@ namespace Uploader.Controllers
             return new
             {
                 progress = fileItem.IpfsProcess.Progress,
+                encodeSize = fileItem.VideoSize.ToString(),
                 hash = fileItem.IpfsHash,
                 lastTimeProgress = fileItem.IpfsProcess.LastTimeProgressChanged,
                 errorMessage = fileItem.IpfsProcess.ErrorMessage,
