@@ -62,6 +62,7 @@ namespace Uploader.Controllers
                 case TypeContainer.Video:
                     return Json(new
                     {
+                        finished = fileContainer.Finished(),
                         sourceAudioCpuEncoding = AudioCpuEncodeResultJson(fileContainer.SourceFileItem),
                         sourceVideoGpuEncoding = VideoGpuEncodeResultJson(fileContainer.SourceFileItem),
                         ipfsAddSourceVideo = IpfsResultJson(fileContainer.SourceFileItem),
