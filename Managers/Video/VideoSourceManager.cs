@@ -10,9 +10,15 @@ namespace Uploader.Managers.Video
 {
     public static class VideoSourceManager
     {
-        public static bool SuccessAnalyseSource(FileItem fileItem, bool spriteMode, ProcessItem processItem)
+        public static bool SuccessAnalyseSource(FileItem sourceFile, bool spriteMode, ProcessItem processItem)
         {
-            FileItem sourceFile = fileItem.FileContainer.SourceFileItem;
+            if(sourceFile == null)
+                throw new ArgumentNullException(nameof(sourceFile));
+            if(sourceFile == null)
+                throw new ArgumentNullException(nameof(sourceFile));
+            if(!sourceFile.IsSource)
+                throw new ArgumentException("Doit être le fichier source", nameof(sourceFile));
+
             // Récupérer la durée totale de la vidéo et sa résolution
             if (!sourceFile.VideoDuration.HasValue)
             {

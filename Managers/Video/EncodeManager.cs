@@ -19,7 +19,7 @@ namespace Uploader.Managers.Video
                 fileItem.AudioVideoCpuEncodeProcess.StartProcessDateTime();
 
                 // Récupérer la durée totale de la vidéo et sa résolution, autorisation encoding
-                if(!VideoSourceManager.SuccessAnalyseSource(fileItem, false, fileItem.AudioVideoCpuEncodeProcess))
+                if(!VideoSourceManager.SuccessAnalyseSource(sourceFile, false, fileItem.AudioVideoCpuEncodeProcess))
                 {
                     return false;
                 }
@@ -53,7 +53,7 @@ namespace Uploader.Managers.Video
                 fileItem.AudioCpuEncodeProcess.StartProcessDateTime();
 
                 // Récupérer la durée totale de la vidéo et sa résolution, autorisation encoding
-                if(!VideoSourceManager.SuccessAnalyseSource(fileItem, false, fileItem.AudioCpuEncodeProcess))
+                if(!VideoSourceManager.SuccessAnalyseSource(fileItem.FileContainer.SourceFileItem, false, fileItem.AudioCpuEncodeProcess))
                 {
                     return false;
                 }
@@ -87,7 +87,7 @@ namespace Uploader.Managers.Video
                 fileItem.VideoGpuEncodeProcess.StartProcessDateTime();
                 
                 // Récupérer la durée totale de la vidéo et sa résolution, autorisation encoding
-                if(!VideoSourceManager.SuccessAnalyseSource(fileItem, false, fileItem.VideoGpuEncodeProcess))
+                if(!VideoSourceManager.SuccessAnalyseSource(fileItem.FileContainer.SourceFileItem, false, fileItem.VideoGpuEncodeProcess))
                 {
                     return false;
                 }
