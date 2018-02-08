@@ -15,6 +15,11 @@ namespace Uploader.Managers.Video
 
         public FfmpegProcessManager(FileItem fileItem, ProcessItem processItem)
         {
+            if(fileItem == null)
+                throw new ArgumentNullException(nameof(fileItem));
+            if(processItem == null)
+                throw new ArgumentNullException(nameof(processItem));
+
             _fileItem = fileItem;
             _processItem = processItem;
         }

@@ -24,7 +24,7 @@ namespace Uploader.Managers.Video
 
                         try
                         {
-                            var ffmpegProcessManager = new FfmpegProcessManager(fileItem, fileItem.InfoSourceProcess);
+                            var ffmpegProcessManager = new FfmpegProcessManager(sourceFile, sourceFile.InfoSourceProcess);
                             string argumentsImage = $"-y -i {Path.GetFileName(sourceFile.SourceFilePath)} -vf fps=1 -vframes 1 {Path.GetFileName(imageOutputPath)}";
                             ffmpegProcessManager.StartProcess(argumentsImage, VideoSettings.EncodeGetOneImageTimeout);
 
