@@ -96,8 +96,8 @@ namespace Uploader.Managers.Video
                 fileItem.VideoGpuEncodeProcess.StartProcessDateTime();
 
                 // encoding video 1:N formats
-                //string arguments = $"-y -hwaccel cuvid -vcodec h264_cuvid -vsync 0 -i {Path.GetFileName(fileItem.VideoAacTempFilePath)}";
-                string arguments = $"-y -i {Path.GetFileName(fileItem.VideoAacTempFilePath)}";
+                string arguments = $"-y -hwaccel cuvid -vcodec h264_cuvid -vsync 0 -i {Path.GetFileName(fileItem.VideoAacTempFilePath)}";
+                //string arguments = $"-y -i {Path.GetFileName(fileItem.VideoAacTempFilePath)}";
                 FileItem sourceFile = fileItem.FileContainer.SourceFileItem;
                 foreach (var item in fileItem.FileContainer.EncodedFileItems)
                 {
@@ -107,8 +107,8 @@ namespace Uploader.Managers.Video
                     if(sourceFile.VideoPixelFormat != "yuv420p")
                         arguments += " -pixel_format yuv420p";
 
-                    //arguments += $" -vf scale_npp={size} -b:v {maxRate} -maxrate {maxRate} -bufsize {maxRate} -vcodec h264_nvenc -acodec copy {Path.GetFileName(item.TempFilePath)}";
-                    arguments += $" -vf scale={size} -b:v {maxRate} -maxrate {maxRate} -bufsize {maxRate} -vcodec h264_nvenc -acodec copy {Path.GetFileName(item.TempFilePath)}";
+                    arguments += $" -vf scale_npp={size} -b:v {maxRate} -maxrate {maxRate} -bufsize {maxRate} -vcodec h264_nvenc -acodec copy {Path.GetFileName(item.TempFilePath)}";
+                    //arguments += $" -vf scale={size} -b:v {maxRate} -maxrate {maxRate} -bufsize {maxRate} -vcodec h264_nvenc -acodec copy {Path.GetFileName(item.TempFilePath)}";
                 }
 
                 var ffmpegProcessManager = new FfmpegProcessManager(fileItem, fileItem.VideoGpuEncodeProcess);
