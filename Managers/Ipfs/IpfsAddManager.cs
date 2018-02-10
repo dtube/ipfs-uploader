@@ -85,9 +85,13 @@ namespace Uploader.Managers.Ipfs
 
             Debug.WriteLine(Path.GetFileName(currentFileItem.OutputFilePath) + " : " + output);
 
-            // Récupérer la progression d'envoi
-            string newProgress = output.Substring(output.IndexOf('%') - 6, 7).Trim();
-            currentFileItem.IpfsProcess.SetProgress(newProgress);
+            // Récupérer la progression d'envoi, ex : 98.45%
+            int startIndex = output.IndexOf('%') - 6;
+            if(startIndex >= 0 && output.Length >= startIndex + 7)
+            {
+                string newProgress = output.Substring(startIndex, 7).Trim();
+                currentFileItem.IpfsProcess.SetProgress(newProgress);
+            }
         }
 
         private static void OutputDataReceived(object sender, DataReceivedEventArgs e)
