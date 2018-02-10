@@ -43,6 +43,12 @@ namespace Uploader.Managers.Front
                 IpfsDaemon.Instance.Queue(fileContainer.SourceFileItem);
             }
 
+            // Récupérer la durée totale de la vidéo et sa résolution, autorisation encoding
+            if(!VideoSourceManager.SuccessAnalyseSource(fileContainer.SourceFileItem, fileContainer.SourceFileItem.InfoSourceProcess))
+            {
+                return fileContainer.ProgressToken;
+            }
+
             if(VideoSettings.GpuEncodeMode)
             {
                 // encoding audio de la source puis ça sera encoding videos Gpu

@@ -166,6 +166,48 @@ namespace Uploader.Models
             private set;
         }
 
+        public string VideoFrameRate
+        {
+            get;
+            set;
+        }
+
+        public int? VideoBitRate
+        {
+            get;
+            set;
+        }
+
+        public string VideoPixelFormat
+        {
+            get;
+            set;
+        }
+
+        public int? VideoRotate
+        {
+            get;
+            set;
+        }
+
+        public int? VideoNbFrame
+        {
+            get;
+            set;
+        }
+
+        public string AudioCodec
+        {
+            get;
+            set;
+        }
+
+        public string VideoCodec
+        {
+            get;
+            set;
+        }
+
         /// <summary>
         /// in seconds
         /// </summary>
@@ -254,7 +296,15 @@ namespace Uploader.Models
 
         public bool SuccessGetSourceInfo()
         {
-            return (VideoDuration??0) > 0 && (VideoWidth??0) > 0 && (VideoHeight??0) > 0;
+            return (VideoDuration??0) > 0 
+            && (VideoWidth??0) > 0 
+            && (VideoHeight??0) > 0 
+            && (VideoBitRate??0) > 0
+            && (VideoNbFrame??0) > 0
+            && !string.IsNullOrWhiteSpace(VideoCodec)
+            && !string.IsNullOrWhiteSpace(VideoPixelFormat)
+            && !string.IsNullOrWhiteSpace(AudioCodec)
+            && !string.IsNullOrWhiteSpace(VideoFrameRate);
         }
 
         public bool HasReachMaxVideoDurationForEncoding()

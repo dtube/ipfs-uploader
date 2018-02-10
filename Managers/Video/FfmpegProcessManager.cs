@@ -71,17 +71,7 @@ namespace Uploader.Managers.Video
 
             Debug.WriteLine(output);
             
-            const string durationMarkup = "  Duration: ";   // "  Duration: 00:01:42.11"
             const string progressMarkup = " time=";         // " time=00:01:42.08"
-
-            // Si on ne connait pas la longueur totale de la vidéo
-            if (!_fileItem.FileContainer.SourceFileItem.VideoDuration.HasValue)
-            {
-                if (output.StartsWith(durationMarkup) && output.Length >= durationMarkup.Length + 8)
-                    _fileItem.FileContainer.SourceFileItem.VideoDuration = GetDurationInSeconds(output.Substring(durationMarkup.Length, 8));
-                else
-                    return;
-            }
 
             // Récupérer la progression toutes les 1s
             if (_processItem.LastTimeProgressChanged.HasValue && (DateTime.UtcNow - _processItem.LastTimeProgressChanged.Value).TotalMilliseconds < 1000)

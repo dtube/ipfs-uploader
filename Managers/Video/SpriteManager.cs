@@ -21,12 +21,6 @@ namespace Uploader.Managers.Video
 
                 LogManager.AddSpriteMessage("SourceFilePath " + Path.GetFileName(fileItem.SourceFilePath), "Start Sprite");             
 
-                // Récupérer la durée totale de la vidéo et sa résolution, autorisation sprite creation
-                if(!VideoSourceManager.SuccessAnalyseSource(sourceFile, true, fileItem.SpriteEncodeProcess))
-                {
-                    return false;
-                }
-
                 int nbImages = VideoSettings.NbSpriteImages;
                 int heightSprite = VideoSettings.HeightSpriteImages;
 

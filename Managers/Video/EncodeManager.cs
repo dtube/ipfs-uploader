@@ -18,14 +18,22 @@ namespace Uploader.Managers.Video
                 LogManager.AddEncodingMessage("SourceFilePath " + Path.GetFileName(sourceFile.SourceFilePath) + " -> " + fileItem.VideoSize, "Start AudioVideoCpuEncoding");
                 fileItem.AudioVideoCpuEncodeProcess.StartProcessDateTime();
 
-                // Récupérer la durée totale de la vidéo et sa résolution, autorisation encoding
-                if(!VideoSourceManager.SuccessAnalyseSource(sourceFile, false, fileItem.AudioVideoCpuEncodeProcess))
-                {
-                    return false;
-                }
-
                 string size = GetSize(fileItem.VideoSize, sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value);
-                string arguments = $"-y -i {Path.GetFileName(sourceFile.SourceFilePath)} -pixel_format yuv420p -vf scale={size} -vcodec libx264 -acodec aac -strict -2 {Path.GetFileName(fileItem.TempFilePath)}"; //-strict -2 pour forcer aac sur ubuntu
+                string arguments = $"-y -i {Path.GetFileName(sourceFile.SourceFilePath)}";
+                if(sourceFile.VideoPixelFormat != "yuv420p")
+                    arguments += " -pixel_format yuv420p";
+
+                arguments += $" -vf scale={size}";
+
+                if(sourceFile.VideoCodec != "h264")
+                    arguments += " -vcodec libx264";
+
+                if(sourceFile.AudioCodec != "aac")
+                    arguments += " -acodec aac -strict -2"; //-strict -2 pour forcer aac sur ubuntu
+                else
+                    arguments += " -acodec copy";
+
+                arguments += $" {Path.GetFileName(fileItem.TempFilePath)}"; 
 
                 var ffmpegProcessManager = new FfmpegProcessManager(fileItem, fileItem.AudioVideoCpuEncodeProcess);
                 ffmpegProcessManager.StartProcess(arguments, VideoSettings.EncodeTimeout);
@@ -52,17 +60,18 @@ namespace Uploader.Managers.Video
                 LogManager.AddEncodingMessage("SourceFilePath " + Path.GetFileName(fileItem.SourceFilePath), "Start AudioCpuEncoding");
                 fileItem.AudioCpuEncodeProcess.StartProcessDateTime();
 
-                // Récupérer la durée totale de la vidéo et sa résolution, autorisation encoding
-                if(!VideoSourceManager.SuccessAnalyseSource(fileItem.FileContainer.SourceFileItem, false, fileItem.AudioCpuEncodeProcess))
+                if(fileItem.FileContainer.SourceFileItem.AudioCodec == "aac")
                 {
-                    return false;
+                    fileItem.AudioCpuEncodeProcess.StartProcessDateTime();
+                    System.IO.File.Copy(fileItem.SourceFilePath, fileItem.TempFilePath);
                 }
-
-                // encoding audio de la source
-                string arguments = $"-y -i {Path.GetFileName(fileItem.SourceFilePath)} -vcodec copy -acodec aac -strict -2 {Path.GetFileName(fileItem.TempFilePath)}";
-
-                var ffmpegProcessManager = new FfmpegProcessManager(fileItem, fileItem.AudioCpuEncodeProcess);
-                ffmpegProcessManager.StartProcess(arguments, VideoSettings.EncodeTimeout);
+                else
+                {
+                    // encoding audio de la source
+                    string arguments = $"-y -i {Path.GetFileName(fileItem.SourceFilePath)} -vcodec copy -acodec aac -strict -2 {Path.GetFileName(fileItem.TempFilePath)}";
+                    var ffmpegProcessManager = new FfmpegProcessManager(fileItem, fileItem.AudioCpuEncodeProcess);
+                    ffmpegProcessManager.StartProcess(arguments, VideoSettings.EncodeTimeout);
+                }
 
                 fileItem.SetVideoAacTempFilePath(fileItem.TempFilePath);
                 LogManager.AddEncodingMessage("OutputFileName " + Path.GetFileName(fileItem.VideoAacTempFilePath) + " / FileSize " + fileItem.FileSize + " / Format " +fileItem.VideoSize, "End AudioCpuEncoding");
@@ -85,22 +94,21 @@ namespace Uploader.Managers.Video
             {
                 LogManager.AddEncodingMessage("SourceFilePath " + Path.GetFileName(fileItem.VideoAacTempFilePath) + " -> 1:N formats", "Start VideoGpuEncoding");
                 fileItem.VideoGpuEncodeProcess.StartProcessDateTime();
-                
-                // Récupérer la durée totale de la vidéo et sa résolution, autorisation encoding
-                if(!VideoSourceManager.SuccessAnalyseSource(fileItem.FileContainer.SourceFileItem, false, fileItem.VideoGpuEncodeProcess))
-                {
-                    return false;
-                }
 
                 // encoding video 1:N formats
                 //string arguments = $"-y -hwaccel cuvid -vcodec h264_cuvid -vsync 0 -i {Path.GetFileName(fileItem.VideoAacTempFilePath)}";
                 string arguments = $"-y -i {Path.GetFileName(fileItem.VideoAacTempFilePath)}";
+                FileItem sourceFile = fileItem.FileContainer.SourceFileItem;
                 foreach (var item in fileItem.FileContainer.EncodedFileItems)
                 {
                     string size = GetSize(item.VideoSize, fileItem.VideoWidth.Value, fileItem.VideoHeight.Value);
                     string maxRate = GetMaxRate(item.VideoSize);
-                    //arguments += $" -pixel_format yuv420p -vf scale_npp={size} -b:v {maxRate} -maxrate {maxRate} -bufsize {maxRate} -vcodec h264_nvenc -acodec copy {Path.GetFileName(item.TempFilePath)}";
-                    arguments += $" -pixel_format yuv420p -vf scale={size} -b:v {maxRate} -maxrate {maxRate} -bufsize {maxRate} -vcodec h264_nvenc -acodec copy {Path.GetFileName(item.TempFilePath)}";
+
+                    if(sourceFile.VideoPixelFormat != "yuv420p")
+                        arguments += " -pixel_format yuv420p";
+
+                    //arguments += $" -vf scale_npp={size} -b:v {maxRate} -maxrate {maxRate} -bufsize {maxRate} -vcodec h264_nvenc -acodec copy {Path.GetFileName(item.TempFilePath)}";
+                    arguments += $" -vf scale={size} -b:v {maxRate} -maxrate {maxRate} -bufsize {maxRate} -vcodec h264_nvenc -acodec copy {Path.GetFileName(item.TempFilePath)}";
                 }
 
                 var ffmpegProcessManager = new FfmpegProcessManager(fileItem, fileItem.VideoGpuEncodeProcess);

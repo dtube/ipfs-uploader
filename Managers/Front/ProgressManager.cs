@@ -13,7 +13,7 @@ namespace Uploader.Managers.Front
 {
     public static class ProgressManager
     {
-        public static string Version => "0.6.9";
+        public static string Version => "0.6.10";
 
         private static ConcurrentDictionary<Guid, FileContainer> progresses = new ConcurrentDictionary<Guid, FileContainer>();
 

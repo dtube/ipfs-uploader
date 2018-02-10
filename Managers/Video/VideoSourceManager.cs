@@ -1,5 +1,4 @@
 using System;
-using System.Drawing;
 using System.IO;
 
 using Uploader.Managers.Common;
@@ -10,7 +9,7 @@ namespace Uploader.Managers.Video
 {
     public static class VideoSourceManager
     {
-        public static bool SuccessAnalyseSource(FileItem sourceFile, bool spriteMode, ProcessItem processItem)
+        public static bool SuccessAnalyseSource(FileItem sourceFile, ProcessItem processItem)
         {
             if(sourceFile == null)
                 throw new ArgumentNullException(nameof(sourceFile));
@@ -20,44 +19,23 @@ namespace Uploader.Managers.Video
                 throw new ArgumentException("Doit être le fichier source", nameof(sourceFile));
 
             // Récupérer la durée totale de la vidéo et sa résolution
-            if (!sourceFile.VideoDuration.HasValue)
+            try
             {
-                lock(sourceFile)
-                {
-                    if (!sourceFile.VideoDuration.HasValue)
-                    {
-                        string imageOutputPath = Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".jpeg");
-
-                        try
-                        {
-                            var ffmpegProcessManager = new FfmpegProcessManager(sourceFile, sourceFile.InfoSourceProcess);
-                            string argumentsImage = $"-y -i {Path.GetFileName(sourceFile.SourceFilePath)} -vf fps=1 -vframes 1 {Path.GetFileName(imageOutputPath)}";
-                            ffmpegProcessManager.StartProcess(argumentsImage, VideoSettings.EncodeGetOneImageTimeout);
-
-                            using(Image image = Image.FromFile(imageOutputPath))
-                            {
-                                sourceFile.VideoWidth = image.Width;
-                                sourceFile.VideoHeight = image.Height;
-                            }
-                        }
-                        catch(Exception ex)
-                        {
-                            Log(ex.ToString(), "Exception source info", spriteMode);
-                            sourceFile.VideoDuration = -1; //pour ne pas essayer de le recalculer sur une demande de video à encoder
-                        }
-
-                        TempFileManager.SafeDeleteTempFile(imageOutputPath);
-                    }
-                }
+                var ffmpegProcessManager = new FfProbeProcessManager(sourceFile);
+                ffmpegProcessManager.StartProcess(VideoSettings.EncodeGetOneImageTimeout);
+            }
+            catch(Exception ex)
+            {
+                Log(ex.ToString(), "Exception source info");
             }
             
             // Si durée totale de vidéo, largeur hauteur non récupéré, on ne peut pas continuer
             if (!sourceFile.SuccessGetSourceInfo())
             {
                 string message = "Error while getting duration, height or width.";
-                Log(message + " FileName : " + Path.GetFileName(sourceFile.SourceFilePath), "Error source info", spriteMode);
+                Log(message + " FileName : " + Path.GetFileName(sourceFile.SourceFilePath), "Error source info");
 
-                if(!spriteMode && sourceFile.IpfsProcess == null)
+                if(sourceFile.IpfsProcess == null)
                 {
                     sourceFile.AddIpfsProcess(sourceFile.SourceFilePath);
                     IpfsDaemon.Instance.Queue(sourceFile);
@@ -68,14 +46,12 @@ namespace Uploader.Managers.Video
                 return false;
             }
 
-            int duration = sourceFile.VideoDuration.Value;
-
-            Log("SourceVideoDuration " + duration + " / SourceVideoFileSize " + sourceFile.FileSize, "Info source", spriteMode);
+            Log("SourceVideoDuration " + sourceFile.VideoDuration.Value + " / SourceVideoFileSize " + sourceFile.FileSize, "Info source");
 
             // Désactivation encoding et sprite si dépassement de la durée maximale
             if(sourceFile.HasReachMaxVideoDurationForEncoding())
             {
-                if(!spriteMode && sourceFile.IpfsProcess == null)
+                if(sourceFile.IpfsProcess == null)
                 {
                     sourceFile.AddIpfsProcess(sourceFile.SourceFilePath);
                     IpfsDaemon.Instance.Queue(sourceFile);
@@ -89,12 +65,9 @@ namespace Uploader.Managers.Video
             return true;
         }
 
-        private static void Log(string message, string typeMessage, bool spriteMode)
+        private static void Log(string message, string typeMessage)
         {
-            if(spriteMode)
-                LogManager.AddSpriteMessage(message, typeMessage);
-            else
-                LogManager.AddEncodingMessage(message, typeMessage);
+            LogManager.AddEncodingMessage(message, typeMessage);
         }
     }
 }
