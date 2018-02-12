@@ -57,5 +57,10 @@ namespace Uploader.Managers.Video
         /// 
         /// </summary>
         public static int NbAudioVideoCpuEncodeDaemon => 1;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public static string AuthorizedQuality => "480p,720p";
     }
 }

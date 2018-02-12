@@ -11,30 +11,9 @@ namespace Uploader.Managers.Front
     {
         public static Guid ComputeVideo(string originFilePath, string videoEncodingFormats, bool? sprite)
         {
-            VideoSize[] formats = new VideoSize[0];
-
-            if (!string.IsNullOrWhiteSpace(videoEncodingFormats))
-            {
-                formats = videoEncodingFormats
-                    .Split(',')
-                    .Select(v =>
-                    {
-                        switch (v)
-                        {
-                            case "360p":
-                                return VideoSize.F360p;
-                            case "480p":
-                                return VideoSize.F480p;
-                            case "720p":
-                                return VideoSize.F720p;
-                            case "1080p":
-                                return VideoSize.F1080p;
-                            default:
-                                throw new InvalidOperationException("Format non reconnu.");
-                        }
-                    })
-                    .ToArray();
-            }
+            VideoSize[] requestFormats = GetVideoSizes(videoEncodingFormats);
+            VideoSize[] authorizedFormats = GetVideoSizes(VideoSettings.AuthorizedQuality);
+            VideoSize[] formats = requestFormats.Intersect(authorizedFormats).ToArray();
 
             FileContainer fileContainer = FileContainer.NewVideoContainer(originFilePath, sprite??false, formats);
 
@@ -64,6 +43,32 @@ namespace Uploader.Managers.Front
             }
 
             return fileContainer.ProgressToken;
+        }
+
+        private static VideoSize[] GetVideoSizes(string videoEncodingFormats)
+        {
+            if (string.IsNullOrWhiteSpace(videoEncodingFormats))
+                return new VideoSize[0];
+
+            return videoEncodingFormats
+                .Split(',')
+                .Select(v =>
+                {
+                    switch (v)
+                    {
+                        case "360p":
+                            return VideoSize.F360p;
+                        case "480p":
+                            return VideoSize.F480p;
+                        case "720p":
+                            return VideoSize.F720p;
+                        case "1080p":
+                            return VideoSize.F1080p;
+                        default:
+                            throw new InvalidOperationException("Format non reconnu.");
+                    }
+                })
+                .ToArray();            
         }
     }
 }
