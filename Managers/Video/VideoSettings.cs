@@ -1,66 +1,75 @@
 namespace Uploader.Managers.Video
 {
-    public static class VideoSettings
+    public class VideoSettings
     {
-        /// <summary>
-        /// milliseconds
-        /// </summary>
-        public static int EncodeGetOneImageTimeout => 10 * 1000; // 10s max pour extraire une image de la vidéo
+        private VideoSettings(){}
+
+        static VideoSettings()
+        {
+            Instance = new VideoSettings();
+        }
+
+        public static VideoSettings Instance { get; private set; }
 
         /// <summary>
-        /// milliseconds
+        /// seconds
         /// </summary>
-        public static int EncodeGetImagesTimeout => 10 * 60 * 1000; // 10min max pour extraire les images du sprite de la vidéo
+        public int FfProbeTimeout { get; set; } // 10s max pour extraire les informations de la vidéo
 
         /// <summary>
-        /// milliseconds
+        /// seconds
         /// </summary>
-        public static int EncodeTimeout => 30 * 60 * 60 * 1000; // 30h max pour encoder la vidéo
+        public int EncodeGetImagesTimeout { get; set; } // 10min max pour extraire les images du sprite de la vidéo
 
         /// <summary>
-        /// minutes
+        /// seconds
         /// </summary>
-        public static int MaxVideoDurationForEncoding => 30 * 60; // 30 minutes max pour encoder une vidéo
+        public int EncodeTimeout { get; set; } // 30h max pour encoder la vidéo
+
+        /// <summary>
+        /// seconds
+        /// </summary>
+        public int MaxVideoDurationForEncoding { get; set; } // 30 minutes max pour encoder une vidéo
 
         /// <summary>
         /// 
         /// </summary>
-        public static int NbSpriteImages => 100;
+        public int NbSpriteImages { get; set; }
 
         /// <summary>
         /// pixels
         /// </summary>
-        public static int HeightSpriteImages => 118;
+        public int HeightSpriteImages { get; set; }
 
         /// <summary>
         /// encoding audio puis encoding video 1:N formats
         /// </summary>
         /// <returns></returns>
-        public static bool GpuEncodeMode => true;
+        public bool GpuEncodeMode { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        public static int NbSpriteDaemon => 1;
+        public int NbSpriteDaemon { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        public static int NbAudioCpuEncodeDaemon => 1;
+        public int NbAudioCpuEncodeDaemon { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        public static int NbVideoGpuEncodeDaemon => 1;
+        public int NbVideoGpuEncodeDaemon { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        public static int NbAudioVideoCpuEncodeDaemon => 1;
+        public int NbAudioVideoCpuEncodeDaemon { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        public static string AuthorizedQuality => "480p,720p";
+        public string AuthorizedQuality { get; set; }
     }
 }

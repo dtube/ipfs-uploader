@@ -27,7 +27,7 @@ namespace Uploader.Managers.Ipfs
                 processStartInfo.FileName = "ipfs";
                 processStartInfo.Arguments = $"add {Path.GetFileName(currentFileItem.OutputFilePath)}";
 
-                if(IpfsSettings.VideoAndSpriteTrickleDag)                
+                if(IpfsSettings.Instance.VideoAndSpriteTrickleDag)                
                     if(currentFileItem.TypeFile == TypeFile.SourceVideo || 
                         currentFileItem.TypeFile == TypeFile.EncodedVideo || 
                         currentFileItem.TypeFile == TypeFile.SpriteVideo)
@@ -51,7 +51,7 @@ namespace Uploader.Managers.Ipfs
                     process.BeginOutputReadLine();
                     process.BeginErrorReadLine();
 
-                    bool success = process.WaitForExit(IpfsSettings.IpfsTimeout);
+                    bool success = process.WaitForExit(IpfsSettings.Instance.IpfsTimeout * 1000);
                     if (!success)
                     {
                         throw new InvalidOperationException("Timeout : Le fichier n'a pas pu être envoyé à ipfs dans le temps imparti.");

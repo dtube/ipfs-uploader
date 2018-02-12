@@ -13,7 +13,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-using Microsoft.Extensions.Options;
+using Uploader.Managers.Front;
+using Uploader.Managers.Ipfs;
+using Uploader.Managers.Video;
 
 namespace Uploader
 {
@@ -39,21 +41,20 @@ namespace Uploader
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            string origins;
-            if (env.IsStaging() || env.IsProduction())
+            Configuration.GetSection("General").Bind(GeneralSettings.Instance);
+            Configuration.GetSection("Ipfs").Bind(IpfsSettings.Instance);
+            Configuration.GetSection("Video").Bind(VideoSettings.Instance);
+
+            if (env.IsDevelopment())
             {
-                origins = "https://d.tube";
-            }
-            else
-            {
-                origins = "http://localhost:3000";
                 app.UseDeveloperExceptionPage();
             }
 
-            Console.WriteLine("CORS Settings: " + origins);
-
             app.UseForwardedHeaders(new ForwardedHeadersOptions{ ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto });
 
+            // A déclarer avant UseMvc
+            string origins = GeneralSettings.Instance.CORS;
+            Console.WriteLine("CORS Settings: " + origins);
             app.UseCors(
                 options => options.WithOrigins(origins).AllowAnyMethod()
             );

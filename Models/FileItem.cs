@@ -17,13 +17,13 @@ namespace Uploader.Models
             fileItem.VideoSize = VideoSize.Source;
             fileItem.InfoSourceProcess = new ProcessItem(fileItem);
 
-            if(VideoSettings.GpuEncodeMode)
+            if(VideoSettings.Instance.GpuEncodeMode)
             {
                 fileItem.AudioCpuEncodeProcess = new ProcessItem(fileItem);
                 fileItem.VideoGpuEncodeProcess = new ProcessItem(fileItem);
             }
 
-            if(IpfsSettings.AddVideoSource)
+            if(IpfsSettings.Instance.AddVideoSource)
             {
                 fileItem.AddIpfsProcess(fileItem.SourceFilePath);
             }
@@ -38,7 +38,7 @@ namespace Uploader.Models
 
             FileItem fileItem = new FileItem(fileContainer, fileContainer.SourceFileItem.SourceFilePath, TypeFile.EncodedVideo);
             fileItem.VideoSize = videoSize;
-            if(!VideoSettings.GpuEncodeMode)
+            if(!VideoSettings.Instance.GpuEncodeMode)
             {
                 fileItem.AudioVideoCpuEncodeProcess = new ProcessItem(fileItem);                
             }
@@ -309,7 +309,7 @@ namespace Uploader.Models
 
         public bool HasReachMaxVideoDurationForEncoding()
         {
-            return VideoDuration.HasValue ? VideoDuration.Value > VideoSettings.MaxVideoDurationForEncoding : false;
+            return VideoDuration.HasValue ? VideoDuration.Value > VideoSettings.Instance.MaxVideoDurationForEncoding : false;
         }
 
         public void AddIpfsProcess(string sourceFilePath)

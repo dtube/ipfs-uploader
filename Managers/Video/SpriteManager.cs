@@ -21,8 +21,8 @@ namespace Uploader.Managers.Video
 
                 LogManager.AddSpriteMessage("SourceFilePath " + Path.GetFileName(fileItem.SourceFilePath), "Start Sprite");             
 
-                int nbImages = VideoSettings.NbSpriteImages;
-                int heightSprite = VideoSettings.HeightSpriteImages;
+                int nbImages = VideoSettings.Instance.NbSpriteImages;
+                int heightSprite = VideoSettings.Instance.HeightSpriteImages;
 
                 // Calculer nb image/s
                 //  si < 100s de vidéo -> 1 image/s
@@ -40,11 +40,11 @@ namespace Uploader.Managers.Video
                 // Extract frameRate image/s de la video
                 string arguments = $"-y -i {Path.GetFileName(fileItem.SourceFilePath)} -r {frameRate} -vf {sizeImageMax} -f image2 {GetPattern(fileItem.TempFilePath)}";
                 var ffmpegProcessManager = new FfmpegProcessManager(fileItem, fileItem.SpriteEncodeProcess);
-                ffmpegProcessManager.StartProcess(arguments, VideoSettings.EncodeGetImagesTimeout);
+                ffmpegProcessManager.StartProcess(arguments, VideoSettings.Instance.EncodeGetImagesTimeout);
                 string[] files = GetListImageFrom(fileItem.TempFilePath); // récupération des images
 
                 LogManager.AddSpriteMessage((files.Length - 1) + " images", "Start Combine images");
-                bool successSprite = CombineBitmap(files.Skip(files.Length - VideoSettings.NbSpriteImages).ToArray(), fileItem.TempFilePath); // création du sprite                                
+                bool successSprite = CombineBitmap(files.Skip(files.Length - VideoSettings.Instance.NbSpriteImages).ToArray(), fileItem.TempFilePath); // création du sprite                                
                 TempFileManager.SafeDeleteTempFiles(files); // suppression des images
                 if(successSprite)
                 {

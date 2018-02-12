@@ -20,7 +20,7 @@ namespace Uploader.Managers.Video
         static VideoGpuEncodeDaemon()
         {
             Instance = new VideoGpuEncodeDaemon();
-            Instance.Start(VideoSettings.NbVideoGpuEncodeDaemon);
+            Instance.Start(VideoSettings.Instance.NbVideoGpuEncodeDaemon);
         }
 
         protected override void ProcessItem(FileItem fileItem)

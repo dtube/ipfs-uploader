@@ -30,7 +30,7 @@ namespace Uploader.Managers.Front
             {
                 LogManager.AddOverlayMessage("SourceFileName " + Path.GetFileName(sourceFile.SourceFilePath), "Start Crop");
                 // resize + crop source image                
-                processStartInfo.FileName = Path.Combine(FrontSettings.ImageMagickPath, "convert");
+                processStartInfo.FileName = Path.Combine(GeneralSettings.Instance.ImageMagickPath, "convert");
                 processStartInfo.Arguments = $"{Path.GetFileName(sourceFile.SourceFilePath)} -resize \"{_finalWidth}x{_finalHeight}^\" -gravity Center -crop {_finalWidth}x{_finalHeight}+0+0 {Path.GetFileName(sourceFile.TempFilePath)}";
                 StartProcess(processStartInfo, 5000);                
                 sourceFile.SetOutputFilePath(sourceFile.TempFilePath);
@@ -57,7 +57,7 @@ namespace Uploader.Managers.Front
             {
                 LogManager.AddOverlayMessage("SourceFileName " + Path.GetFileName(fileContainer.OverlayFileItem.SourceFilePath), "Start Overlay");
                 // watermark source image
-                processStartInfo.FileName = Path.Combine(FrontSettings.ImageMagickPath, "composite");
+                processStartInfo.FileName = Path.Combine(GeneralSettings.Instance.ImageMagickPath, "composite");
                 processStartInfo.Arguments = $"-gravity NorthEast {_overlayImagePath} {Path.GetFileName(fileContainer.OverlayFileItem.SourceFilePath)} {Path.GetFileName(fileContainer.OverlayFileItem.TempFilePath)}";
                 StartProcess(processStartInfo, 5000);
                 fileContainer.OverlayFileItem.SetOutputFilePath(fileContainer.OverlayFileItem.TempFilePath);

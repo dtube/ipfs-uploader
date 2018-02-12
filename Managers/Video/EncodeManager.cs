@@ -36,7 +36,7 @@ namespace Uploader.Managers.Video
                 arguments += $" {Path.GetFileName(fileItem.TempFilePath)}"; 
 
                 var ffmpegProcessManager = new FfmpegProcessManager(fileItem, fileItem.AudioVideoCpuEncodeProcess);
-                ffmpegProcessManager.StartProcess(arguments, VideoSettings.EncodeTimeout);
+                ffmpegProcessManager.StartProcess(arguments, VideoSettings.Instance.EncodeTimeout);
 
                 fileItem.SetOutputFilePath(fileItem.TempFilePath);
                 LogManager.AddEncodingMessage("OutputFileName " + Path.GetFileName(fileItem.OutputFilePath) + " / FileSize " + fileItem.FileSize + " / Format " +fileItem.VideoSize, "End AudioVideoCpuEncoding");
@@ -70,7 +70,7 @@ namespace Uploader.Managers.Video
                     // encoding audio de la source
                     string arguments = $"-y -i {Path.GetFileName(fileItem.SourceFilePath)} -vcodec copy -acodec aac -strict -2 {Path.GetFileName(fileItem.TempFilePath)}";
                     var ffmpegProcessManager = new FfmpegProcessManager(fileItem, fileItem.AudioCpuEncodeProcess);
-                    ffmpegProcessManager.StartProcess(arguments, VideoSettings.EncodeTimeout);
+                    ffmpegProcessManager.StartProcess(arguments, VideoSettings.Instance.EncodeTimeout);
                 }
 
                 fileItem.SetVideoAacTempFilePath(fileItem.TempFilePath);
@@ -112,7 +112,7 @@ namespace Uploader.Managers.Video
                 }
 
                 var ffmpegProcessManager = new FfmpegProcessManager(fileItem, fileItem.VideoGpuEncodeProcess);
-                ffmpegProcessManager.StartProcess(arguments, VideoSettings.EncodeTimeout);
+                ffmpegProcessManager.StartProcess(arguments, VideoSettings.Instance.EncodeTimeout);
 
                 foreach (var item in fileItem.FileContainer.EncodedFileItems)
                 {

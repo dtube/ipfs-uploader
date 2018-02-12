@@ -20,7 +20,7 @@ namespace Uploader.Managers.Video
         static AudioVideoCpuEncodeDaemon()
         {
             Instance = new AudioVideoCpuEncodeDaemon();
-            Instance.Start(VideoSettings.NbAudioVideoCpuEncodeDaemon);
+            Instance.Start(VideoSettings.Instance.NbAudioVideoCpuEncodeDaemon);
         }
 
         protected override void ProcessItem(FileItem fileItem)

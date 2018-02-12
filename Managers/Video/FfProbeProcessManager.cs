@@ -50,7 +50,7 @@ namespace Uploader.Managers.Video
                 process.BeginOutputReadLine();
                 process.BeginErrorReadLine();
 
-                bool success = process.WaitForExit(timeout);
+                bool success = process.WaitForExit(timeout * 1000);
                 if (!success)
                 {
                     throw new InvalidOperationException("Timeout : Le fichier n'a pas pu être analysé dans le temps imparti.");

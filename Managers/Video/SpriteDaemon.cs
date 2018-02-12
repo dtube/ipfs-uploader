@@ -19,7 +19,7 @@ namespace Uploader.Managers.Video
         static SpriteDaemon()
         {
             Instance = new SpriteDaemon();
-            Instance.Start(VideoSettings.NbSpriteDaemon);
+            Instance.Start(VideoSettings.Instance.NbSpriteDaemon);
         }
 
         protected override void ProcessItem(FileItem fileItem)

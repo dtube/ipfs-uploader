@@ -21,8 +21,8 @@ namespace Uploader.Managers.Video
             // Récupérer la durée totale de la vidéo et sa résolution
             try
             {
-                var ffmpegProcessManager = new FfProbeProcessManager(sourceFile);
-                ffmpegProcessManager.StartProcess(VideoSettings.EncodeGetOneImageTimeout);
+                var ffProbeProcessManager = new FfProbeProcessManager(sourceFile);
+                ffProbeProcessManager.StartProcess(VideoSettings.Instance.FfProbeTimeout);
             }
             catch(Exception ex)
             {

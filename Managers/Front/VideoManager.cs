@@ -12,12 +12,12 @@ namespace Uploader.Managers.Front
         public static Guid ComputeVideo(string originFilePath, string videoEncodingFormats, bool? sprite)
         {
             VideoSize[] requestFormats = GetVideoSizes(videoEncodingFormats);
-            VideoSize[] authorizedFormats = GetVideoSizes(VideoSettings.AuthorizedQuality);
+            VideoSize[] authorizedFormats = GetVideoSizes(VideoSettings.Instance.AuthorizedQuality);
             VideoSize[] formats = requestFormats.Intersect(authorizedFormats).ToArray();
 
             FileContainer fileContainer = FileContainer.NewVideoContainer(originFilePath, sprite??false, formats);
 
-            if(IpfsSettings.AddVideoSource)
+            if(IpfsSettings.Instance.AddVideoSource)
             {
                 IpfsDaemon.Instance.Queue(fileContainer.SourceFileItem);
             }
@@ -28,7 +28,7 @@ namespace Uploader.Managers.Front
                 return fileContainer.ProgressToken;
             }
 
-            if(VideoSettings.GpuEncodeMode)
+            if(VideoSettings.Instance.GpuEncodeMode)
             {
                 // encoding audio de la source puis ça sera encoding videos Gpu
                 AudioCpuEncodeDaemon.Instance.Queue(fileContainer.SourceFileItem, "waiting audio encoding...");

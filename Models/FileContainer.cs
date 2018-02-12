@@ -133,7 +133,7 @@ namespace Uploader.Models
 
         public bool MustAbort()
         {
-            return (DateTime.UtcNow - LastTimeProgressRequested).TotalSeconds > FrontSettings.MaxGetProgressCanceled;
+            return (DateTime.UtcNow - LastTimeProgressRequested).TotalSeconds > GeneralSettings.Instance.MaxGetProgressCanceled;
         }
         
         private IEnumerable<FileItem> GetAllFile()
