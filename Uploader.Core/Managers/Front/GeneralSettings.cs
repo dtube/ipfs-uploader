@@ -1,6 +1,6 @@
 namespace Uploader.Core.Managers.Front
 {
-    public class GeneralSettings
+    internal class GeneralSettings
     {
         private GeneralSettings(){}
 

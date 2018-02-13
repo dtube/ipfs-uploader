@@ -1,6 +1,6 @@
 namespace Uploader.Core.Managers.Ipfs
 {
-    public class IpfsSettings
+    internal class IpfsSettings
     {
         private IpfsSettings(){}
 

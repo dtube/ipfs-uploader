@@ -41,9 +41,7 @@ namespace Uploader.Web
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            Configuration.GetSection("General").Bind(GeneralSettings.Instance);
-            Configuration.GetSection("Ipfs").Bind(IpfsSettings.Instance);
-            Configuration.GetSection("Video").Bind(VideoSettings.Instance);
+            Uploader.Core.Managers.Common.Startup.InitSettings(Configuration);
 
             if (env.IsDevelopment())
             {

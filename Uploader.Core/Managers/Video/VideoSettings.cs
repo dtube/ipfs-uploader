@@ -1,6 +1,6 @@
 namespace Uploader.Core.Managers.Video
 {
-    public class VideoSettings
+    internal class VideoSettings
     {
         private VideoSettings(){}
 
