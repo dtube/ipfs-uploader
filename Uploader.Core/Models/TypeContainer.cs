@@ -1,6 +1,6 @@
 namespace Uploader.Core.Models
 {
-    public enum TypeContainer
+    internal enum TypeContainer
     {
         Undefined,
         Video,

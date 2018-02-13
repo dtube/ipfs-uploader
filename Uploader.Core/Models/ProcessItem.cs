@@ -5,7 +5,7 @@ using Uploader.Core.Managers.Common;
 
 namespace Uploader.Core.Models
 {
-    public class ProcessItem
+    internal class ProcessItem
     {
         public ProcessItem(FileItem fileItem)
         {

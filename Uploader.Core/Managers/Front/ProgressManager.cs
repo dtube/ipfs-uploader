@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,11 +14,11 @@ namespace Uploader.Core.Managers.Front
 {
     public static class ProgressManager
     {
-        public static string Version => "0.6.11";
+        public static string Version => GeneralSettings.Instance.Version;
 
         private static ConcurrentDictionary<Guid, FileContainer> progresses = new ConcurrentDictionary<Guid, FileContainer>();
 
-        public static void RegisterProgress(FileContainer fileContainer)
+        internal static void RegisterProgress(FileContainer fileContainer)
         {
             progresses.TryAdd(fileContainer.ProgressToken, fileContainer);
 
@@ -315,18 +316,20 @@ namespace Uploader.Core.Managers.Front
             return Math.Round(seconds/3600d, 2) + " heure(s)";
         }
 
-        public static FileContainer GetFileContainerByToken(Guid progressToken)
+        public static dynamic GetFileContainerByToken(Guid progressToken)
         {
             FileContainer fileContainer;
             progresses.TryGetValue(progressToken, out fileContainer);
 
             if(fileContainer != null)
                 fileContainer.UpdateLastTimeProgressRequest();
+            else
+                return null;
 
-            return fileContainer;
+            return GetResult(fileContainer);
         }
 
-        public static FileContainer GetFileContainerBySourceHash(string sourceHash)
+        public static dynamic GetFileContainerBySourceHash(string sourceHash)
         {
             FileContainer fileContainer = progresses.Values
                 .Where(s => s.SourceFileItem.IpfsHash == sourceHash)
@@ -335,8 +338,138 @@ namespace Uploader.Core.Managers.Front
 
             if(fileContainer != null)
                 fileContainer.UpdateLastTimeProgressRequest();
-            
-            return fileContainer;
+            else
+                return null;
+
+            return GetResult(fileContainer);
+        }
+
+        private static dynamic GetResult(FileContainer fileContainer)
+        {
+            switch (fileContainer.TypeContainer)
+            {
+                case TypeContainer.Video:
+                    return new
+                    {
+                        finished = fileContainer.Finished(),
+                        sourceAudioCpuEncoding = AudioCpuEncodeResultJson(fileContainer.SourceFileItem),
+                        sourceVideoGpuEncoding = VideoGpuEncodeResultJson(fileContainer.SourceFileItem),
+                        ipfsAddSourceVideo = IpfsResultJson(fileContainer.SourceFileItem),
+                        sprite = fileContainer.SpriteVideoFileItem == null ? null : (new
+                        {
+                            spriteCreation = SpriteResultJson(fileContainer.SpriteVideoFileItem),
+                            ipfsAddSprite = IpfsResultJson(fileContainer.SpriteVideoFileItem)
+                        }),
+                        encodedVideos = fileContainer.EncodedFileItems
+                            .Select(e =>
+                                new
+                                {
+                                    encode = AudioVideoCpuEncodeResultJson(e),
+                                    ipfsAddEncodeVideo = IpfsResultJson(e)
+                                })
+                            .ToArray()
+                    };
+
+                case TypeContainer.Overlay:
+                    return new
+                    {
+                        ipfsAddSource = IpfsResultJson(fileContainer.SourceFileItem),
+                        ipfsAddOverlay = IpfsResultJson(fileContainer.OverlayFileItem)
+                    };
+            }
+
+            Debug.WriteLine("Type container non géré " + fileContainer.TypeContainer);
+            throw new InvalidOperationException("type container non géré");
+        }
+
+        private static dynamic IpfsResultJson(FileItem fileItem)
+        {
+            if (fileItem == null || fileItem.IpfsProcess == null)
+                return null;
+
+            return new
+            {
+                progress = fileItem.IpfsProcess.Progress,
+                encodeSize = fileItem.VideoSize.ToString(),
+                hash = fileItem.IpfsHash,
+                lastTimeProgress = fileItem.IpfsProcess.LastTimeProgressChanged,
+                errorMessage = fileItem.IpfsProcess.ErrorMessage,
+                step = fileItem.IpfsProcess.CurrentStep.ToString(),
+                positionInQueue = Position(fileItem.IpfsProcess, IpfsDaemon.Instance.CurrentPositionInQueue),
+                fileSize = fileItem.FileSize
+            };
+        }
+
+        private static dynamic SpriteResultJson(FileItem fileItem)
+        {
+            if (fileItem == null || fileItem.SpriteEncodeProcess == null)
+                return null;
+
+            return new
+            {
+                progress = fileItem.SpriteEncodeProcess.Progress,
+                encodeSize = fileItem.VideoSize.ToString(),
+                lastTimeProgress = fileItem.SpriteEncodeProcess.LastTimeProgressChanged,
+                errorMessage = fileItem.SpriteEncodeProcess.ErrorMessage,
+                step = fileItem.SpriteEncodeProcess.CurrentStep.ToString(),
+                positionInQueue = Position(fileItem.SpriteEncodeProcess, SpriteDaemon.Instance.CurrentPositionInQueue)
+            };
+        }
+
+        private static dynamic AudioCpuEncodeResultJson(FileItem fileItem)
+        {
+            if (fileItem == null || fileItem.AudioCpuEncodeProcess == null)
+                return null;
+
+            return new
+            {
+                progress = fileItem.AudioCpuEncodeProcess.Progress,
+                encodeSize = fileItem.VideoSize.ToString(),
+                lastTimeProgress = fileItem.AudioCpuEncodeProcess.LastTimeProgressChanged,
+                errorMessage = fileItem.AudioCpuEncodeProcess.ErrorMessage,
+                step = fileItem.AudioCpuEncodeProcess.CurrentStep.ToString(),
+                positionInQueue = Position(fileItem.AudioCpuEncodeProcess, AudioCpuEncodeDaemon.Instance.CurrentPositionInQueue)
+            };
+        }
+
+        private static dynamic AudioVideoCpuEncodeResultJson(FileItem fileItem)
+        {
+            if (fileItem == null || fileItem.AudioVideoCpuEncodeProcess == null)
+                return null;
+
+            return new
+            {
+                progress = fileItem.AudioVideoCpuEncodeProcess.Progress,
+                encodeSize = fileItem.VideoSize.ToString(),
+                lastTimeProgress = fileItem.AudioVideoCpuEncodeProcess.LastTimeProgressChanged,
+                errorMessage = fileItem.AudioVideoCpuEncodeProcess.ErrorMessage,
+                step = fileItem.AudioVideoCpuEncodeProcess.CurrentStep.ToString(),
+                positionInQueue = Position(fileItem.AudioVideoCpuEncodeProcess, AudioVideoCpuEncodeDaemon.Instance.CurrentPositionInQueue)
+            };
+        }
+
+        private static dynamic VideoGpuEncodeResultJson(FileItem fileItem)
+        {
+            if (fileItem == null || fileItem.VideoGpuEncodeProcess == null)
+                return null;
+
+            return new
+            {
+                progress = fileItem.VideoGpuEncodeProcess.Progress,
+                encodeSize = fileItem.VideoSize.ToString(),
+                lastTimeProgress = fileItem.VideoGpuEncodeProcess.LastTimeProgressChanged,
+                errorMessage = fileItem.VideoGpuEncodeProcess.ErrorMessage,
+                step = fileItem.VideoGpuEncodeProcess.CurrentStep.ToString(),
+                positionInQueue = Position(fileItem.VideoGpuEncodeProcess, VideoGpuEncodeDaemon.Instance.CurrentPositionInQueue)
+            };
+        }
+
+        private static int? Position(ProcessItem processItem, int daemonCurrentPositionInQueue)
+        {
+            if (processItem.CurrentStep != ProcessStep.Waiting)
+                return null;
+
+            return processItem.PositionInQueue - daemonCurrentPositionInQueue;
         }
     }
 }

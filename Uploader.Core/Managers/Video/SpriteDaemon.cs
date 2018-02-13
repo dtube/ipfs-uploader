@@ -12,7 +12,7 @@ using Uploader.Core.Models;
 
 namespace Uploader.Core.Managers.Video
 {
-    public class SpriteDaemon : BaseDaemon
+    internal class SpriteDaemon : BaseDaemon
     {
         public static SpriteDaemon Instance { get; private set; }
 

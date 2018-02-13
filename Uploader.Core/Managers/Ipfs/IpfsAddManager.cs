@@ -7,7 +7,7 @@ using Uploader.Core.Models;
 
 namespace Uploader.Core.Managers.Ipfs
 {
-    public static class IpfsAddManager
+    internal static class IpfsAddManager
     {
         private static FileItem currentFileItem;
 

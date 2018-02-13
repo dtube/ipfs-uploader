@@ -13,7 +13,7 @@ using Uploader.Core.Models;
 
 namespace Uploader.Core.Managers.Video
 {
-    public class VideoGpuEncodeDaemon : BaseDaemon
+    internal class VideoGpuEncodeDaemon : BaseDaemon
     {
         public static VideoGpuEncodeDaemon Instance { get; private set; }
 

@@ -10,7 +10,7 @@ using Uploader.Core.Models;
 
 namespace Uploader.Core.Managers.Video
 {
-    public class SpriteManager
+    internal class SpriteManager
     {
         public static bool Encode(FileItem fileItem)
         {

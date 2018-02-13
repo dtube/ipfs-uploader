@@ -10,7 +10,7 @@ using Uploader.Core.Models;
 
 namespace Uploader.Core.Managers.Video
 {
-    public class FfProbeProcessManager
+    internal class FfProbeProcessManager
     {
         private FileItem _fileItem;
 

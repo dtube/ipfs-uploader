@@ -8,7 +8,7 @@ using Uploader.Core.Managers.Front;
 
 namespace Uploader.Core.Models
 {
-    public class FileContainer
+    internal class FileContainer
     {
         private static long nbInstance;
 

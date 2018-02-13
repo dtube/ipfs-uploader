@@ -9,7 +9,7 @@ using Uploader.Core.Managers.Video;
 
 namespace Uploader.Core.Models
 {
-    public class FileItem
+    internal class FileItem
     {
         public static FileItem NewSourceVideoFileItem(FileContainer fileContainer)
         {

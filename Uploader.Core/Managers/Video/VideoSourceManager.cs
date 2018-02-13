@@ -7,7 +7,7 @@ using Uploader.Core.Models;
 
 namespace Uploader.Core.Managers.Video
 {
-    public static class VideoSourceManager
+    internal static class VideoSourceManager
     {
         public static bool SuccessAnalyseSource(FileItem sourceFile, ProcessItem processItem)
         {

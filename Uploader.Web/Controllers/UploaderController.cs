@@ -9,10 +9,7 @@ using Uploader.Web.Attributes;
 using Uploader.Web.Helper;
 
 using Uploader.Core.Managers.Common;
-using Uploader.Core.Managers.Ipfs;
 using Uploader.Core.Managers.Front;
-using Uploader.Core.Managers.Video;
-using Uploader.Core.Models;
 
 namespace Uploader.Web.Controllers
 {

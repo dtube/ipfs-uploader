@@ -1,6 +1,6 @@
 namespace Uploader.Core.Models
 {
-    public enum TypeFile
+    internal enum TypeFile
     {
         Undefined,
         SourceVideo,

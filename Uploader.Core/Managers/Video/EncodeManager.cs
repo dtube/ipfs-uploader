@@ -8,7 +8,7 @@ using Uploader.Core.Models;
 
 namespace Uploader.Core.Managers.Video
 {
-    public static class EncodeManager
+    internal static class EncodeManager
     {
         public static bool AudioVideoCpuEncoding(FileItem fileItem)
         {

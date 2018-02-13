@@ -1,6 +1,6 @@
 namespace Uploader.Core.Models
 {
-    public enum ProcessStep
+    internal enum ProcessStep
     {
         Init,
         Waiting,

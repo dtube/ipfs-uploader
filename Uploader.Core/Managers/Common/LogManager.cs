@@ -4,7 +4,7 @@ using System.IO;
 
 namespace Uploader.Core.Managers.Common
 {
-    public static class LogManager
+    internal static class LogManager
     {
         private static object _lockEncodeFile = new object();
         private static object _lockIpfsFile = new object();

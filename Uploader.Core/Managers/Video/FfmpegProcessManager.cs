@@ -8,7 +8,7 @@ using Uploader.Core.Models;
 
 namespace Uploader.Core.Managers.Video
 {
-    public class FfmpegProcessManager
+    internal class FfmpegProcessManager
     {
         private FileItem _fileItem;
         private ProcessItem _processItem;

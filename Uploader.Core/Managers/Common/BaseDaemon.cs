@@ -13,7 +13,7 @@ using Uploader.Core.Models;
 
 namespace Uploader.Core.Managers.Common
 {
-    public abstract class BaseDaemon
+    internal abstract class BaseDaemon
     {
         private ConcurrentQueue<FileItem> queueFileItems = new ConcurrentQueue<FileItem>();
 

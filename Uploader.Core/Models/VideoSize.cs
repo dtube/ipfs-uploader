@@ -1,6 +1,6 @@
 namespace Uploader.Core.Models
 {
-    public enum VideoSize
+    internal enum VideoSize
     {
         Undefined,
         Source,

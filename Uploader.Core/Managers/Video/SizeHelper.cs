@@ -2,7 +2,7 @@ using System;
 
 namespace Uploader.Core.Managers.Video
 {
-    public static class SizeHelper
+    internal static class SizeHelper
     {
         /// <summary>
         /// 

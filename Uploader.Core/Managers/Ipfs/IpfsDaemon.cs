@@ -11,7 +11,7 @@ using Uploader.Core.Models;
 
 namespace Uploader.Core.Managers.Ipfs
 {
-    public class IpfsDaemon : BaseDaemon
+    internal class IpfsDaemon : BaseDaemon
     {
         public static IpfsDaemon Instance { get; private set; }
 
