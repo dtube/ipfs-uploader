@@ -13,10 +13,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-using Uploader.Core.Managers.Front;
-using Uploader.Core.Managers.Ipfs;
-using Uploader.Core.Managers.Video;
-
 namespace Uploader.Web
 {
     public class Startup
