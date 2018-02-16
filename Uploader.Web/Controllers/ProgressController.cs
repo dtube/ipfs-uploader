@@ -18,16 +18,16 @@ namespace Uploader.Web.Controllers
     {
         [HttpGet]
         [Route("/getStatus")]
-        public JsonResult GetStatus(bool details = false)
+        public IActionResult GetStatus(bool details = false)
         {
-            return Json(ProgressManager.GetStats(details));
+            return Ok(ProgressManager.GetStats(details));
         }
 
         [HttpGet]
         [Route("/getProgressByToken/{token}")]
-        public ActionResult GetProgressByToken(Guid token)
+        public IActionResult GetProgressByToken(Guid token)
         {
-            var result = ProgressManager.GetFileContainerByToken(token);
+            dynamic result = ProgressManager.GetFileContainerByToken(token);
             if (result == null)
             {
                 return BadRequest(new
@@ -35,14 +35,14 @@ namespace Uploader.Web.Controllers
                     errorMessage = "token not exist"
                 });
             }
-            return Json(result);
+            return Ok(result);
         }
 
         [HttpGet]
         [Route("/getProgressBySourceHash/{sourceHash}")]
-        public ActionResult GetProgressBySourceHash(string sourceHash)
+        public IActionResult GetProgressBySourceHash(string sourceHash)
         {
-            var result = ProgressManager.GetFileContainerBySourceHash(sourceHash);
+            dynamic result = ProgressManager.GetFileContainerBySourceHash(sourceHash);
             if (result == null)
             {
                 return BadRequest(new
@@ -50,7 +50,7 @@ namespace Uploader.Web.Controllers
                     errorMessage = "hash not exist"
                 });
             }
-            return Json(result);
+            return Ok(result);
         }
     }
 }

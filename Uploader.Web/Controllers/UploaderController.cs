@@ -31,7 +31,7 @@ namespace Uploader.Web.Controllers
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("Exception Upload Video : {0}", ex);
+                Debug.WriteLine($"Exception ComputeVideo : {ex}");
                 return BadRequest(new
                 {
                     errorMessage = ex.Message
@@ -54,7 +54,7 @@ namespace Uploader.Web.Controllers
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("Exception OverlayImage : {0}", ex);
+                Debug.WriteLine($"Exception ComputeOverlay : {ex}");
                 return BadRequest(new
                 {
                     errorMessage = ex.Message
@@ -75,7 +75,7 @@ namespace Uploader.Web.Controllers
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("Exception ConvertSubtitle : {0}", ex);
+                Debug.WriteLine($"Exception ConvertSubtitle : {ex}");
                 return BadRequest(new
                 {
                     errorMessage = ex.Message
