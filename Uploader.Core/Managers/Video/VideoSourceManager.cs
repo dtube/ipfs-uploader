@@ -22,7 +22,7 @@ namespace Uploader.Core.Managers.Video
             try
             {
                 var ffProbeProcessManager = new FfProbeProcessManager(sourceFile);
-                ffProbeProcessManager.StartProcess(VideoSettings.Instance.FfProbeTimeout);
+                ffProbeProcessManager.FillInfo(VideoSettings.Instance.FfProbeTimeout);
             }
             catch(Exception ex)
             {

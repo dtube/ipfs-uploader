@@ -1,9 +1,5 @@
 using System;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 using Uploader.Core.Managers.Common;
 using Uploader.Core.Models;
@@ -22,64 +18,25 @@ namespace Uploader.Core.Managers.Video
             _fileItem = fileItem;
         }
 
-        public void StartProcess(int timeout)
+        public void FillInfo(int timeout)
         {
             // https://trac.ffmpeg.org/wiki/FFprobeTips
             string arguments = $"-v error -of default=nw=1 -show_entries stream_tags=rotate:format=size,duration:stream=index,codec_name,pix_fmt,height,width,duration,nb_frames,avg_frame_rate,bit_rate {Path.GetFileName(_fileItem.SourceFilePath)}";
 
-            var processStartInfo = new ProcessStartInfo();
-            processStartInfo.FileName = "ffprobe";
-
-            processStartInfo.RedirectStandardOutput = true;
-            processStartInfo.RedirectStandardError = true;
-            processStartInfo.WorkingDirectory = TempFileManager.GetTempDirectory();
-
-            processStartInfo.UseShellExecute = false;
-            processStartInfo.ErrorDialog = false;
-            processStartInfo.CreateNoWindow = true;
-            processStartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-
-            processStartInfo.Arguments = arguments;
-
-            LogManager.AddEncodingMessage(processStartInfo.FileName + " " + processStartInfo.Arguments, "Launch command");
-
-            using(Process process = Process.Start(processStartInfo))
+            var process = new ProcessManager("ffprobe", arguments);
+            LogManager.AddEncodingMessage("ffprobe" + " " + arguments, "Launch command");
+            process.Launch(timeout);
+            
+            foreach (string output in process.DataOutput.ToString().Split(Environment.NewLine))
             {
-                process.OutputDataReceived += new DataReceivedEventHandler(OutputDataReceived);
-                process.ErrorDataReceived += new DataReceivedEventHandler(OutputErrorDataReceived);
-
-                process.BeginOutputReadLine();
-                process.BeginErrorReadLine();
-
-                bool success = process.WaitForExit(timeout * 1000);
-                if (!success)
-                {
-                    throw new InvalidOperationException("Timeout : Le fichier n'a pas pu être analysé dans le temps imparti.");
-                }
-
-                if (process.ExitCode != 0)
-                {
-                    throw new InvalidOperationException($"Le fichier n'a pas pu être analysé, erreur {process.ExitCode}.");
-                }
-
-                // attendre la lecture de tous les champs
-                for (int i = 0; i < 10; i++)
-                {
-                    if(_fileItem.SuccessGetSourceInfo())
-                        break;
-                    
-                    Task.Delay(100).Wait();
-                }                    
+                Fill(output);
             }
         }
 
-        private void OutputDataReceived(object sender, DataReceivedEventArgs e)
+        private void Fill(string output)
         {
-            string output = e.Data;
             if (string.IsNullOrWhiteSpace(output))
                 return;
-
-            Debug.WriteLine(output);
 
             if(!_fileItem.VideoDuration.HasValue && output.StartsWith("duration="))
             {
@@ -121,15 +78,6 @@ namespace Uploader.Core.Managers.Video
             {
                 _fileItem.VideoRotate = Convert.ToInt32(output.Split('=')[1]);
             }
-        }
-
-        private void OutputErrorDataReceived(object sender, DataReceivedEventArgs e)
-        {
-            string output = e.Data;
-            if (string.IsNullOrWhiteSpace(output))
-                return;
-
-            Debug.WriteLine(output);
         }
     }
 }
