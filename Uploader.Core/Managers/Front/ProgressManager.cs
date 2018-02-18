@@ -376,6 +376,12 @@ namespace Uploader.Core.Managers.Front
                         ipfsAddSource = IpfsResultJson(fileContainer.SourceFileItem),
                         ipfsAddOverlay = IpfsResultJson(fileContainer.OverlayFileItem)
                     };
+
+                case TypeContainer.Subtitle:
+                    return new
+                    {
+                        ipfsAddSource = IpfsResultJson(fileContainer.SubtitleFileItem)
+                    };
             }
 
             Debug.WriteLine("Type container non géré " + fileContainer.TypeContainer);

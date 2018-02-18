@@ -16,8 +16,10 @@ namespace Uploader.Core.Managers.Front
             FileContainer fileContainer = FileContainer.NewSubtitleContainer();
             string outputfilePath = Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".vtt");
 
-            if (!IsValidVTT(text))
+            if (!IsValidVTT(text)) {
+                fileContainer.SubtitleFileItem.IpfsProcess.SetErrorMessage("Not a valid WEBVTT file");
                 return fileContainer.ProgressToken;
+            } 
 
             try
             {
