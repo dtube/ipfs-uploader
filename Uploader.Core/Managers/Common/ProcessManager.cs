@@ -12,12 +12,17 @@ namespace Uploader.Core.Managers.Common
 
         public int ExitCode { get; private set; }
 
-        public StringBuilder DataOutput { get; private set; }
+        public StringBuilder DataOutput { get; private set; } = new StringBuilder();
 
-        public StringBuilder ErrorOutput { get; private set; }
+        public StringBuilder ErrorOutput { get; private set; } = new StringBuilder();
 
         public ProcessManager(string fileName, string arguments)
         {
+            if(string.IsNullOrWhiteSpace(fileName))
+                throw new ArgumentNullException(nameof(fileName));
+            if(string.IsNullOrWhiteSpace(arguments))
+                throw new ArgumentNullException(nameof(arguments));
+
             _processStartInfo = new ProcessStartInfo();
             _processStartInfo.FileName = fileName;
             _processStartInfo.Arguments = arguments;
@@ -36,66 +41,96 @@ namespace Uploader.Core.Managers.Common
         {
             Debug.WriteLine(_processStartInfo.FileName + " " + _processStartInfo.Arguments, "Launch command");
 
-            using(Process process = Process.Start(_processStartInfo))
+            try
             {
-                DataOutput = new StringBuilder();
-                ErrorOutput = new StringBuilder();
-
-                process.OutputDataReceived += new DataReceivedEventHandler(OutputDataReceived);
-                process.ErrorDataReceived += new DataReceivedEventHandler(ErrorDataReceived);
-
-                process.BeginOutputReadLine();
-                process.BeginErrorReadLine();
-
-                bool success = process.WaitForExit(timeout * 1000);
-
-                HasTimeout = !success;
-                ExitCode = process.ExitCode;
-
-                if (HasTimeout)
+                using(Process process = Process.Start(_processStartInfo))
                 {
-                    Debug.WriteLine("Timeout : Le process n'a pas pu être exécuté dans le temps imparti.");
-                    return false;
-                }
+                    process.OutputDataReceived += new DataReceivedEventHandler(OutputDataReceived);
+                    process.ErrorDataReceived += new DataReceivedEventHandler(ErrorDataReceived);
 
-                if (ExitCode != 0)
-                {
-                    Debug.WriteLine($"Error : Le process n'a pas pu être exécuté correctement, erreur {process.ExitCode}.");
-                    return false;
-                }
+                    process.BeginOutputReadLine();
+                    process.BeginErrorReadLine();
 
-                return true;
+                    bool success = process.WaitForExit(timeout * 1000);
+
+                    HasTimeout = !success;
+                    ExitCode = process.ExitCode;
+
+                    if (HasTimeout)
+                    {
+                        Debug.WriteLine("Timeout : Le process n'a pas pu être exécuté dans le temps imparti.");
+                        return false;
+                    }
+
+                    if (ExitCode != 0)
+                    {
+                        Debug.WriteLine($"Error : Le process n'a pas pu être exécuté correctement, erreur {process.ExitCode}.");
+                        return false;
+                    }
+
+                    return true;
+                }
             }
+            catch
+            {
+                return false;
+            }            
         }
 
         public bool Launch(int timeout)
         {
-            using(Process process = Process.Start(_processStartInfo))
+            Debug.WriteLine(_processStartInfo.FileName + " " + _processStartInfo.Arguments, "Launch command");
+
+            try
             {
-                bool success = process.WaitForExit(timeout * 1000);
-
-                DataOutput = new StringBuilder(process.StandardOutput.ReadToEnd());
-                ErrorOutput = new StringBuilder(process.StandardError.ReadToEnd());
-
-                Debug.WriteLine(DataOutput);
-                Debug.WriteLine(ErrorOutput);
-
-                HasTimeout = !success;
-                ExitCode = process.ExitCode;
-
-                if (HasTimeout)
+                using(Process process = Process.Start(_processStartInfo))
                 {
-                    Debug.WriteLine("Timeout : Le process n'a pas pu être exécuté dans le temps imparti.");
-                    return false;
-                }
+                    bool success = process.WaitForExit(timeout * 1000);
 
-                if (ExitCode != 0)
+                    DataOutput = DataOutput.Append(process.StandardOutput.ReadToEnd());
+                    ErrorOutput = ErrorOutput.Append(process.StandardError.ReadToEnd());
+
+                    Debug.WriteLine(DataOutput);
+                    Debug.WriteLine(ErrorOutput);
+
+                    HasTimeout = !success;
+                    ExitCode = process.ExitCode;
+
+                    if (HasTimeout)
+                    {
+                        Debug.WriteLine("Timeout : Le process n'a pas pu être exécuté dans le temps imparti.");
+                        return false;
+                    }
+
+                    if (ExitCode != 0)
+                    {
+                        Debug.WriteLine($"Error : Le process n'a pas pu être exécuté correctement, erreur {process.ExitCode}.");
+                        return false;
+                    }
+
+                    return true;
+                }
+            }
+            catch
+            {
+                return false;
+            }            
+        }
+
+        public bool LaunchWithoutTracking()
+        {
+            Debug.WriteLine(_processStartInfo.FileName + " " + _processStartInfo.Arguments, "Launch command");
+
+            try
+            {
+                using(Process process = Process.Start(_processStartInfo))
                 {
-                    Debug.WriteLine($"Error : Le process n'a pas pu être exécuté correctement, erreur {process.ExitCode}.");
-                    return false;
-                }
-
-                return true;
+                    return !process.HasExited || process.ExitCode == 0;
+                }   
+            }
+            catch
+            {
+                return false;
             }
         }
 

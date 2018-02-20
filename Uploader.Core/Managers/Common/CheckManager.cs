@@ -2,21 +2,49 @@ namespace Uploader.Core.Managers.Common
 {
     public static class CheckManager
     {
-        public static bool CheckIpfs()
+        public static bool CheckAndLaunchIpfsDaemon()
         {
-            var process = new ProcessManager("ipfs", "daemon");
-            bool success = process.Launch(1);
-            if(!success)
-                return false;
+            //IPFS_PATH=~/monDossierIPFS/ ipfs init
+            //todo comment changer sous windows le chemin des fichiers ipfs
 
-            if(process.DataOutput.ToString().Contains("please run: 'ipfs init'"))
+            var process0 = new ProcessManager("ipfs", "version");
+            bool success0 = process0.Launch(2);
+            if(!success0)
             {
-                //todo run ipfs init
-
-                    //si process ipfs init en erreur, return false
+                return false;
+            }
+            if(!process0.DataOutput.ToString().Contains("ipfs version 0.4."))
+            {
+                return false;
             }
 
-            return true;
+            var process1 = new ProcessManager("ipfs", "stats bw");
+            bool success1 = process1.Launch(5);
+            if(success1)
+                return true; //le process ipfs est déjà lancé
+            
+            bool mustStart = false;
+            if(process1.ErrorOutput.ToString().Contains("please run: 'ipfs init'"))
+            {
+                var process2 = new ProcessManager("ipfs", "init");
+                bool success2 = process2.Launch(10);
+                if(!success2)
+                {
+                    return false; // echec ipfs init
+                }
+                if(!process2.DataOutput.ToString().Contains("generating 2048-bit RSA keypair...done"))
+                {
+                    return false;  // echec ipfs init
+                }
+                mustStart = true;            
+            }
+            if(mustStart || process1.ErrorOutput.ToString().Contains("Error: This command must be run in online mode. Try"))
+            {
+                var process3 = new ProcessManager("ipfs", "daemon");
+                return process3.LaunchWithoutTracking();  // echec ipfs daemon
+            }
+
+            return false;
         }
 
         public static bool CheckFfmpeg()
