@@ -56,6 +56,8 @@ namespace Uploader.Core.Managers.Front
                 {
                     switch (v)
                     {
+                        case "240p":
+                            return VideoSize.F240p;
                         case "360p":
                             return VideoSize.F360p;
                         case "480p":

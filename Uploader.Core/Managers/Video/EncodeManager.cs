@@ -141,6 +141,12 @@ namespace Uploader.Core.Managers.Video
         {
             switch (videoSize)
             {
+                case VideoSize.F240p:
+                    {
+                        Tuple<int, int> finalSize = SizeHelper.GetSize(width, height, 426, 240);
+                        return $"{finalSize.Item1}:{finalSize.Item2}";
+                    }
+
                 case VideoSize.F360p:
                     {
                         Tuple<int, int> finalSize = SizeHelper.GetSize(width, height, 640, 360);
@@ -174,6 +180,9 @@ namespace Uploader.Core.Managers.Video
         {
             switch (videoSize)
             {
+                case VideoSize.F240p:
+                        return "100k";
+
                 case VideoSize.F360p:
                         return "200k";
 
