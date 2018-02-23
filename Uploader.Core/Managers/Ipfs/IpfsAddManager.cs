@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-
+using Microsoft.Extensions.Logging;
 using Uploader.Core.Managers.Common;
 using Uploader.Core.Models;
 
@@ -17,7 +17,7 @@ namespace Uploader.Core.Managers.Ipfs
             {
                 currentFileItem = fileItem;
 
-                LogManager.AddIpfsMessage("FileName " + Path.GetFileName(currentFileItem.OutputFilePath), "Start");
+                LogManager.AddIpfsMessage(LogLevel.Information, "FileName " + Path.GetFileName(currentFileItem.OutputFilePath), "Start");
 
                 currentFileItem.IpfsHash = null;
                 currentFileItem.IpfsProcess.StartProcessDateTime();
@@ -42,7 +42,7 @@ namespace Uploader.Core.Managers.Ipfs
                 processStartInfo.CreateNoWindow = true;
                 processStartInfo.WindowStyle = ProcessWindowStyle.Hidden;
 
-                LogManager.AddIpfsMessage(processStartInfo.FileName + " " + processStartInfo.Arguments, "Launch command");
+                LogManager.AddIpfsMessage(LogLevel.Information, processStartInfo.FileName + " " + processStartInfo.Arguments, "Launch command");
                 using(Process process = Process.Start(processStartInfo))
                 {
                     process.OutputDataReceived += new DataReceivedEventHandler(OutputDataReceived);
@@ -64,11 +64,11 @@ namespace Uploader.Core.Managers.Ipfs
                 }
 
                 currentFileItem.IpfsProcess.EndProcessDateTime();
-                LogManager.AddIpfsMessage("Hash " + currentFileItem.IpfsHash + " / FileSize " + currentFileItem.FileSize, "End");
+                LogManager.AddIpfsMessage(LogLevel.Information, "Hash " + currentFileItem.IpfsHash + " / FileSize " + currentFileItem.FileSize, "End");
             }
             catch (Exception ex)
             {
-                LogManager.AddIpfsMessage("FileSize " + currentFileItem.FileSize + " / Progress " + currentFileItem.IpfsProcess.Progress + " / Exception " + ex, "Exception");
+                LogManager.AddIpfsMessage(LogLevel.Critical, "FileSize " + currentFileItem.FileSize + " / Progress " + currentFileItem.IpfsProcess.Progress + " / Exception " + ex, "Exception");
                 currentFileItem.IpfsProcess.SetErrorMessage("Exception");
             }
         }

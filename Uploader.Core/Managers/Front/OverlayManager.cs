@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-
+using Microsoft.Extensions.Logging;
 using Uploader.Core.Managers.Common;
 using Uploader.Core.Managers.Ipfs;
 using Uploader.Core.Models;
@@ -20,28 +20,28 @@ namespace Uploader.Core.Managers.Front
 
             try
             {
-                LogManager.AddOverlayMessage("SourceFileName " + Path.GetFileName(sourceFile.SourceFilePath), "Start Crop");
+                LogManager.AddOverlayMessage(LogLevel.Information, "SourceFileName " + Path.GetFileName(sourceFile.SourceFilePath), "Start Crop");
                 // resize + crop source image                
                 string arguments = $"{Path.GetFileName(sourceFile.SourceFilePath)} -resize \"{_finalWidth}x{_finalHeight}^\" -gravity Center -crop {_finalWidth}x{_finalHeight}+0+0 {Path.GetFileName(sourceFile.TempFilePath)}";
                 var process = new ProcessManager(Path.Combine(GeneralSettings.Instance.ImageMagickPath, "convert"), arguments);
-                LogManager.AddOverlayMessage("convert" + " " + arguments, "Launch command");
+                LogManager.AddOverlayMessage(LogLevel.Information, "convert" + " " + arguments, "Launch command");
                 bool success = process.Launch(5);
                 if(!success)
                 {
                     TempFileManager.SafeDeleteTempFile(sourceFile.SourceFilePath);
                     TempFileManager.SafeDeleteTempFile(sourceFile.TempFilePath);
-                    LogManager.AddOverlayMessage("Erreur convert", "Erreur");
+                    LogManager.AddOverlayMessage(LogLevel.Error, "Erreur convert", "Erreur");
                     return fileContainer.ProgressToken;
                 }
                 sourceFile.SetOutputFilePath(sourceFile.TempFilePath);
-                LogManager.AddOverlayMessage("OutputFileName " + Path.GetFileName(sourceFile.OutputFilePath), "End Crop");
+                LogManager.AddOverlayMessage(LogLevel.Information, "OutputFileName " + Path.GetFileName(sourceFile.OutputFilePath), "End Crop");
                 IpfsDaemon.Instance.Queue(sourceFile);
             }
             catch(Exception ex)
             {
                 TempFileManager.SafeDeleteTempFile(sourceFile.SourceFilePath);
                 TempFileManager.SafeDeleteTempFile(sourceFile.TempFilePath);
-                LogManager.AddOverlayMessage(ex.ToString(), "Exception");
+                LogManager.AddOverlayMessage(LogLevel.Critical, ex.ToString(), "Exception");
                 return fileContainer.ProgressToken;
             }
 
@@ -55,26 +55,26 @@ namespace Uploader.Core.Managers.Front
 
             try
             {
-                LogManager.AddOverlayMessage("SourceFileName " + Path.GetFileName(fileContainer.OverlayFileItem.SourceFilePath), "Start Overlay");
+                LogManager.AddOverlayMessage(LogLevel.Information, "SourceFileName " + Path.GetFileName(fileContainer.OverlayFileItem.SourceFilePath), "Start Overlay");
                 // watermark source image
                 string arguments = $"-gravity NorthEast {_overlayImagePath} {Path.GetFileName(fileContainer.OverlayFileItem.SourceFilePath)} {Path.GetFileName(fileContainer.OverlayFileItem.TempFilePath)}";
                 var process = new ProcessManager(Path.Combine(GeneralSettings.Instance.ImageMagickPath, "composite"), arguments);
-                LogManager.AddOverlayMessage("composite" + " " + arguments, "Launch command");
+                LogManager.AddOverlayMessage(LogLevel.Information, "composite" + " " + arguments, "Launch command");
                 bool success = process.Launch(5);
                 if(!success)
                 {
                     TempFileManager.SafeDeleteTempFile(fileContainer.OverlayFileItem.TempFilePath);
-                    LogManager.AddOverlayMessage("Erreur composite", "Erreur");
+                    LogManager.AddOverlayMessage(LogLevel.Error, "Erreur composite", "Erreur");
                     return fileContainer.ProgressToken;
                 }
                 fileContainer.OverlayFileItem.SetOutputFilePath(fileContainer.OverlayFileItem.TempFilePath);
-                LogManager.AddOverlayMessage("OutputFileName " + Path.GetFileName(fileContainer.OverlayFileItem.OutputFilePath), "End Overlay");
+                LogManager.AddOverlayMessage(LogLevel.Information, "OutputFileName " + Path.GetFileName(fileContainer.OverlayFileItem.OutputFilePath), "End Overlay");
                 IpfsDaemon.Instance.Queue(fileContainer.OverlayFileItem);
             }
             catch(Exception ex)
             {
                 TempFileManager.SafeDeleteTempFile(fileContainer.OverlayFileItem.TempFilePath);
-                LogManager.AddOverlayMessage(ex.ToString(), "Exception");
+                LogManager.AddOverlayMessage(LogLevel.Critical, ex.ToString(), "Exception");
                 return fileContainer.ProgressToken;
             }
 

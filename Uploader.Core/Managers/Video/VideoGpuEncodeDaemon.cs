@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-
+using Microsoft.Extensions.Logging;
 using Uploader.Core.Managers.Common;
 using Uploader.Core.Managers.Front;
 using Uploader.Core.Managers.Ipfs;
@@ -29,7 +29,7 @@ namespace Uploader.Core.Managers.Video
             if (!fileItem.VideoGpuEncodeProcess.CanProcess())
             {
                 string message = "FileName " + Path.GetFileName(fileItem.OutputFilePath) + " car le client est déconnecté";
-                LogManager.AddEncodingMessage(message, "Annulation");
+                LogManager.AddEncodingMessage(LogLevel.Warning, message, "Annulation");
                 fileItem.VideoGpuEncodeProcess.CancelCascade("Le client est déconnecté.");
                 return;
             }
@@ -54,7 +54,7 @@ namespace Uploader.Core.Managers.Video
 
         protected override void LogException(FileItem fileItem, Exception ex)
         {
-            LogManager.AddEncodingMessage(ex.ToString(), "Exception non gérée");                        
+            LogManager.AddEncodingMessage(LogLevel.Critical, ex.ToString(), "Exception non gérée");                        
             fileItem.VideoGpuEncodeProcess.SetErrorMessage("Exception non gérée");
         }
 

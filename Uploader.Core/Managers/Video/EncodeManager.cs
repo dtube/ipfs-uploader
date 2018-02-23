@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-
+using Microsoft.Extensions.Logging;
 using Uploader.Core.Managers.Common;
 using Uploader.Core.Managers.Ipfs;
 using Uploader.Core.Models;
@@ -15,7 +15,7 @@ namespace Uploader.Core.Managers.Video
             try
             {
                 FileItem sourceFile = fileItem.FileContainer.SourceFileItem;
-                LogManager.AddEncodingMessage("SourceFilePath " + Path.GetFileName(sourceFile.SourceFilePath) + " -> " + fileItem.VideoSize, "Start AudioVideoCpuEncoding");
+                LogManager.AddEncodingMessage(LogLevel.Information, "SourceFilePath " + Path.GetFileName(sourceFile.SourceFilePath) + " -> " + fileItem.VideoSize, "Start AudioVideoCpuEncoding");
                 fileItem.AudioVideoCpuEncodeProcess.StartProcessDateTime();
 
                 string size = GetSize(fileItem.VideoSize, sourceFile.VideoWidth.Value, sourceFile.VideoHeight.Value);
@@ -39,14 +39,14 @@ namespace Uploader.Core.Managers.Video
                 ffmpegProcessManager.StartProcess(arguments, VideoSettings.Instance.EncodeTimeout);
 
                 fileItem.SetOutputFilePath(fileItem.TempFilePath);
-                LogManager.AddEncodingMessage("OutputFileName " + Path.GetFileName(fileItem.OutputFilePath) + " / FileSize " + fileItem.FileSize + " / Format " +fileItem.VideoSize, "End AudioVideoCpuEncoding");
+                LogManager.AddEncodingMessage(LogLevel.Information, "OutputFileName " + Path.GetFileName(fileItem.OutputFilePath) + " / FileSize " + fileItem.FileSize + " / Format " +fileItem.VideoSize, "End AudioVideoCpuEncoding");
                 fileItem.AudioVideoCpuEncodeProcess.EndProcessDateTime();
 
                 return true;
             }
             catch (Exception ex)
             {
-                LogManager.AddEncodingMessage("Video Duration " + fileItem.VideoDuration + " / FileSize " + fileItem.FileSize + " / Progress " + fileItem.AudioVideoCpuEncodeProcess.Progress + " / Exception : " + ex, "Exception AudioVideoCpuEncoding");
+                LogManager.AddEncodingMessage(LogLevel.Critical, "Video Duration " + fileItem.VideoDuration + " / FileSize " + fileItem.FileSize + " / Progress " + fileItem.AudioVideoCpuEncodeProcess.Progress + " / Exception : " + ex, "Exception AudioVideoCpuEncoding");
                 fileItem.AudioVideoCpuEncodeProcess.SetErrorMessage("Exception");
                 TempFileManager.SafeDeleteTempFile(fileItem.TempFilePath);
                 return false;
@@ -57,7 +57,7 @@ namespace Uploader.Core.Managers.Video
         {
             try
             {
-                LogManager.AddEncodingMessage("SourceFilePath " + Path.GetFileName(fileItem.SourceFilePath), "Start AudioCpuEncoding");
+                LogManager.AddEncodingMessage(LogLevel.Information, "SourceFilePath " + Path.GetFileName(fileItem.SourceFilePath), "Start AudioCpuEncoding");
                 fileItem.AudioCpuEncodeProcess.StartProcessDateTime();
 
                 if(fileItem.FileContainer.SourceFileItem.AudioCodec == "aac")
@@ -74,14 +74,14 @@ namespace Uploader.Core.Managers.Video
                 }
 
                 fileItem.SetVideoAacTempFilePath(fileItem.TempFilePath);
-                LogManager.AddEncodingMessage("OutputFileName " + Path.GetFileName(fileItem.VideoAacTempFilePath) + " / FileSize " + fileItem.FileSize + " / Format " +fileItem.VideoSize, "End AudioCpuEncoding");
+                LogManager.AddEncodingMessage(LogLevel.Information, "OutputFileName " + Path.GetFileName(fileItem.VideoAacTempFilePath) + " / FileSize " + fileItem.FileSize + " / Format " +fileItem.VideoSize, "End AudioCpuEncoding");
                 fileItem.AudioCpuEncodeProcess.EndProcessDateTime();
 
                 return true;
             }
             catch (Exception ex)
             {
-                LogManager.AddEncodingMessage("Video Duration " + fileItem.VideoDuration + " / FileSize " + fileItem.FileSize + " / Progress " + fileItem.AudioCpuEncodeProcess.Progress + " / Exception : " + ex, "Exception AudioCpuEncoding");
+                LogManager.AddEncodingMessage(LogLevel.Critical, "Video Duration " + fileItem.VideoDuration + " / FileSize " + fileItem.FileSize + " / Progress " + fileItem.AudioCpuEncodeProcess.Progress + " / Exception : " + ex, "Exception AudioCpuEncoding");
                 fileItem.AudioCpuEncodeProcess.SetErrorMessage("Exception");
                 TempFileManager.SafeDeleteTempFile(fileItem.TempFilePath);
                 return false;
@@ -92,7 +92,7 @@ namespace Uploader.Core.Managers.Video
         {
             try
             {
-                LogManager.AddEncodingMessage("SourceFilePath " + Path.GetFileName(fileItem.VideoAacTempFilePath) + " -> 1:N formats", "Start VideoGpuEncoding");
+                LogManager.AddEncodingMessage(LogLevel.Information, "SourceFilePath " + Path.GetFileName(fileItem.VideoAacTempFilePath) + " -> 1:N formats", "Start VideoGpuEncoding");
                 fileItem.VideoGpuEncodeProcess.StartProcessDateTime();
 
                 // encoding video 1:N formats
@@ -117,7 +117,7 @@ namespace Uploader.Core.Managers.Video
                 foreach (var item in fileItem.FileContainer.EncodedFileItems)
                 {
                     item.SetOutputFilePath(item.TempFilePath);
-                    LogManager.AddEncodingMessage("OutputFileName " + Path.GetFileName(item.OutputFilePath) + " / FileSize " + item.FileSize + " / Format " + item.VideoSize, "End VideoGpuEncoding");
+                    LogManager.AddEncodingMessage(LogLevel.Information, "OutputFileName " + Path.GetFileName(item.OutputFilePath) + " / FileSize " + item.FileSize + " / Format " + item.VideoSize, "End VideoGpuEncoding");
                 }
                 fileItem.VideoGpuEncodeProcess.EndProcessDateTime();
                 TempFileManager.SafeDeleteTempFile(fileItem.VideoAacTempFilePath);
@@ -126,7 +126,7 @@ namespace Uploader.Core.Managers.Video
             }
             catch (Exception ex)
             {
-                LogManager.AddEncodingMessage("Video Duration " + fileItem.VideoDuration + " / FileSize " + fileItem.FileSize + " / Progress " + fileItem.VideoGpuEncodeProcess.Progress + " / Exception : " + ex, "Exception VideoGpuEncoding");
+                LogManager.AddEncodingMessage(LogLevel.Critical, "Video Duration " + fileItem.VideoDuration + " / FileSize " + fileItem.FileSize + " / Progress " + fileItem.VideoGpuEncodeProcess.Progress + " / Exception : " + ex, "Exception VideoGpuEncoding");
                 fileItem.VideoGpuEncodeProcess.SetErrorMessage("Exception");
                 foreach (FileItem item in fileItem.FileContainer.EncodedFileItems)
                 {

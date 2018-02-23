@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-
+using Microsoft.Extensions.Logging;
 using Uploader.Core.Managers.Common;
 using Uploader.Core.Managers.Ipfs;
 using Uploader.Core.Models;
@@ -26,14 +26,14 @@ namespace Uploader.Core.Managers.Video
             }
             catch(Exception ex)
             {
-                Log(ex.ToString(), "Exception source info");
+                LogManager.AddEncodingMessage(LogLevel.Critical, ex.ToString(), "Exception source info");
             }
             
             // Si durée totale de vidéo, largeur hauteur non récupéré, on ne peut pas continuer
             if (!sourceFile.SuccessGetSourceInfo())
             {
                 string message = "Error while getting duration, height or width.";
-                Log(message + " FileName : " + Path.GetFileName(sourceFile.SourceFilePath), "Error source info");
+                LogManager.AddEncodingMessage(LogLevel.Error, message + " FileName : " + Path.GetFileName(sourceFile.SourceFilePath), "Error source info");
 
                 if(sourceFile.IpfsProcess == null)
                 {
@@ -46,7 +46,7 @@ namespace Uploader.Core.Managers.Video
                 return false;
             }
 
-            Log("SourceVideoDuration " + sourceFile.VideoDuration.Value + " / SourceVideoFileSize " + sourceFile.FileSize, "Info source");
+            LogManager.AddEncodingMessage(LogLevel.Information, "SourceVideoDuration " + sourceFile.VideoDuration.Value + " / SourceVideoFileSize " + sourceFile.FileSize, "Info source");
 
             // Désactivation encoding et sprite si dépassement de la durée maximale
             if(sourceFile.HasReachMaxVideoDurationForEncoding())
@@ -63,11 +63,6 @@ namespace Uploader.Core.Managers.Video
             }
 
             return true;
-        }
-
-        private static void Log(string message, string typeMessage)
-        {
-            LogManager.AddEncodingMessage(message, typeMessage);
         }
     }
 }

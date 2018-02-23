@@ -2,7 +2,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-
+using Microsoft.Extensions.Logging;
 using Uploader.Core.Managers.Common;
 using Uploader.Core.Models;
 
@@ -40,9 +40,9 @@ namespace Uploader.Core.Managers.Video
             processStartInfo.Arguments = arguments;
 
             if(_fileItem.TypeFile == TypeFile.SpriteVideo)
-                LogManager.AddSpriteMessage(processStartInfo.FileName + " " + processStartInfo.Arguments, "Launch command");
+                LogManager.AddSpriteMessage(LogLevel.Information, processStartInfo.FileName + " " + processStartInfo.Arguments, "Launch command");
             else
-                LogManager.AddEncodingMessage(processStartInfo.FileName + " " + processStartInfo.Arguments, "Launch command");
+                LogManager.AddEncodingMessage(LogLevel.Information, processStartInfo.FileName + " " + processStartInfo.Arguments, "Launch command");
 
             using(Process process = Process.Start(processStartInfo))
             {

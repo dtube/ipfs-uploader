@@ -59,20 +59,24 @@ namespace Uploader.Core.Managers.Common
                     if (HasTimeout)
                     {
                         Debug.WriteLine("Timeout : Le process n'a pas pu être exécuté dans le temps imparti.");
+                        //log
                         return false;
                     }
 
                     if (ExitCode != 0)
                     {
                         Debug.WriteLine($"Error : Le process n'a pas pu être exécuté correctement, erreur {process.ExitCode}.");
+                        //log
                         return false;
                     }
 
                     return true;
                 }
             }
-            catch
+            catch(Exception ex)
             {
+                Debug.WriteLine($"Exception : Le process n'a pas pu être exécuté correctement : {ex}.");
+                //log
                 return false;
             }            
         }
@@ -99,20 +103,24 @@ namespace Uploader.Core.Managers.Common
                     if (HasTimeout)
                     {
                         Debug.WriteLine("Timeout : Le process n'a pas pu être exécuté dans le temps imparti.");
+                        //log
                         return false;
                     }
 
                     if (ExitCode != 0)
                     {
                         Debug.WriteLine($"Error : Le process n'a pas pu être exécuté correctement, erreur {process.ExitCode}.");
+                        //log
                         return false;
                     }
 
                     return true;
                 }
             }
-            catch
+            catch(Exception ex)
             {
+                Debug.WriteLine($"Exception : Le process n'a pas pu être exécuté correctement : {ex}.");
+                //log
                 return false;
             }            
         }
@@ -128,8 +136,10 @@ namespace Uploader.Core.Managers.Common
                     return !process.HasExited || process.ExitCode == 0;
                 }   
             }
-            catch
+            catch(Exception ex)
             {
+                Debug.WriteLine($"Exception : Le process n'a pas pu être exécuté correctement : {ex}.");
+                //log
                 return false;
             }
         }

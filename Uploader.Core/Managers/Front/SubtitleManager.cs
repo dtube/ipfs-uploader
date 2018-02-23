@@ -2,7 +2,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
-
+using Microsoft.Extensions.Logging;
 using Uploader.Core.Managers.Common;
 using Uploader.Core.Managers.Ipfs;
 using Uploader.Core.Models;
@@ -30,7 +30,7 @@ namespace Uploader.Core.Managers.Front
             catch(Exception ex)
             {
                 TempFileManager.SafeDeleteTempFile(outputfilePath);
-                LogManager.AddSubtitleMessage(ex.ToString(), "Exception");
+                LogManager.AddSubtitleMessage(LogLevel.Critical, ex.ToString(), "Exception");
                 return fileContainer.ProgressToken;
             }
 

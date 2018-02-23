@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
-
+using Microsoft.Extensions.Logging;
 using Uploader.Core.Managers.Common;
 using Uploader.Core.Models;
 
@@ -19,7 +19,7 @@ namespace Uploader.Core.Managers.Video
             {
                 fileItem.SpriteEncodeProcess.StartProcessDateTime();
 
-                LogManager.AddSpriteMessage("SourceFilePath " + Path.GetFileName(fileItem.SourceFilePath), "Start Sprite");             
+                LogManager.AddSpriteMessage(LogLevel.Information, "SourceFilePath " + Path.GetFileName(fileItem.SourceFilePath), "Start Sprite");             
 
                 int nbImages = VideoSettings.Instance.NbSpriteImages;
                 int heightSprite = VideoSettings.Instance.HeightSpriteImages;
@@ -43,17 +43,17 @@ namespace Uploader.Core.Managers.Video
                 ffmpegProcessManager.StartProcess(arguments, VideoSettings.Instance.EncodeGetImagesTimeout);
                 string[] files = GetListImageFrom(fileItem.TempFilePath); // récupération des images
 
-                LogManager.AddSpriteMessage((files.Length - 1) + " images", "Start Combine images");
+                LogManager.AddSpriteMessage(LogLevel.Information, (files.Length - 1) + " images", "Start Combine images");
                 bool successSprite = CombineBitmap(files.Skip(files.Length - VideoSettings.Instance.NbSpriteImages).ToArray(), fileItem.TempFilePath); // création du sprite                                
                 TempFileManager.SafeDeleteTempFiles(files); // suppression des images
                 if(successSprite)
                 {
                     fileItem.SetOutputFilePath(fileItem.TempFilePath);
-                    LogManager.AddSpriteMessage("OutputFileName " + Path.GetFileName(fileItem.OutputFilePath) + " / FileSize " + fileItem.FileSize, "End Sprite");
+                    LogManager.AddSpriteMessage(LogLevel.Information, "OutputFileName " + Path.GetFileName(fileItem.OutputFilePath) + " / FileSize " + fileItem.FileSize, "End Sprite");
                 }
                 else
                 {
-                    LogManager.AddSpriteMessage("Error while combine images", "Error");
+                    LogManager.AddSpriteMessage(LogLevel.Error, "Error while combine images", "Error");
                     fileItem.SpriteEncodeProcess.SetErrorMessage("Error creation sprite while combine images");
                     return false;
                 }
@@ -63,7 +63,7 @@ namespace Uploader.Core.Managers.Video
             }
             catch (Exception ex)
             {
-                LogManager.AddSpriteMessage("Video Duration " + sourceFile.VideoDuration + " / FileSize " + fileItem.FileSize + " / Progress " + fileItem.SpriteEncodeProcess.Progress + " / Exception : " + ex, "Exception");
+                LogManager.AddSpriteMessage(LogLevel.Critical, "Video Duration " + sourceFile.VideoDuration + " / FileSize " + fileItem.FileSize + " / Progress " + fileItem.SpriteEncodeProcess.Progress + " / Exception : " + ex, "Exception");
                 fileItem.SpriteEncodeProcess.SetErrorMessage("Exception");
                 string[] files = GetListImageFrom(fileItem.TempFilePath); // récupération des images
                 TempFileManager.SafeDeleteTempFiles(files); // suppression des images
@@ -135,7 +135,7 @@ namespace Uploader.Core.Managers.Video
             }
             catch(Exception ex)
             {
-                LogManager.AddSpriteMessage(ex.ToString(), "Exception");
+                LogManager.AddSpriteMessage(LogLevel.Critical, ex.ToString(), "Exception");
                 TempFileManager.SafeDeleteTempFile(outputFilePath);
                 return false;
             }
