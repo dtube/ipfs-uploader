@@ -69,7 +69,7 @@ namespace Uploader.Core.Managers.Video
             if (string.IsNullOrWhiteSpace(output))
                 return;
 
-            Debug.WriteLine(output);
+            LogManager.AddEncodingMessage(LogLevel.Debug, output, "DEBUG");
             
             const string progressMarkup = " time=";         // " time=00:01:42.08"
 
@@ -80,7 +80,7 @@ namespace Uploader.Core.Managers.Video
             if (!output.Contains(progressMarkup) || output.Length < (output.IndexOf(progressMarkup) + progressMarkup.Length + 8))
                 return;
 
-            Debug.WriteLine(Path.GetFileName(_fileItem.SourceFilePath) + " : " + output);
+            LogManager.AddEncodingMessage(LogLevel.Debug, Path.GetFileName(_fileItem.SourceFilePath) + " : " + output, "DEBUG");
 
             // Récupérer la progression d'encodage avec la durée d'encodage traitée
             int durationDone = GetDurationInSeconds(output.Substring(output.IndexOf(progressMarkup) + progressMarkup.Length, 8))??0;

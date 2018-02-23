@@ -83,7 +83,7 @@ namespace Uploader.Core.Managers.Ipfs
             if (currentFileItem.IpfsProcess.LastTimeProgressChanged.HasValue && (DateTime.UtcNow - currentFileItem.IpfsProcess.LastTimeProgressChanged.Value).TotalMilliseconds < 1000)
                 return;
 
-            Debug.WriteLine(Path.GetFileName(currentFileItem.OutputFilePath) + " : " + output);
+            LogManager.AddIpfsMessage(LogLevel.Debug, Path.GetFileName(currentFileItem.OutputFilePath) + " : " + output, "DEBUG");
 
             // Récupérer la progression d'envoi, ex : 98.45%
             int startIndex = output.IndexOf('%') - 6;
@@ -100,7 +100,7 @@ namespace Uploader.Core.Managers.Ipfs
             if (string.IsNullOrWhiteSpace(output))
                 return;
 
-            Debug.WriteLine(Path.GetFileName(currentFileItem.OutputFilePath) + " : " + output);
+            LogManager.AddIpfsMessage(LogLevel.Debug, Path.GetFileName(currentFileItem.OutputFilePath) + " : " + output, "DEBUG");
 
             if (output.StartsWith("added "))
             {

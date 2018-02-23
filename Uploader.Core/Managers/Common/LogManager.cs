@@ -8,6 +8,7 @@ namespace Uploader.Core.Managers.Common
 {
     public class LogManager
     {
+        private static ILogger _logGeneral;
         private static ILogger _logEncoding;
         private static ILogger _logSprite;
         private static ILogger _logOverlay;
@@ -16,11 +17,17 @@ namespace Uploader.Core.Managers.Common
 
         public static void Init(ILoggerFactory loggerFactory)
         {
+            _logGeneral = loggerFactory.CreateLogger("general");
             _logEncoding = loggerFactory.CreateLogger("ffmpeg");
             _logSprite = loggerFactory.CreateLogger("sprite");
             _logOverlay = loggerFactory.CreateLogger("overlay");
             _logSubtitle = loggerFactory.CreateLogger("subtitle");
             _logIpfs = loggerFactory.CreateLogger("ipfs");
+        }
+
+        public static void AddGeneralMessage(LogLevel logLevel, string message, string typeMessage)
+        {
+            Log(_logGeneral, logLevel, message, typeMessage);
         }
 
         public static void AddEncodingMessage(LogLevel logLevel, string message, string typeMessage)
@@ -55,9 +62,11 @@ namespace Uploader.Core.Managers.Common
             {
                 case LogLevel.Trace:
                     logger.LogTrace(formatMessage);
+                    Trace.WriteLine(formatMessage);
                     break;
                 case LogLevel.Debug:
                     logger.LogDebug(formatMessage);
+                    Debug.WriteLine(formatMessage);
                     break;
                 case LogLevel.Information:
                     logger.LogInformation(formatMessage);

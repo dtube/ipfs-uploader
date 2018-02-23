@@ -39,7 +39,7 @@ namespace Uploader.Core.Managers.Front
 
         private static bool IsValidVTT(string text)
         {
-            Debug.WriteLine(text);
+            LogManager.AddSubtitleMessage(LogLevel.Debug, text, "DEBUG");
             if (!text.StartsWith("WEBVTT"))
                 return false;
 

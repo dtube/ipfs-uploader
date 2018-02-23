@@ -1,9 +1,9 @@
 using System;
-using System.Diagnostics;
 using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.Logging;
 
 using Uploader.Web.Attributes;
 using Uploader.Web.Helper;
@@ -31,7 +31,7 @@ namespace Uploader.Web.Controllers
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Exception ComputeVideo : {ex}");
+                LogManager.AddEncodingMessage(LogLevel.Critical, $"Exception ComputeVideo : {ex}", "Exception");
                 return BadRequest(new
                 {
                     errorMessage = ex.Message
@@ -54,7 +54,7 @@ namespace Uploader.Web.Controllers
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Exception ComputeOverlay : {ex}");
+                LogManager.AddOverlayMessage(LogLevel.Critical, $"Exception ComputeOverlay : {ex}", "Exception");
                 return BadRequest(new
                 {
                     errorMessage = ex.Message
@@ -75,7 +75,7 @@ namespace Uploader.Web.Controllers
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Exception ConvertSubtitle : {ex}");
+                LogManager.AddSubtitleMessage(LogLevel.Critical, $"Exception ConvertSubtitle : {ex}", "Exception");
                 return BadRequest(new
                 {
                     errorMessage = ex.Message
@@ -100,7 +100,7 @@ namespace Uploader.Web.Controllers
             }
             catch(Exception ex)
             {
-                Debug.WriteLine("Exception Download File : {0}", ex);
+                LogManager.AddGeneralMessage(LogLevel.Critical, $"Exception Download File : {ex}", "Exception");
                 TempFileManager.SafeDeleteTempFile(sourceFilePath);
                 throw;
             }

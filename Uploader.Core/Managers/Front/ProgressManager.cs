@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Microsoft.Extensions.Logging;
+
+using Uploader.Core.Managers.Common;
 using Uploader.Core.Managers.Ipfs;
 using Uploader.Core.Managers.Video;
 using Uploader.Core.Models;
@@ -384,7 +386,7 @@ namespace Uploader.Core.Managers.Front
                     };
             }
 
-            Debug.WriteLine("Type container non géré " + fileContainer.TypeContainer);
+            LogManager.AddGeneralMessage(LogLevel.Critical, "Type container non géré " + fileContainer.TypeContainer, "Exception");
             throw new InvalidOperationException("type container non géré");
         }
 
