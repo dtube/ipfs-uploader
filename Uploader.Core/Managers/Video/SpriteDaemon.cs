@@ -28,8 +28,7 @@ namespace Uploader.Core.Managers.Video
             if (!fileItem.SpriteEncodeProcess.CanProcess())
             {
                 string message = "FileName " + Path.GetFileName(fileItem.OutputFilePath) + " car le client est déconnecté";
-                LogManager.AddSpriteMessage(LogLevel.Warning, message, "Annulation");
-                fileItem.SpriteEncodeProcess.CancelCascade("Le client est déconnecté.");
+                fileItem.SpriteEncodeProcess.CancelCascade("Le client est déconnecté.", message);
                 return;
             }
 
@@ -40,8 +39,7 @@ namespace Uploader.Core.Managers.Video
 
         protected override void LogException(FileItem fileItem, Exception ex)
         {
-            LogManager.AddSpriteMessage(LogLevel.Critical, ex.ToString(), "Exception non gérée");                        
-            fileItem.SpriteEncodeProcess.SetErrorMessage("Exception non gérée");
+            fileItem.SpriteEncodeProcess.SetErrorMessage("Exception non gérée", "Exception non gérée", ex);
         }
 
         public void Queue(FileItem fileItem, string messageIpfs)

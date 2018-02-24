@@ -27,8 +27,7 @@ namespace Uploader.Core.Managers.Ipfs
             if (!fileItem.IpfsProcess.CanProcess())
             {
                 string message = "FileName " + Path.GetFileName(fileItem.OutputFilePath) + " car le client est déconnecté";
-                LogManager.AddIpfsMessage(LogLevel.Warning, message, "Annulation");
-                fileItem.IpfsProcess.CancelStarted("Le client est déconnecté.");
+                fileItem.IpfsProcess.CancelStarted("Le client est déconnecté.", message);
                 return;                
             }
 
@@ -38,8 +37,7 @@ namespace Uploader.Core.Managers.Ipfs
 
         protected override void LogException(FileItem fileItem, Exception ex)
         {
-            LogManager.AddIpfsMessage(LogLevel.Critical, ex.ToString(), "Exception non gérée");
-            fileItem.IpfsProcess.SetErrorMessage("Exception non gérée");
+            fileItem.IpfsProcess.SetErrorMessage("Exception non gérée", "Exception non gérée", ex);
         }
 
         public void Queue(FileItem fileItem)

@@ -29,8 +29,7 @@ namespace Uploader.Core.Managers.Video
             if (!fileItem.AudioVideoCpuEncodeProcess.CanProcess())
             {
                 string message = "FileName " + Path.GetFileName(fileItem.OutputFilePath) + " car le client est déconnecté";
-                LogManager.AddEncodingMessage(LogLevel.Warning, message, "Annulation");
-                fileItem.AudioVideoCpuEncodeProcess.CancelCascade("Le client est déconnecté.");
+                fileItem.AudioVideoCpuEncodeProcess.CancelCascade("Le client est déconnecté.", message);
                 return;
             }
 
@@ -49,8 +48,7 @@ namespace Uploader.Core.Managers.Video
 
         protected override void LogException(FileItem fileItem, Exception ex)
         {
-            LogManager.AddEncodingMessage(LogLevel.Critical, ex.ToString(), "Exception non gérée");                        
-            fileItem.AudioVideoCpuEncodeProcess.SetErrorMessage("Exception non gérée");
+            fileItem.AudioVideoCpuEncodeProcess.SetErrorMessage("Exception non gérée", "Exception AudioVideoCpuEncoding non gérée", ex);
         }
 
         public void Queue(FileItem fileItem, string messageIpfs)

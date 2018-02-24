@@ -2,11 +2,15 @@ using System;
 using System.Diagnostics;
 using System.Text;
 
+using Microsoft.Extensions.Logging;
+
 namespace Uploader.Core.Managers.Common
 {
     public class ProcessManager
     {
         private ProcessStartInfo _processStartInfo;
+
+        private ILogger Logger { get; set; }
 
         public bool HasTimeout { get; private set; }
 
@@ -16,12 +20,16 @@ namespace Uploader.Core.Managers.Common
 
         public StringBuilder ErrorOutput { get; private set; } = new StringBuilder();
 
-        public ProcessManager(string fileName, string arguments)
+        public ProcessManager(string fileName, string arguments, ILogger logger)
         {
             if(string.IsNullOrWhiteSpace(fileName))
                 throw new ArgumentNullException(nameof(fileName));
             if(string.IsNullOrWhiteSpace(arguments))
                 throw new ArgumentNullException(nameof(arguments));
+            if(logger == null)
+                throw new ArgumentNullException(nameof(logger));
+
+            Logger = logger;
 
             _processStartInfo = new ProcessStartInfo();
             _processStartInfo.FileName = fileName;
@@ -39,7 +47,7 @@ namespace Uploader.Core.Managers.Common
 
         public bool LaunchAsync(int timeout)
         {
-            Debug.WriteLine(_processStartInfo.FileName + " " + _processStartInfo.Arguments, "Launch command");
+            LogManager.Log(Logger, LogLevel.Information, _processStartInfo.FileName + " " + _processStartInfo.Arguments, "Launch command");
 
             try
             {
@@ -58,15 +66,13 @@ namespace Uploader.Core.Managers.Common
 
                     if (HasTimeout)
                     {
-                        Debug.WriteLine("Timeout : Le process n'a pas pu être exécuté dans le temps imparti.");
-                        //log
+                        LogManager.Log(Logger, LogLevel.Error, $"Le process n'a pas pu être exécuté dans le temps imparti.", "Timeout");
                         return false;
                     }
 
                     if (ExitCode != 0)
                     {
-                        Debug.WriteLine($"Error : Le process n'a pas pu être exécuté correctement, erreur {process.ExitCode}.");
-                        //log
+                        LogManager.Log(Logger, LogLevel.Error, $"Le process n'a pas pu être exécuté correctement, erreur {process.ExitCode}.", "Error");
                         return false;
                     }
 
@@ -75,15 +81,14 @@ namespace Uploader.Core.Managers.Common
             }
             catch(Exception ex)
             {
-                Debug.WriteLine($"Exception : Le process n'a pas pu être exécuté correctement : {ex}.");
-                //log
+                LogManager.Log(Logger, LogLevel.Critical, $"Exception : Le process n'a pas pu être exécuté correctement : {ex}.", "Exception");
                 return false;
             }            
         }
 
         public bool Launch(int timeout)
         {
-            Debug.WriteLine(_processStartInfo.FileName + " " + _processStartInfo.Arguments, "Launch command");
+            LogManager.Log(Logger, LogLevel.Information, _processStartInfo.FileName + " " + _processStartInfo.Arguments, "Launch command");
 
             try
             {
@@ -94,23 +99,21 @@ namespace Uploader.Core.Managers.Common
                     DataOutput = DataOutput.Append(process.StandardOutput.ReadToEnd());
                     ErrorOutput = ErrorOutput.Append(process.StandardError.ReadToEnd());
 
-                    Debug.WriteLine(DataOutput);
-                    Debug.WriteLine(ErrorOutput);
+                    LogManager.Log(Logger, LogLevel.Debug, DataOutput.ToString(), "DEBUG");
+                    LogManager.Log(Logger, LogLevel.Debug, ErrorOutput.ToString(), "DEBUG");
 
                     HasTimeout = !success;
                     ExitCode = process.ExitCode;
 
                     if (HasTimeout)
                     {
-                        Debug.WriteLine("Timeout : Le process n'a pas pu être exécuté dans le temps imparti.");
-                        //log
+                        LogManager.Log(Logger, LogLevel.Error, $"Le process n'a pas pu être exécuté dans le temps imparti.", "Timeout");
                         return false;
                     }
 
                     if (ExitCode != 0)
                     {
-                        Debug.WriteLine($"Error : Le process n'a pas pu être exécuté correctement, erreur {process.ExitCode}.");
-                        //log
+                        LogManager.Log(Logger, LogLevel.Error, $"Le process n'a pas pu être exécuté correctement, erreur {process.ExitCode}.", "Error");
                         return false;
                     }
 
@@ -119,15 +122,14 @@ namespace Uploader.Core.Managers.Common
             }
             catch(Exception ex)
             {
-                Debug.WriteLine($"Exception : Le process n'a pas pu être exécuté correctement : {ex}.");
-                //log
+                LogManager.Log(Logger, LogLevel.Critical, $"Exception : Le process n'a pas pu être exécuté correctement : {ex}.", "Exception");
                 return false;
             }            
         }
 
         public bool LaunchWithoutTracking()
         {
-            Debug.WriteLine(_processStartInfo.FileName + " " + _processStartInfo.Arguments, "Launch command");
+            LogManager.Log(Logger, LogLevel.Information, _processStartInfo.FileName + " " + _processStartInfo.Arguments, "Launch command");
 
             try
             {
@@ -138,8 +140,7 @@ namespace Uploader.Core.Managers.Common
             }
             catch(Exception ex)
             {
-                Debug.WriteLine($"Exception : Le process n'a pas pu être exécuté correctement : {ex}.");
-                //log
+                LogManager.Log(Logger, LogLevel.Critical, $"Exception : Le process n'a pas pu être exécuté correctement : {ex}.", "Exception");
                 return false;
             }
         }
@@ -150,7 +151,7 @@ namespace Uploader.Core.Managers.Common
             if (string.IsNullOrWhiteSpace(output))
                 return;
 
-            Debug.WriteLine(output);
+            LogManager.Log(Logger, LogLevel.Debug, output, "DEBUG");
             DataOutput.AppendLine(output);
         }
 
@@ -160,7 +161,7 @@ namespace Uploader.Core.Managers.Common
             if (string.IsNullOrWhiteSpace(output))
                 return;
 
-            Debug.WriteLine(output);
+            LogManager.Log(Logger, LogLevel.Debug, output, "DEBUG");
             ErrorOutput.AppendLine(output);
         }
     }

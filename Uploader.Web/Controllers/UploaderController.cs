@@ -31,7 +31,7 @@ namespace Uploader.Web.Controllers
             }
             catch (Exception ex)
             {
-                LogManager.AddEncodingMessage(LogLevel.Critical, $"Exception ComputeVideo : {ex}", "Exception");
+                LogManager.AddEncodingMessage(LogLevel.Critical, "Exception non gérée", "Exception", ex);
                 return BadRequest(new
                 {
                     errorMessage = ex.Message
@@ -54,7 +54,7 @@ namespace Uploader.Web.Controllers
             }
             catch (Exception ex)
             {
-                LogManager.AddOverlayMessage(LogLevel.Critical, $"Exception ComputeOverlay : {ex}", "Exception");
+                LogManager.AddOverlayMessage(LogLevel.Critical, "Exception non gérée", "Exception", ex);
                 return BadRequest(new
                 {
                     errorMessage = ex.Message

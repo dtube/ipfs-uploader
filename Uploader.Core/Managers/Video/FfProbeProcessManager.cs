@@ -23,8 +23,7 @@ namespace Uploader.Core.Managers.Video
             // https://trac.ffmpeg.org/wiki/FFprobeTips
             string arguments = $"-v error -of default=nw=1 -show_entries stream_tags=rotate:format=size,duration:stream=index,codec_name,pix_fmt,height,width,duration,nb_frames,avg_frame_rate,bit_rate {Path.GetFileName(_fileItem.SourceFilePath)}";
 
-            var process = new ProcessManager("ffprobe", arguments);
-            LogManager.AddEncodingMessage(LogLevel.Information, "ffprobe" + " " + arguments, "Launch command");
+            var process = new ProcessManager("ffprobe", arguments, LogManager.FfmpegLogger);
             process.Launch(timeout);
             
             foreach (string output in process.DataOutput.ToString().Split(Environment.NewLine))

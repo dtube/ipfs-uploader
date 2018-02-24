@@ -15,12 +15,12 @@ namespace Uploader.Core.Models
         {
             FileItem fileItem = new FileItem(fileContainer, fileContainer.OriginFilePath, TypeFile.SourceVideo);
             fileItem.VideoSize = VideoSize.Source;
-            fileItem.InfoSourceProcess = new ProcessItem(fileItem);
+            fileItem.InfoSourceProcess = new ProcessItem(fileItem, LogManager.FfmpegLogger);
 
             if(VideoSettings.Instance.GpuEncodeMode)
             {
-                fileItem.AudioCpuEncodeProcess = new ProcessItem(fileItem);
-                fileItem.VideoGpuEncodeProcess = new ProcessItem(fileItem);
+                fileItem.AudioCpuEncodeProcess = new ProcessItem(fileItem, LogManager.FfmpegLogger);
+                fileItem.VideoGpuEncodeProcess = new ProcessItem(fileItem, LogManager.FfmpegLogger);
             }
 
             if(IpfsSettings.Instance.AddVideoSource)
@@ -40,9 +40,9 @@ namespace Uploader.Core.Models
             fileItem.VideoSize = videoSize;
             if(!VideoSettings.Instance.GpuEncodeMode)
             {
-                fileItem.AudioVideoCpuEncodeProcess = new ProcessItem(fileItem);                
+                fileItem.AudioVideoCpuEncodeProcess = new ProcessItem(fileItem, LogManager.FfmpegLogger);                
             }
-            fileItem.IpfsProcess = new ProcessItem(fileItem);
+            fileItem.IpfsProcess = new ProcessItem(fileItem, LogManager.IpfsLogger);
             return fileItem;
         }
 
@@ -50,29 +50,29 @@ namespace Uploader.Core.Models
         {
             FileItem fileItem = new FileItem(fileContainer, fileContainer.OriginFilePath, TypeFile.SpriteVideo);
             fileItem.VideoSize = VideoSize.Source;
-            fileItem.SpriteEncodeProcess = new ProcessItem(fileItem);
-            fileItem.IpfsProcess = new ProcessItem(fileItem);
+            fileItem.SpriteEncodeProcess = new ProcessItem(fileItem, LogManager.SpriteLogger);
+            fileItem.IpfsProcess = new ProcessItem(fileItem, LogManager.IpfsLogger);
             return fileItem;
         }
 
         public static FileItem NewSourceImageFileItem(FileContainer fileContainer)
         {
             FileItem fileItem = new FileItem(fileContainer, fileContainer.OriginFilePath, TypeFile.SourceImage);
-            fileItem.IpfsProcess = new ProcessItem(fileItem);
+            fileItem.IpfsProcess = new ProcessItem(fileItem, LogManager.OverlayLogger);
             return fileItem;
         }
 
         public static FileItem NewOverlayImageFileItem(FileContainer fileContainer)
         {
             FileItem fileItem = new FileItem(fileContainer, fileContainer.SourceFileItem.SourceFilePath, TypeFile.OverlayImage);
-            fileItem.IpfsProcess = new ProcessItem(fileItem);
+            fileItem.IpfsProcess = new ProcessItem(fileItem, LogManager.OverlayLogger);
             return fileItem;
         }
 
         public static FileItem NewSubtitleFileItem(FileContainer fileContainer)
         {
             FileItem fileItem = new FileItem(fileContainer, null, TypeFile.SubtitleText);
-            fileItem.IpfsProcess = new ProcessItem(fileItem);
+            fileItem.IpfsProcess = new ProcessItem(fileItem, LogManager.OverlayLogger);
             return fileItem;
         }
 
@@ -316,7 +316,7 @@ namespace Uploader.Core.Models
         {
             if(IpfsProcess == null)
             {
-                IpfsProcess = new ProcessItem(this);
+                IpfsProcess = new ProcessItem(this, LogManager.IpfsLogger);
                 IpfsProcess.CantCascadeCancel = true;
                 SetOutputFilePath(sourceFilePath);
             }

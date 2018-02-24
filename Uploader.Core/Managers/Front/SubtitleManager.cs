@@ -16,8 +16,9 @@ namespace Uploader.Core.Managers.Front
             FileContainer fileContainer = FileContainer.NewSubtitleContainer();
             string outputfilePath = Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".vtt");
 
-            if (!IsValidVTT(text)) {
-                fileContainer.SubtitleFileItem.IpfsProcess.SetErrorMessage("Not a valid WEBVTT file");
+            if (!IsValidVTT(text))
+            {
+                fileContainer.SubtitleFileItem.IpfsProcess.SetErrorMessage("Not a valid WEBVTT file", "Not a valid WEBVTT file");
                 return fileContainer.ProgressToken;
             } 
 
@@ -30,7 +31,7 @@ namespace Uploader.Core.Managers.Front
             catch(Exception ex)
             {
                 TempFileManager.SafeDeleteTempFile(outputfilePath);
-                LogManager.AddSubtitleMessage(LogLevel.Critical, ex.ToString(), "Exception");
+                LogManager.AddSubtitleMessage(LogLevel.Critical, "Exception non gérée", "Exception", ex);
                 return fileContainer.ProgressToken;
             }
 

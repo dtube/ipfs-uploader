@@ -6,56 +6,56 @@ using Microsoft.Extensions.Logging;
 
 namespace Uploader.Core.Managers.Common
 {
-    public class LogManager
+    public static class LogManager
     {
-        private static ILogger _logGeneral;
-        private static ILogger _logEncoding;
-        private static ILogger _logSprite;
-        private static ILogger _logOverlay;
-        private static ILogger _logSubtitle;
-        private static ILogger _logIpfs;
-
         public static void Init(ILoggerFactory loggerFactory)
         {
-            _logGeneral = loggerFactory.CreateLogger("general");
-            _logEncoding = loggerFactory.CreateLogger("ffmpeg");
-            _logSprite = loggerFactory.CreateLogger("sprite");
-            _logOverlay = loggerFactory.CreateLogger("overlay");
-            _logSubtitle = loggerFactory.CreateLogger("subtitle");
-            _logIpfs = loggerFactory.CreateLogger("ipfs");
+            GeneralLogger = loggerFactory.CreateLogger("general");
+            FfmpegLogger = loggerFactory.CreateLogger("ffmpeg");
+            SpriteLogger = loggerFactory.CreateLogger("sprite");
+            OverlayLogger = loggerFactory.CreateLogger("overlay");
+            SubtitleLogger = loggerFactory.CreateLogger("subtitle");
+            IpfsLogger = loggerFactory.CreateLogger("ipfs");
         }
 
-        public static void AddGeneralMessage(LogLevel logLevel, string message, string typeMessage)
+        public static ILogger GeneralLogger { get; private set; }
+        public static ILogger FfmpegLogger { get; private set; }
+        public static ILogger SpriteLogger { get; private set; }
+        public static ILogger IpfsLogger { get; private set; }
+        public static ILogger OverlayLogger { get; private set; }
+        public static ILogger SubtitleLogger { get; private set; }
+
+        public static void AddGeneralMessage(LogLevel logLevel, string message, string typeMessage, Exception exception = null)
         {
-            Log(_logGeneral, logLevel, message, typeMessage);
+            Log(GeneralLogger, logLevel, message, typeMessage, exception);
         }
 
-        public static void AddEncodingMessage(LogLevel logLevel, string message, string typeMessage)
+        public static void AddEncodingMessage(LogLevel logLevel, string message, string typeMessage, Exception exception = null)
         {
-            Log(_logEncoding, logLevel, message, typeMessage);
+            Log(FfmpegLogger, logLevel, message, typeMessage, exception);
         }
 
-        public static void AddIpfsMessage(LogLevel logLevel, string message, string typeMessage)
+        public static void AddIpfsMessage(LogLevel logLevel, string message, string typeMessage, Exception exception = null)
         {
-            Log(_logIpfs, logLevel, message, typeMessage);
+            Log(IpfsLogger, logLevel, message, typeMessage, exception);
         }
 
-        public static void AddSpriteMessage(LogLevel logLevel, string message, string typeMessage)
+        public static void AddSpriteMessage(LogLevel logLevel, string message, string typeMessage, Exception exception = null)
         {
-            Log(_logSprite, logLevel, message, typeMessage);
+            Log(SpriteLogger, logLevel, message, typeMessage, exception);
         }
 
-        public static void AddOverlayMessage(LogLevel logLevel, string message, string typeMessage)
+        public static void AddOverlayMessage(LogLevel logLevel, string message, string typeMessage, Exception exception = null)
         {
-            Log(_logOverlay, logLevel, message, typeMessage);
+            Log(OverlayLogger, logLevel, message, typeMessage, exception);
         }
 
-        public static void AddSubtitleMessage(LogLevel logLevel, string message, string typeMessage)
+        public static void AddSubtitleMessage(LogLevel logLevel, string message, string typeMessage, Exception exception = null)
         {
-            Log(_logSubtitle, logLevel, message, typeMessage);
+            Log(SubtitleLogger, logLevel, message, typeMessage, exception);
         }
 
-        private static void Log(ILogger logger, LogLevel logLevel, string message, string typeMessage)
+        public static void Log(ILogger logger, LogLevel logLevel, string message, string typeMessage, Exception exception = null)
         {
             string formatMessage = $"[{typeMessage}] {message}";
             switch (logLevel)
@@ -78,7 +78,10 @@ namespace Uploader.Core.Managers.Common
                     logger.LogError(formatMessage);
                     break;
                 case LogLevel.Critical:
-                    logger.LogCritical(formatMessage);
+                    if(exception == null)
+                        logger.LogCritical(formatMessage);
+                    else
+                        logger.LogCritical(exception, formatMessage);
                     break;
             }
         }

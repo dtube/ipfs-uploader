@@ -7,7 +7,7 @@ namespace Uploader.Core.Managers.Common
             //IPFS_PATH=~/monDossierIPFS/ ipfs init
             //todo comment changer sous windows le chemin des fichiers ipfs
 
-            var process0 = new ProcessManager("ipfs", "version");
+            var process0 = new ProcessManager("ipfs", "version", LogManager.IpfsLogger);
             bool success0 = process0.Launch(2);
             if(!success0)
             {
@@ -18,7 +18,7 @@ namespace Uploader.Core.Managers.Common
                 return false;
             }
 
-            var process1 = new ProcessManager("ipfs", "stats bw");
+            var process1 = new ProcessManager("ipfs", "stats bw", LogManager.IpfsLogger);
             bool success1 = process1.Launch(5);
             if(success1)
                 return true; //le process ipfs est déjà lancé
@@ -26,7 +26,7 @@ namespace Uploader.Core.Managers.Common
             bool mustStart = false;
             if(process1.ErrorOutput.ToString().Contains("please run: 'ipfs init'"))
             {
-                var process2 = new ProcessManager("ipfs", "init");
+                var process2 = new ProcessManager("ipfs", "init", LogManager.IpfsLogger);
                 bool success2 = process2.Launch(10);
                 if(!success2)
                 {
@@ -40,7 +40,7 @@ namespace Uploader.Core.Managers.Common
             }
             if(mustStart || process1.ErrorOutput.ToString().Contains("Error: This command must be run in online mode. Try"))
             {
-                var process3 = new ProcessManager("ipfs", "daemon");
+                var process3 = new ProcessManager("ipfs", "daemon", LogManager.IpfsLogger);
                 return process3.LaunchWithoutTracking();  // echec ipfs daemon
             }
 
@@ -49,7 +49,7 @@ namespace Uploader.Core.Managers.Common
 
         public static bool CheckFfmpeg()
         {
-            var process = new ProcessManager("ffmpeg", "-version");
+            var process = new ProcessManager("ffmpeg", "-version", LogManager.FfmpegLogger);
             bool success = process.Launch(1);
             if(!success)
                 return false;
@@ -64,7 +64,7 @@ namespace Uploader.Core.Managers.Common
 
         public static bool CheckFfprobe()
         {
-            var process = new ProcessManager("ffprobe", "-version");
+            var process = new ProcessManager("ffprobe", "-version", LogManager.FfmpegLogger);
             bool success = process.Launch(1);
             if(!success)
                 return false;
@@ -79,7 +79,7 @@ namespace Uploader.Core.Managers.Common
 
         public static bool CheckImageMagickComposite()
         {
-            var process = new ProcessManager("C:\\ImageMagick\\composite", "-version");
+            var process = new ProcessManager("C:\\ImageMagick\\composite", "-version", LogManager.SpriteLogger);
             bool success = process.Launch(1);
             if(!success)
                 return false;
@@ -94,7 +94,7 @@ namespace Uploader.Core.Managers.Common
 
         public static bool CheckImageMagickConvert()
         {
-            var process = new ProcessManager("C:\\ImageMagick\\convert", "-version");
+            var process = new ProcessManager("C:\\ImageMagick\\convert", "-version", LogManager.SpriteLogger);
             bool success = process.Launch(1);
             if(!success)
                 return false;

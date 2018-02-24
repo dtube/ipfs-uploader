@@ -46,8 +46,8 @@ namespace Uploader.Core.Managers.Video
             }
             catch (Exception ex)
             {
-                LogManager.AddEncodingMessage(LogLevel.Critical, "Video Duration " + fileItem.VideoDuration + " / FileSize " + fileItem.FileSize + " / Progress " + fileItem.AudioVideoCpuEncodeProcess.Progress + " / Exception : " + ex, "Exception AudioVideoCpuEncoding");
-                fileItem.AudioVideoCpuEncodeProcess.SetErrorMessage("Exception");
+                string message = "Exception AudioVideoCpuEncoding : Video Duration " + fileItem.VideoDuration + " / FileSize " + fileItem.FileSize + " / Progress " + fileItem.AudioVideoCpuEncodeProcess.Progress;
+                fileItem.AudioVideoCpuEncodeProcess.SetErrorMessage("Exception non gérée", message, ex);
                 TempFileManager.SafeDeleteTempFile(fileItem.TempFilePath);
                 return false;
             }
@@ -81,8 +81,8 @@ namespace Uploader.Core.Managers.Video
             }
             catch (Exception ex)
             {
-                LogManager.AddEncodingMessage(LogLevel.Critical, "Video Duration " + fileItem.VideoDuration + " / FileSize " + fileItem.FileSize + " / Progress " + fileItem.AudioCpuEncodeProcess.Progress + " / Exception : " + ex, "Exception AudioCpuEncoding");
-                fileItem.AudioCpuEncodeProcess.SetErrorMessage("Exception");
+                string message = "Exception AudioCpuEncoding : Video Duration " + fileItem.VideoDuration + " / FileSize " + fileItem.FileSize + " / Progress " + fileItem.AudioCpuEncodeProcess.Progress;
+                fileItem.AudioCpuEncodeProcess.SetErrorMessage("Exception non gérée", message, ex);
                 TempFileManager.SafeDeleteTempFile(fileItem.TempFilePath);
                 return false;
             }
@@ -126,8 +126,8 @@ namespace Uploader.Core.Managers.Video
             }
             catch (Exception ex)
             {
-                LogManager.AddEncodingMessage(LogLevel.Critical, "Video Duration " + fileItem.VideoDuration + " / FileSize " + fileItem.FileSize + " / Progress " + fileItem.VideoGpuEncodeProcess.Progress + " / Exception : " + ex, "Exception VideoGpuEncoding");
-                fileItem.VideoGpuEncodeProcess.SetErrorMessage("Exception");
+                string message = "Exception VideoGpuEncoding : Video Duration " + fileItem.VideoDuration + " / FileSize " + fileItem.FileSize + " / Progress " + fileItem.VideoGpuEncodeProcess.Progress;
+                fileItem.VideoGpuEncodeProcess.SetErrorMessage("Exception non gérée", message, ex);
                 foreach (FileItem item in fileItem.FileContainer.EncodedFileItems)
                 {
                     TempFileManager.SafeDeleteTempFile(item.TempFilePath);

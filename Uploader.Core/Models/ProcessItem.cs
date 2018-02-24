@@ -1,20 +1,27 @@
 using System;
 using System.Collections.Generic;
-
+using Microsoft.Extensions.Logging;
 using Uploader.Core.Managers.Common;
 
 namespace Uploader.Core.Models
 {
     internal class ProcessItem
     {
-        public ProcessItem(FileItem fileItem)
+        public ProcessItem(FileItem fileItem, ILogger logger)
         {
             CurrentStep = ProcessStep.Init;
             FileItem = fileItem;
+            Logger = logger;
             CreationDate = DateTime.UtcNow;
         }
 
         public FileItem FileItem
+        {
+            get;
+            private set;
+        }
+
+        public ILogger Logger
         {
             get;
             private set;
@@ -156,18 +163,19 @@ namespace Uploader.Core.Models
             return !FileItem.FileContainer.MustAbort() && CurrentStep == ProcessStep.Waiting;
         }
 
-        public void CancelCascade(string message)
+        public void CancelCascade(string shortMessage, string longMessage)
         {
-            CancelStarted(message);
-            FileItem.FileContainer.CancelAll(message);
+            CancelStarted(shortMessage, longMessage);
+            FileItem.FileContainer.CancelAll(shortMessage);
         }
 
-        public void CancelStarted(string message)
+        public void CancelStarted(string shortMessage, string longMessage)
         {
             if(CurrentStep != ProcessStep.Started)
                 return;
-                
-            Cancel(message);
+            
+            LogManager.Log(Logger, LogLevel.Warning, longMessage, "Annulation");
+            Cancel(shortMessage);
         }
 
         public void CancelUnstarted(string message)
@@ -179,7 +187,7 @@ namespace Uploader.Core.Models
         }
 
         private void Cancel(string message)
-        {               
+        {
             Progress = null;
             LastTimeProgressChanged = null;
             ErrorMessage = message;
@@ -202,14 +210,28 @@ namespace Uploader.Core.Models
                 LastTimeProgressChanged = DateTime.UtcNow;
         }
 
-        public void SetErrorMessage(string message)
+        public void SetErrorMessage(string shortMessage, string longMessage)
         {
-            ErrorMessage = message;
+            LogManager.Log(Logger, LogLevel.Error, longMessage, "Error");
+
+            ErrorMessage = shortMessage;
 
             EndProcess = DateTime.UtcNow;
             CurrentStep = ProcessStep.Error;
 
-            FileItem.FileContainer.CancelAll(message);
+            FileItem.FileContainer.CancelAll(shortMessage);
+        }
+
+        public void SetErrorMessage(string shortMessage, string longMessage, Exception exception)
+        {
+            LogManager.Log(Logger, LogLevel.Critical, longMessage, "Exception", exception);
+
+            ErrorMessage = shortMessage;
+
+            EndProcess = DateTime.UtcNow;
+            CurrentStep = ProcessStep.Error;
+
+            FileItem.FileContainer.CancelAll(shortMessage);
         }
         
         public void EndProcessDateTime()

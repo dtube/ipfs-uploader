@@ -386,7 +386,7 @@ namespace Uploader.Core.Managers.Front
                     };
             }
 
-            LogManager.AddGeneralMessage(LogLevel.Critical, "Type container non géré " + fileContainer.TypeContainer, "Exception");
+            LogManager.AddGeneralMessage(LogLevel.Critical, "Type container non géré " + fileContainer.TypeContainer, "Error");
             throw new InvalidOperationException("type container non géré");
         }
 

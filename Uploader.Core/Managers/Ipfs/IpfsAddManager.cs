@@ -68,8 +68,8 @@ namespace Uploader.Core.Managers.Ipfs
             }
             catch (Exception ex)
             {
-                LogManager.AddIpfsMessage(LogLevel.Critical, "FileSize " + currentFileItem.FileSize + " / Progress " + currentFileItem.IpfsProcess.Progress + " / Exception " + ex, "Exception");
-                currentFileItem.IpfsProcess.SetErrorMessage("Exception");
+                string message = "FileSize " + currentFileItem.FileSize + " / Progress " + currentFileItem.IpfsProcess.Progress;
+                currentFileItem.IpfsProcess.SetErrorMessage("Exception non gérée", message, ex);
             }
         }
 

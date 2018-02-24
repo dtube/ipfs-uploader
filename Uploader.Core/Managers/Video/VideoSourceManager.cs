@@ -26,14 +26,14 @@ namespace Uploader.Core.Managers.Video
             }
             catch(Exception ex)
             {
-                LogManager.AddEncodingMessage(LogLevel.Critical, ex.ToString(), "Exception source info");
+                LogManager.AddEncodingMessage(LogLevel.Critical, "Exception non gérée", "Exception source info", ex);
             }
             
             // Si durée totale de vidéo, largeur hauteur non récupéré, on ne peut pas continuer
             if (!sourceFile.SuccessGetSourceInfo())
             {
                 string message = "Error while getting duration, height or width.";
-                LogManager.AddEncodingMessage(LogLevel.Error, message + " FileName : " + Path.GetFileName(sourceFile.SourceFilePath), "Error source info");
+                string longMessage = message + " FileName : " + Path.GetFileName(sourceFile.SourceFilePath);
 
                 if(sourceFile.IpfsProcess == null)
                 {
@@ -41,7 +41,7 @@ namespace Uploader.Core.Managers.Video
                     IpfsDaemon.Instance.Queue(sourceFile);
                 }
 
-                processItem.SetErrorMessage(message);
+                processItem.SetErrorMessage(message, longMessage);
 
                 return false;
             }
@@ -57,7 +57,7 @@ namespace Uploader.Core.Managers.Video
                     IpfsDaemon.Instance.Queue(sourceFile);
                 }
 
-                processItem.CancelCascade("Dépassement de la durée limite de la vidéo atteinte.");
+                processItem.CancelCascade("Dépassement de la durée limite de la vidéo atteinte.", "Dépassement de la durée limite de la vidéo atteinte.");
 
                 return false;
             }
