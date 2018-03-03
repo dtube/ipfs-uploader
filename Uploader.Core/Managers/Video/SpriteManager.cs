@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Microsoft.Extensions.Logging;
+
 using Uploader.Core.Managers.Common;
+using Uploader.Core.Managers.Front;
 using Uploader.Core.Models;
 
 namespace Uploader.Core.Managers.Video
@@ -44,7 +45,24 @@ namespace Uploader.Core.Managers.Video
                 string[] files = GetListImageFrom(fileItem.TempFilePath); // récupération des images
 
                 LogManager.AddSpriteMessage(LogLevel.Information, (files.Length - 1) + " images", "Start Combine images");
-                bool successSprite = CombineBitmap(files.Skip(files.Length - VideoSettings.Instance.NbSpriteImages).ToArray(), fileItem.TempFilePath); // création du sprite                                
+
+
+                // garder que les 100 dernières images pour éliminer les premières (1 ou 2 en réalité)
+                int skip = files.Length > VideoSettings.Instance.NbSpriteImages
+                    ? files.Length - VideoSettings.Instance.NbSpriteImages
+                    : 0;
+                var list = new StringBuilder();
+                foreach (string imagePath in files.Skip(skip))
+                {
+                    if(list.Length > 0)
+                        list.Append(" ");
+
+                    list.Append(Path.GetFileName(imagePath));
+                }
+
+                arguments = $"-mode concatenate -tile 1x {list} {Path.GetFileName(fileItem.TempFilePath)}";
+                var process = new ProcessManager(Path.Combine(GeneralSettings.Instance.ImageMagickPath, "montage"), arguments, LogManager.SpriteLogger);
+                bool successSprite = process.Launch(5);
                 TempFileManager.SafeDeleteTempFiles(files); // suppression des images
                 if(successSprite)
                 {
@@ -54,6 +72,7 @@ namespace Uploader.Core.Managers.Video
                 else
                 {
                     fileItem.SpriteEncodeProcess.SetErrorMessage("Error while combine images", "Error creation sprite while combine images");
+                    TempFileManager.SafeDeleteTempFile(fileItem.TempFilePath);
                     return false;
                 }
 
@@ -85,71 +104,6 @@ namespace Uploader.Core.Managers.Video
                 return new string[0];
 
             return Directory.EnumerateFiles(directoryName, Path.GetFileNameWithoutExtension(filePath) + "-*.jpeg").OrderBy(s => s).ToArray();
-        }
-
-        private static bool CombineBitmap(string[] filesToCombine, string outputFilePath)
-        {
-            if(filesToCombine == null || filesToCombine.Length == 0)
-                return false;
-            if(string.IsNullOrWhiteSpace(outputFilePath))
-                return false;
-
-            //read all images into memory
-            var images = new List<Image>();
-
-            try
-            {
-                int width = 0;
-                int height = 0;
-
-                foreach (string imagePath in filesToCombine)
-                {
-                    // create a Bitmap from the file and add it to the list
-                    Image image = Image.FromFile(imagePath);                  
-
-                    // update the size of the final bitmap
-                    height += image.Height;
-                    width = image.Width > width ? image.Width : width;
-
-                    images.Add(image);
-                }
-
-                //create a bitmap to hold the combined image
-                using(var finalBitmap = new Bitmap(width, height))
-                {
-                    //get a graphics object from the image so we can draw on it
-                    using(Graphics graphics = Graphics.FromImage(finalBitmap))
-                    {
-                        // Ajoute les images les unes à la suite des autres verticalement
-                        int offset = 0;
-                        foreach (Image image in images)
-                        {
-                            graphics.DrawImage(image, new Rectangle(0, offset, image.Width, image.Height));
-                            offset += image.Height;
-                        }
-                    }
-                    finalBitmap.Save(outputFilePath, ImageFormat.Jpeg);
-                }
-                return true;
-            }
-            catch(Exception ex)
-            {
-                LogManager.AddSpriteMessage(LogLevel.Critical, "Exception non gérée", "Exception", ex);
-                TempFileManager.SafeDeleteTempFile(outputFilePath);
-                return false;
-            }
-            finally
-            {
-                try
-                {
-                    //clean up memory
-                    foreach (Image image in images)
-                    {
-                        image.Dispose();
-                    }
-                }
-                catch{}
-            }
         }
     }
 }

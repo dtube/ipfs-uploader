@@ -143,11 +143,6 @@ namespace Uploader.Core.Models
             CurrentStep = ProcessStep.Waiting;
         }
 
-        public bool WorkInProgress()
-        {
-            return CurrentStep == ProcessStep.Waiting || CurrentStep == ProcessStep.Started;
-        }
-
         public bool Unstarted()
         {
             return CurrentStep == ProcessStep.Init || CurrentStep == ProcessStep.Waiting;
@@ -165,15 +160,12 @@ namespace Uploader.Core.Models
 
         public void CancelCascade(string shortMessage, string longMessage)
         {
-            CancelStarted(shortMessage, longMessage);
+            Cancel(shortMessage, longMessage);
             FileItem.FileContainer.CancelAll(shortMessage);
         }
 
-        public void CancelStarted(string shortMessage, string longMessage)
-        {
-            if(CurrentStep != ProcessStep.Started)
-                return;
-            
+        public void Cancel(string shortMessage, string longMessage)
+        {           
             LogManager.Log(Logger, LogLevel.Warning, longMessage, "Annulation");
             Cancel(shortMessage);
         }

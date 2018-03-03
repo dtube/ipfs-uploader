@@ -27,7 +27,7 @@ namespace Uploader.Core.Managers.Ipfs
             if (!fileItem.IpfsProcess.CanProcess())
             {
                 string message = "FileName " + Path.GetFileName(fileItem.OutputFilePath) + " car le client est déconnecté";
-                fileItem.IpfsProcess.CancelStarted("Le client est déconnecté.", message);
+                fileItem.IpfsProcess.Cancel("Le client est déconnecté.", message);
                 return;                
             }
 
