@@ -24,27 +24,29 @@ namespace Uploader.Core.Models
 
         public string OriginFilePath { get; }
 
-        public static FileContainer NewVideoContainer(string originFilePath, bool sprite, params VideoSize[] videoSizes)
+        public static FileContainer NewVideoContainer(string originFilePath)
         {
             FileContainer fileContainer = new FileContainer(TypeContainer.Video, originFilePath);
 
             fileContainer.SourceFileItem = FileItem.NewSourceVideoFileItem(fileContainer);
 
-            // si sprite demandé
-            if (sprite)
-            {
-                fileContainer.SpriteVideoFileItem = FileItem.NewSpriteVideoFileItem(fileContainer);
-            }
+            ProgressManager.RegisterProgress(fileContainer);
+            return fileContainer;
+        }
 
+        public void AddSprite()
+        {
+            SpriteVideoFileItem = FileItem.NewSpriteVideoFileItem(this);
+        }
+
+        public void AddEncodedVideo(IList<VideoSize> videoSizes)
+        {
             var list = new List<FileItem>();
             foreach (VideoSize videoSize in videoSizes)
             {
-                list.Add(FileItem.NewEncodedVideoFileItem(fileContainer, videoSize));
+                list.Add(FileItem.NewEncodedVideoFileItem(this, videoSize));
             }
-            fileContainer.EncodedFileItems = list;
-
-            ProgressManager.RegisterProgress(fileContainer);
-            return fileContainer;
+            EncodedFileItems = list;
         }
 
         public static FileContainer NewOverlayContainer(string originFilePath)
@@ -75,6 +77,8 @@ namespace Uploader.Core.Models
 
             TypeContainer = typeContainer;
             OriginFilePath = originFilePath;
+
+            EncodedFileItems = new List<FileItem>();
 
             ProgressToken = Guid.NewGuid();
 

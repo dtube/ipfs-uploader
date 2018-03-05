@@ -32,35 +32,13 @@ namespace Uploader.Core.Managers.Video
             // Si durée totale de vidéo, largeur hauteur non récupéré, on ne peut pas continuer
             if (!sourceFile.SuccessGetSourceInfo())
             {
-                string message = "Error while getting duration, height or width.";
+                string message = "Error while source video information.";
                 string longMessage = message + " FileName : " + Path.GetFileName(sourceFile.SourceFilePath);
-
-                if(sourceFile.IpfsProcess == null)
-                {
-                    sourceFile.AddIpfsProcess(sourceFile.SourceFilePath);
-                    IpfsDaemon.Instance.Queue(sourceFile);
-                }
-
                 processItem.SetErrorMessage(message, longMessage);
-
                 return false;
             }
 
             LogManager.AddEncodingMessage(LogLevel.Information, "SourceVideoDuration " + sourceFile.VideoDuration.Value + " / SourceVideoFileSize " + sourceFile.FileSize, "Info source");
-
-            // Désactivation encoding et sprite si dépassement de la durée maximale
-            if(sourceFile.HasReachMaxVideoDurationForEncoding())
-            {
-                if(sourceFile.IpfsProcess == null)
-                {
-                    sourceFile.AddIpfsProcess(sourceFile.SourceFilePath);
-                    IpfsDaemon.Instance.Queue(sourceFile);
-                }
-
-                processItem.CancelCascade("Dépassement de la durée limite de la vidéo atteinte.", "Dépassement de la durée limite de la vidéo atteinte.");
-
-                return false;
-            }
 
             return true;
         }

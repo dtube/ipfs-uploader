@@ -357,19 +357,20 @@ namespace Uploader.Core.Managers.Front
                         sourceAudioCpuEncoding = AudioCpuEncodeResultJson(fileContainer.SourceFileItem),
                         sourceVideoGpuEncoding = VideoGpuEncodeResultJson(fileContainer.SourceFileItem),
                         ipfsAddSourceVideo = IpfsResultJson(fileContainer.SourceFileItem),
-                        sprite = fileContainer.SpriteVideoFileItem == null ? null : (new
-                        {
-                            spriteCreation = SpriteResultJson(fileContainer.SpriteVideoFileItem),
-                            ipfsAddSprite = IpfsResultJson(fileContainer.SpriteVideoFileItem)
-                        }),
-                        encodedVideos = fileContainer.EncodedFileItems
-                            .Select(e =>
-                                new
-                                {
-                                    encode = AudioVideoCpuEncodeResultJson(e),
-                                    ipfsAddEncodeVideo = IpfsResultJson(e)
-                                })
-                            .ToArray()
+                        sprite = fileContainer.SpriteVideoFileItem == null ? null :
+                            new
+                            {
+                                spriteCreation = SpriteResultJson(fileContainer.SpriteVideoFileItem),
+                                ipfsAddSprite = IpfsResultJson(fileContainer.SpriteVideoFileItem)
+                            },
+                        encodedVideos = !fileContainer.EncodedFileItems.Any() ? null :
+                            fileContainer.EncodedFileItems.Select(e =>
+                                    new
+                                    {
+                                        encode = AudioVideoCpuEncodeResultJson(e),
+                                        ipfsAddEncodeVideo = IpfsResultJson(e)
+                                    })
+                                .ToArray()
                     };
 
                 case TypeContainer.Overlay:

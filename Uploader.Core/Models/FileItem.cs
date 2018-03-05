@@ -23,11 +23,6 @@ namespace Uploader.Core.Models
                 fileItem.VideoGpuEncodeProcess = new ProcessItem(fileItem, LogManager.FfmpegLogger);
             }
 
-            if(IpfsSettings.Instance.AddVideoSource)
-            {
-                fileItem.AddIpfsProcess(fileItem.SourceFilePath);
-            }
-
             return fileItem;
         }
 
@@ -112,7 +107,7 @@ namespace Uploader.Core.Models
 
         public bool IsSource => TypeFile == TypeFile.SourceVideo || TypeFile == TypeFile.SourceImage;
 
-        public DateTime LastActivityDateTime => Tools.Max(CreationDate, GetAllProcess().Max(p => p.LastActivityDateTime));
+        public DateTime LastActivityDateTime => Tools.Max(CreationDate, GetAllProcess().Any() ? GetAllProcess().Max(p => p.LastActivityDateTime) : DateTime.MinValue);
 
         public long? FileSize { get; private set; }
 
@@ -342,6 +337,9 @@ namespace Uploader.Core.Models
 
         public void Cancel(string message)
         {
+            if(!GetAllProcess().Any())
+                return;
+
             foreach (ProcessItem item in GetAllProcess().Where(p => p.Unstarted() && !p.CantCascadeCancel))
             {
                 item.CancelUnstarted(message);
@@ -350,6 +348,9 @@ namespace Uploader.Core.Models
 
         public bool Finished()
         {
+            if(!GetAllProcess().Any())
+                return true;
+
             return GetAllProcess().All(p => p.Finished());
         }
     }
