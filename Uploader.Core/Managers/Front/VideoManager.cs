@@ -37,7 +37,7 @@ namespace Uploader.Core.Managers.Front
                 if(formats.Any())
                     fileContainer.AddEncodedVideo(formats);
 
-                // si ipfs add source demandé mais pas d'encoding à faire...
+                // si ipfs add source demandé ou pas d'encoding à faire...
                 if(IpfsSettings.Instance.AddVideoSource || !fileContainer.EncodedFileItems.Any())
                 {
                     sourceFile.AddIpfsProcess(sourceFile.SourceFilePath);
@@ -61,6 +61,7 @@ namespace Uploader.Core.Managers.Front
             {
                 if (VideoSettings.Instance.GpuEncodeMode)
                 {
+                    sourceFile.AddGpuEncodeProcess();
                     // encoding audio de la source puis ça sera encoding videos Gpu
                     AudioCpuEncodeDaemon.Instance.Queue(sourceFile, "waiting audio encoding...");
                 }
@@ -69,6 +70,7 @@ namespace Uploader.Core.Managers.Front
                     // si encoding est demandé, et gpuMode -> encodingAudio
                     foreach (FileItem file in fileContainer.EncodedFileItems)
                     {
+                        file.AddCpuEncodeProcess();
                         AudioVideoCpuEncodeDaemon.Instance.Queue(file, "Waiting encode...");
                     }
                 }

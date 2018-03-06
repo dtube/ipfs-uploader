@@ -16,13 +16,6 @@ namespace Uploader.Core.Models
             FileItem fileItem = new FileItem(fileContainer, fileContainer.OriginFilePath, TypeFile.SourceVideo);
             fileItem.VideoSize = null;
             fileItem.InfoSourceProcess = new ProcessItem(fileItem, LogManager.FfmpegLogger);
-
-            if(VideoSettings.Instance.GpuEncodeMode)
-            {
-                fileItem.AudioCpuEncodeProcess = new ProcessItem(fileItem, LogManager.FfmpegLogger);
-                fileItem.VideoGpuEncodeProcess = new ProcessItem(fileItem, LogManager.FfmpegLogger);
-            }
-
             return fileItem;
         }
 
@@ -33,10 +26,6 @@ namespace Uploader.Core.Models
 
             FileItem fileItem = new FileItem(fileContainer, fileContainer.SourceFileItem.SourceFilePath, TypeFile.EncodedVideo);
             fileItem.VideoSize = videoSize;
-            if(!VideoSettings.Instance.GpuEncodeMode)
-            {
-                fileItem.AudioVideoCpuEncodeProcess = new ProcessItem(fileItem, LogManager.FfmpegLogger);                
-            }
             fileItem.IpfsProcess = new ProcessItem(fileItem, LogManager.IpfsLogger);
             return fileItem;
         }
@@ -93,6 +82,17 @@ namespace Uploader.Core.Models
                     SetTempFilePath(Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".png"));
                 break;
             }
+        }
+
+        public void AddGpuEncodeProcess()
+        {
+            AudioCpuEncodeProcess = new ProcessItem(this, LogManager.FfmpegLogger);
+            VideoGpuEncodeProcess = new ProcessItem(this, LogManager.FfmpegLogger);
+        }
+
+        public void AddCpuEncodeProcess()
+        {
+            AudioVideoCpuEncodeProcess = new ProcessItem(this, LogManager.FfmpegLogger);
         }
 
         public DateTime CreationDate
