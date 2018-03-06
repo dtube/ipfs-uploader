@@ -399,7 +399,7 @@ namespace Uploader.Core.Managers.Front
             return new
             {
                 progress = fileItem.IpfsProcess.Progress,
-                encodeSize = fileItem.VideoSize.ToString(),
+                encodeSize = fileItem.VideoSize.VideoSizeString(),
                 hash = fileItem.IpfsHash,
                 lastTimeProgress = fileItem.IpfsProcess.LastTimeProgressChanged,
                 errorMessage = fileItem.IpfsProcess.ErrorMessage,
@@ -417,7 +417,7 @@ namespace Uploader.Core.Managers.Front
             return new
             {
                 progress = fileItem.SpriteEncodeProcess.Progress,
-                encodeSize = fileItem.VideoSize.ToString(),
+                encodeSize = fileItem.VideoSize.VideoSizeString(),
                 lastTimeProgress = fileItem.SpriteEncodeProcess.LastTimeProgressChanged,
                 errorMessage = fileItem.SpriteEncodeProcess.ErrorMessage,
                 step = fileItem.SpriteEncodeProcess.CurrentStep.ToString(),
@@ -433,7 +433,7 @@ namespace Uploader.Core.Managers.Front
             return new
             {
                 progress = fileItem.AudioCpuEncodeProcess.Progress,
-                encodeSize = fileItem.VideoSize.ToString(),
+                encodeSize = fileItem.VideoSize.VideoSizeString(),
                 lastTimeProgress = fileItem.AudioCpuEncodeProcess.LastTimeProgressChanged,
                 errorMessage = fileItem.AudioCpuEncodeProcess.ErrorMessage,
                 step = fileItem.AudioCpuEncodeProcess.CurrentStep.ToString(),
@@ -449,7 +449,7 @@ namespace Uploader.Core.Managers.Front
             return new
             {
                 progress = fileItem.AudioVideoCpuEncodeProcess.Progress,
-                encodeSize = fileItem.VideoSize.ToString(),
+                encodeSize = fileItem.VideoSize.VideoSizeString(),
                 lastTimeProgress = fileItem.AudioVideoCpuEncodeProcess.LastTimeProgressChanged,
                 errorMessage = fileItem.AudioVideoCpuEncodeProcess.ErrorMessage,
                 step = fileItem.AudioVideoCpuEncodeProcess.CurrentStep.ToString(),
@@ -465,12 +465,17 @@ namespace Uploader.Core.Managers.Front
             return new
             {
                 progress = fileItem.VideoGpuEncodeProcess.Progress,
-                encodeSize = fileItem.VideoSize.ToString(),
+                encodeSize = fileItem.VideoSize.VideoSizeString(),
                 lastTimeProgress = fileItem.VideoGpuEncodeProcess.LastTimeProgressChanged,
                 errorMessage = fileItem.VideoGpuEncodeProcess.ErrorMessage,
                 step = fileItem.VideoGpuEncodeProcess.CurrentStep.ToString(),
                 positionInQueue = Position(fileItem.VideoGpuEncodeProcess, VideoGpuEncodeDaemon.Instance.CurrentPositionInQueue)
             };
+        }
+
+        private static string VideoSizeString(this VideoSize videoSize)
+        {
+            return videoSize == null ? "source" : videoSize.Height.ToString() + "p";
         }
 
         private static int? Position(ProcessItem processItem, int daemonCurrentPositionInQueue)

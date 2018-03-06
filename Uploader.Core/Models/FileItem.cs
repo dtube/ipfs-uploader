@@ -14,7 +14,7 @@ namespace Uploader.Core.Models
         public static FileItem NewSourceVideoFileItem(FileContainer fileContainer)
         {
             FileItem fileItem = new FileItem(fileContainer, fileContainer.OriginFilePath, TypeFile.SourceVideo);
-            fileItem.VideoSize = VideoSize.Source;
+            fileItem.VideoSize = null;
             fileItem.InfoSourceProcess = new ProcessItem(fileItem, LogManager.FfmpegLogger);
 
             if(VideoSettings.Instance.GpuEncodeMode)
@@ -28,8 +28,8 @@ namespace Uploader.Core.Models
 
         public static FileItem NewEncodedVideoFileItem(FileContainer fileContainer, VideoSize videoSize)
         {
-            if (videoSize == VideoSize.Undefined)
-                throw new InvalidOperationException("VideoSize inconnu");
+            if (videoSize == null)
+                throw new ArgumentNullException(nameof(videoSize));
 
             FileItem fileItem = new FileItem(fileContainer, fileContainer.SourceFileItem.SourceFilePath, TypeFile.EncodedVideo);
             fileItem.VideoSize = videoSize;
@@ -44,7 +44,7 @@ namespace Uploader.Core.Models
         public static FileItem NewSpriteVideoFileItem(FileContainer fileContainer)
         {
             FileItem fileItem = new FileItem(fileContainer, fileContainer.OriginFilePath, TypeFile.SpriteVideo);
-            fileItem.VideoSize = VideoSize.Source;
+            fileItem.VideoSize = null;
             fileItem.SpriteEncodeProcess = new ProcessItem(fileItem, LogManager.SpriteLogger);
             fileItem.IpfsProcess = new ProcessItem(fileItem, LogManager.IpfsLogger);
             return fileItem;

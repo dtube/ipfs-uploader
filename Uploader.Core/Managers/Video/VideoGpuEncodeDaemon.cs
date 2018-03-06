@@ -36,11 +36,11 @@ namespace Uploader.Core.Managers.Video
             // encoding videos par GPU
             if (EncodeManager.VideoGpuEncoding(fileItem))
             {                        
-                // rechercher le 480p pour le sprite
-                var video480p = fileItem.FileContainer.EncodedFileItems.FirstOrDefault(v => v.VideoSize == VideoSize.F480p);
-                if(video480p != null && fileItem.FileContainer.SpriteVideoFileItem != null)
+                // rechercher la video la plus petite pour le sprite
+                FileItem videoLight = fileItem.FileContainer.EncodedFileItems.OrderBy(e => e.VideoSize.QualityOrder).FirstOrDefault();
+                if(videoLight != null && fileItem.FileContainer.SpriteVideoFileItem != null)
                 {
-                    fileItem.FileContainer.SpriteVideoFileItem.SetSourceFilePath(video480p.OutputFilePath);
+                    fileItem.FileContainer.SpriteVideoFileItem.SetSourceFilePath(videoLight.OutputFilePath);
                     SpriteDaemon.Instance.Queue(fileItem.FileContainer.SpriteVideoFileItem, "Waiting sprite creation...");
                 }
 

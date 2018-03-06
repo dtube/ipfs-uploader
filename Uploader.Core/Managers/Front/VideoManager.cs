@@ -22,42 +22,20 @@ namespace Uploader.Core.Managers.Front
             {
                 VideoSize[] requestFormats = GetVideoSizes(videoEncodingFormats);
                 VideoSize[] authorizedFormats = GetVideoSizes(VideoSettings.Instance.AuthorizedQuality);
-                IList<VideoSize> formats = requestFormats.Intersect(authorizedFormats).ToList();
+                IList<VideoSize> formats = requestFormats
+                    .Intersect(authorizedFormats)
+                    .OrderBy(v => v.QualityOrder)
+                    .ToList();
 
                 // suppression des formats à encoder avec une qualité/bitrate/nbframe/resolution... supérieure
                 foreach (VideoSize videoSize in formats.ToList())
                 {
-                    switch (videoSize)
-                    {
-                        case VideoSize.F240p:
-                            if(sourceFile.VideoHeight <= 240)
-                                formats.Remove(videoSize);
-                            break;
-
-                        case VideoSize.F360p:
-                            if(sourceFile.VideoHeight <= 360)
-                                formats.Remove(videoSize);
-                            break;
-
-                        case VideoSize.F480p:
-                            if(sourceFile.VideoHeight <= 480)
-                                formats.Remove(videoSize);
-                            break;
-
-                        case VideoSize.F720p:
-                            if(sourceFile.VideoHeight <= 720)
-                                formats.Remove(videoSize);
-                            break;
-
-                        case VideoSize.F1080p:
-                            if(sourceFile.VideoHeight <= 1080)
-                                formats.Remove(videoSize);
-                            break;
-                    }
+                    if(sourceFile.VideoHeight <= videoSize.Height)
+                        formats.Remove(videoSize);
                 }            
 
                 if(formats.Any())
-                        fileContainer.AddEncodedVideo(formats);
+                    fileContainer.AddEncodedVideo(formats);
 
                 // si ipfs add source demandé mais pas d'encoding à faire...
                 if(IpfsSettings.Instance.AddVideoSource || !fileContainer.EncodedFileItems.Any())
@@ -106,24 +84,7 @@ namespace Uploader.Core.Managers.Front
 
             return videoEncodingFormats
                 .Split(',')
-                .Select(v =>
-                {
-                    switch (v)
-                    {
-                        case "240p":
-                            return VideoSize.F240p;
-                        case "360p":
-                            return VideoSize.F360p;
-                        case "480p":
-                            return VideoSize.F480p;
-                        case "720p":
-                            return VideoSize.F720p;
-                        case "1080p":
-                            return VideoSize.F1080p;
-                        default:
-                            throw new InvalidOperationException("Format non reconnu.");
-                    }
-                })
+                .Select(v => VideoSizeFactory.GetSize(v))
                 .ToArray();            
         }
     }

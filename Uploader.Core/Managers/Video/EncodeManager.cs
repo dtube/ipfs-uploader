@@ -39,7 +39,7 @@ namespace Uploader.Core.Managers.Video
                 ffmpegProcessManager.StartProcess(arguments, VideoSettings.Instance.EncodeTimeout);
 
                 fileItem.SetOutputFilePath(fileItem.TempFilePath);
-                LogManager.AddEncodingMessage(LogLevel.Information, "OutputFileName " + Path.GetFileName(fileItem.OutputFilePath) + " / FileSize " + fileItem.FileSize + " / Format " +fileItem.VideoSize, "End AudioVideoCpuEncoding");
+                LogManager.AddEncodingMessage(LogLevel.Information, "OutputFileName " + Path.GetFileName(fileItem.OutputFilePath) + " / FileSize " + fileItem.FileSize + " / Format " + fileItem.VideoSize, "End AudioVideoCpuEncoding");
                 fileItem.AudioVideoCpuEncodeProcess.EndProcessDateTime();
 
                 return true;
@@ -74,7 +74,7 @@ namespace Uploader.Core.Managers.Video
                 }
 
                 fileItem.SetVideoAacTempFilePath(fileItem.TempFilePath);
-                LogManager.AddEncodingMessage(LogLevel.Information, "OutputFileName " + Path.GetFileName(fileItem.VideoAacTempFilePath) + " / FileSize " + fileItem.FileSize + " / Format " +fileItem.VideoSize, "End AudioCpuEncoding");
+                LogManager.AddEncodingMessage(LogLevel.Information, "OutputFileName " + Path.GetFileName(fileItem.VideoAacTempFilePath) + " / FileSize " + fileItem.FileSize + " / Format " + fileItem.VideoSize, "End AudioCpuEncoding");
                 fileItem.AudioCpuEncodeProcess.EndProcessDateTime();
 
                 return true;
@@ -99,10 +99,10 @@ namespace Uploader.Core.Managers.Video
                 string arguments = $"-y -hwaccel cuvid -vcodec h264_cuvid -vsync 0 -i {Path.GetFileName(fileItem.VideoAacTempFilePath)}";
                 //string arguments = $"-y -i {Path.GetFileName(fileItem.VideoAacTempFilePath)}";
                 FileItem sourceFile = fileItem.FileContainer.SourceFileItem;
-                foreach (var item in fileItem.FileContainer.EncodedFileItems)
+                foreach (FileItem item in fileItem.FileContainer.EncodedFileItems)
                 {
                     string size = GetSize(item.VideoSize, fileItem.VideoWidth.Value, fileItem.VideoHeight.Value);
-                    string maxRate = GetMaxRate(item.VideoSize);
+                    string maxRate = item.VideoSize.MaxRate;
 
                     if(sourceFile.VideoPixelFormat != "yuv420p")
                         arguments += " -pixel_format yuv420p";
@@ -139,65 +139,8 @@ namespace Uploader.Core.Managers.Video
 
         private static string GetSize(VideoSize videoSize, int width, int height)
         {
-            switch (videoSize)
-            {
-                case VideoSize.F240p:
-                    {
-                        Tuple<int, int> finalSize = SizeHelper.GetSize(width, height, 426, 240);
-                        return $"{finalSize.Item1}:{finalSize.Item2}";
-                    }
-
-                case VideoSize.F360p:
-                    {
-                        Tuple<int, int> finalSize = SizeHelper.GetSize(width, height, 640, 360);
-                        return $"{finalSize.Item1}:{finalSize.Item2}";
-                    }
-
-                case VideoSize.F480p:
-                    {
-                        Tuple<int, int> finalSize = SizeHelper.GetSize(width, height, 854, 480);
-                        return $"{finalSize.Item1}:{finalSize.Item2}";
-                    }
-
-                case VideoSize.F720p:
-                    {
-                        Tuple<int, int> finalSize = SizeHelper.GetSize(width, height, 1280, 720);
-                        return $"{finalSize.Item1}:{finalSize.Item2}";
-                    }
-
-                case VideoSize.F1080p:
-                    {
-                        Tuple<int, int> finalSize = SizeHelper.GetSize(width, height, 1920, 1080);
-                        return $"{finalSize.Item1}:{finalSize.Item2}";
-                    }
-
-                default:
-                    throw new InvalidOperationException("Format non reconnu.");
-            }
-        }
-
-        private static string GetMaxRate(VideoSize videoSize)
-        {
-            switch (videoSize)
-            {
-                case VideoSize.F240p:
-                        return "100k";
-
-                case VideoSize.F360p:
-                        return "200k";
-
-                case VideoSize.F480p:
-                        return "500k";
-
-                case VideoSize.F720p:
-                        return "1000k";
-
-                case VideoSize.F1080p:
-                        return "1600k";
-
-                default:
-                    throw new InvalidOperationException("Format non reconnu.");
-            }
+            Tuple<int, int> finalSize = SizeHelper.GetSize(width, height, videoSize.Width, videoSize.Height);
+            return $"{finalSize.Item1}:{finalSize.Item2}";
         }
     }
 }

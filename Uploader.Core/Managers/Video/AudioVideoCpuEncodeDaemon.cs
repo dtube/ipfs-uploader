@@ -35,8 +35,9 @@ namespace Uploader.Core.Managers.Video
 
             if (EncodeManager.AudioVideoCpuEncoding(fileItem))
             {
-                // rechercher le 480p pour le sprite
-                if(fileItem.VideoSize == VideoSize.F480p && fileItem.FileContainer.SpriteVideoFileItem != null)
+                // rechercher si c'est la video la plus petite pour le sprite
+                if(fileItem.FileContainer.SpriteVideoFileItem != null 
+                    && fileItem.VideoSize.QualityOrder == fileItem.FileContainer.EncodedFileItems.Min(e => e.VideoSize.QualityOrder))
                 {
                     fileItem.FileContainer.SpriteVideoFileItem.SetSourceFilePath(fileItem.OutputFilePath);
                     SpriteDaemon.Instance.Queue(fileItem.FileContainer.SpriteVideoFileItem, "Waiting sprite creation...");
