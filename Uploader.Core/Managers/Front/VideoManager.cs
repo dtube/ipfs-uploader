@@ -17,8 +17,17 @@ namespace Uploader.Core.Managers.Front
 
             // Récupérer la durée totale de la vidéo et sa résolution, autorisation encoding
             bool successGetSourceInfo = VideoSourceManager.SuccessAnalyseSource(sourceFile, sourceFile.InfoSourceProcess);
+            if(!successGetSourceInfo)
+                return fileContainer.ProgressToken;
 
-            if(successGetSourceInfo && !sourceFile.HasReachMaxVideoDurationForEncoding())
+            // si ipfs add source demandé ou dépassement de la durée max
+            if(IpfsSettings.Instance.AddVideoSource || sourceFile.HasReachMaxVideoDurationForEncoding())
+            {
+                sourceFile.AddIpfsProcess(sourceFile.SourceFilePath);
+                IpfsDaemon.Instance.Queue(sourceFile);
+            }
+
+            if(!sourceFile.HasReachMaxVideoDurationForEncoding())
             {
                 VideoSize[] requestFormats = GetVideoSizes(videoEncodingFormats);
                 VideoSize[] authorizedFormats = GetVideoSizes(VideoSettings.Instance.AuthorizedQuality);
@@ -40,13 +49,6 @@ namespace Uploader.Core.Managers.Front
 
                 // ajouter les formats à encoder
                 fileContainer.AddEncodedVideo(formats);
-
-                // si ipfs add source demandé
-                if(IpfsSettings.Instance.AddVideoSource)
-                {
-                    sourceFile.AddIpfsProcess(sourceFile.SourceFilePath);
-                    IpfsDaemon.Instance.Queue(sourceFile);
-                }
 
                 // si sprite demandé
                 if (sprite??false)
