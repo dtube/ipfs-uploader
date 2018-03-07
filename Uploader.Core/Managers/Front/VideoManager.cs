@@ -30,15 +30,19 @@ namespace Uploader.Core.Managers.Front
                 // suppression des formats à encoder avec une qualité/bitrate/nbframe/resolution... supérieure
                 foreach (VideoSize videoSize in formats.ToList())
                 {
-                    if(sourceFile.VideoHeight <= videoSize.Height)
+                    if(sourceFile.VideoHeight <= videoSize.MinSourceHeightForEncoding)
                         formats.Remove(videoSize);
                 }            
 
-                if(formats.Any())
-                    fileContainer.AddEncodedVideo(formats);
+                // si pas de vidéo à encoder, encoder dans la plus petite qualité
+                if(!formats.Any())
+                    formats.Add(authorizedFormats.OrderBy(a => a.QualityOrder).First());
 
-                // si ipfs add source demandé ou pas d'encoding à faire...
-                if(IpfsSettings.Instance.AddVideoSource || !fileContainer.EncodedFileItems.Any())
+                // ajouter les formats à encoder
+                fileContainer.AddEncodedVideo(formats);
+
+                // si ipfs add source demandé
+                if(IpfsSettings.Instance.AddVideoSource)
                 {
                     sourceFile.AddIpfsProcess(sourceFile.SourceFilePath);
                     IpfsDaemon.Instance.Queue(sourceFile);
@@ -48,17 +52,8 @@ namespace Uploader.Core.Managers.Front
                 if (sprite??false)
                 {                
                     fileContainer.AddSprite();
-
-                    // si pas d'encoding à faire... déclencher le sprite maintenant avec la source
-                    if(!fileContainer.EncodedFileItems.Any())
-                    {
-                        SpriteDaemon.Instance.Queue(fileContainer.SpriteVideoFileItem, "Waiting sprite creation...");
-                    }
                 }
-            }
 
-            if(fileContainer.EncodedFileItems.Any())
-            {
                 if (VideoSettings.Instance.GpuEncodeMode)
                 {
                     sourceFile.AddGpuEncodeProcess();

@@ -8,6 +8,8 @@ namespace Uploader.Core.Models
     {
         public abstract int Width { get; }
         public abstract int Height { get; }
+
+        public abstract int MinSourceHeightForEncoding { get; }
         public abstract string MaxRate { get; }
         public abstract int QualityOrder { get; }
     }
@@ -16,6 +18,7 @@ namespace Uploader.Core.Models
     {
         public override int Width => 426;
         public override int Height => 240;
+        public override int MinSourceHeightForEncoding => 120;
         public override string MaxRate => "100k";
         public override int QualityOrder => 1;
     }
@@ -24,6 +27,7 @@ namespace Uploader.Core.Models
     {
         public override int Width => 640;
         public override int Height => 360;
+        public override int MinSourceHeightForEncoding => 300;
         public override string MaxRate => "200k";
         public override int QualityOrder => 2;
     }
@@ -32,6 +36,7 @@ namespace Uploader.Core.Models
     {
         public override int Width => 854;
         public override int Height => 480;
+        public override int MinSourceHeightForEncoding => 360;
         public override string MaxRate => "500k";
         public override int QualityOrder => 3;
     }
@@ -40,6 +45,7 @@ namespace Uploader.Core.Models
     {
         public override int Width => 1280;
         public override int Height => 720;
+        public override int MinSourceHeightForEncoding => 600;
         public override string MaxRate => "1000k";
         public override int QualityOrder => 4;
     }
@@ -48,6 +54,7 @@ namespace Uploader.Core.Models
     {
         public override int Width => 1920;
         public override int Height => 1080;
+        public override int MinSourceHeightForEncoding => 900;
         public override string MaxRate => "1600k";
         public override int QualityOrder => 5;
     }
@@ -59,10 +66,10 @@ namespace Uploader.Core.Models
         static VideoSizeFactory()
         {
             _dico.Add("240p", new VideoSize240());
-            _dico.Add("360p", new VideoSize360());
+            //_dico.Add("360p", new VideoSize360());
             _dico.Add("480p", new VideoSize480());
             _dico.Add("720p", new VideoSize720());
-            _dico.Add("1080p", new VideoSize1080());
+            //_dico.Add("1080p", new VideoSize1080());
         }
 
         public static VideoSize GetSize(string urlTag)
