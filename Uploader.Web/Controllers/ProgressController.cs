@@ -20,14 +20,14 @@ namespace Uploader.Web.Controllers
         [Route("/getStatus")]
         public IActionResult GetStatus(bool details = false)
         {
-            return Ok(ProgressManager.GetStats(details));
+            return Json(ProgressManager.GetStats(details));
         }
 
         [HttpGet]
         [Route("/getErrors")]
         public IActionResult GetErrors()
         {
-            return Ok(ProgressManager.GetErrors());
+            return Json(ProgressManager.GetErrors());
         }
 
         [HttpGet]
@@ -42,7 +42,7 @@ namespace Uploader.Web.Controllers
                     errorMessage = "token not exist"
                 });
             }
-            return Ok(result);
+            return Json(result);
         }
 
         [HttpGet]
@@ -57,7 +57,7 @@ namespace Uploader.Web.Controllers
                     errorMessage = "hash not exist"
                 });
             }
-            return Ok(result);
+            return Json(result);
         }
     }
 }
