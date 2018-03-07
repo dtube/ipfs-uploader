@@ -59,7 +59,7 @@ namespace Uploader.Core.Managers.Front
                 var listIpfsAdded = new List<FileItem>();
 
                 listVideoEncoded.AddRange(list.Select(l => l.SourceFileItem));
-                listIpfsAdded.AddRange(list.Select(l => l.SourceFileItem));
+                listIpfsAdded.AddRange(list.Select(l => l.SourceFileItem).Where(f => f.IpfsProcess != null));
 
                 var listSpriteFiles = list.Where(l => l.SpriteVideoFileItem != null).Select(l => l.SpriteVideoFileItem).ToList();
                 listSpriteCreated.AddRange(listSpriteFiles);
@@ -67,7 +67,7 @@ namespace Uploader.Core.Managers.Front
 
                 var listEncodeFiles = list.Where(l => l.EncodedFileItems != null).SelectMany(l => l.EncodedFileItems).ToList();
                 listVideoEncoded.AddRange(listEncodeFiles);
-                listIpfsAdded.AddRange(listEncodeFiles);
+                listIpfsAdded.AddRange(listEncodeFiles.Where(f => f.IpfsProcess != null));
 
                 return new
                 {
@@ -112,8 +112,8 @@ namespace Uploader.Core.Managers.Front
                 audioCpuEncodeLast24h = GetAudioCpuEncodeStats(listVideoEncoded.Where(f => f.AudioCpuEncodeProcess != null && f.AudioCpuEncodeProcess.CurrentStep == step).ToList()),
                 videoGpuEncodeLast24h = GetVideoGpuEncodeStats(listVideoEncoded.Where(f => f.VideoGpuEncodeProcess != null && f.VideoGpuEncodeProcess.CurrentStep == step).ToList()),
                 audioVideoCpuEncodeLast24h = GetAudioVideoCpuEncodeStats(listVideoEncoded.Where(f => f.AudioVideoCpuEncodeProcess != null && f.AudioVideoCpuEncodeProcess.CurrentStep == step).ToList()),
-                spriteCreationLast24h = GetSpriteEncodeStats(listSpriteCreated.Where(f => f.SpriteEncodeProcess.CurrentStep == step).ToList()),
-                ipfsAddLast24h = GetIpfsStats(listIpfsAdded.Where(f => f.IpfsProcess.CurrentStep == step).ToList())
+                spriteCreationLast24h = GetSpriteEncodeStats(listSpriteCreated.Where(f => f.SpriteEncodeProcess != null && f.SpriteEncodeProcess.CurrentStep == step).ToList()),
+                ipfsAddLast24h = GetIpfsStats(listIpfsAdded.Where(f => f.IpfsProcess != null && f.IpfsProcess.CurrentStep == step).ToList())
             };
         }
 
