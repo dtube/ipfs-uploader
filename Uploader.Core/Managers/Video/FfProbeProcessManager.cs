@@ -28,7 +28,11 @@ namespace Uploader.Core.Managers.Video
             
             foreach (string output in process.DataOutput.ToString().Split(Environment.NewLine))
             {
-                Fill(output);
+                try
+                {
+                    Fill(output);
+                }
+                catch{}
             }
         }
 
@@ -53,13 +57,17 @@ namespace Uploader.Core.Managers.Video
             {
                 _fileItem.VideoCodec = output.Split('=')[1];
             }
-            else if(!_fileItem.VideoBitRate.HasValue && output.StartsWith("bit_rate="))
-            {
-                _fileItem.VideoBitRate = Convert.ToInt32(output.Split('=')[1]);
-            }
             else if(_fileItem.VideoPixelFormat == null && output.StartsWith("pix_fmt="))
             {
                 _fileItem.VideoPixelFormat = output.Split('=')[1];
+            }
+            else if(_fileItem.AudioCodec == null && output.StartsWith("codec_name="))
+            {
+                _fileItem.AudioCodec = output.Split('=')[1];
+            }
+            /*else if(!_fileItem.VideoBitRate.HasValue && output.StartsWith("bit_rate="))
+            {
+                _fileItem.VideoBitRate = Convert.ToInt32(output.Split('=')[1]);
             }
             else if(_fileItem.VideoFrameRate == null && output.StartsWith("avg_frame_rate="))
             {
@@ -69,14 +77,10 @@ namespace Uploader.Core.Managers.Video
             {
                 _fileItem.VideoNbFrame = Convert.ToInt32(output.Split('=')[1]);
             }
-            else if(_fileItem.AudioCodec == null && output.StartsWith("codec_name="))
-            {
-                _fileItem.AudioCodec = output.Split('=')[1];
-            }
             else if(_fileItem.VideoRotate == null && output.StartsWith("TAG:rotate="))
             {
                 _fileItem.VideoRotate = Convert.ToInt32(output.Split('=')[1]);
-            }
+            }*/
         }
     }
 }

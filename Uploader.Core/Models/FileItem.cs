@@ -161,31 +161,31 @@ namespace Uploader.Core.Models
             private set;
         }
 
-        public string VideoFrameRate
+        /*public string VideoFrameRate
         {
             get;
             set;
-        }
+        }*/
 
-        public int? VideoBitRate
+        /*public int? VideoBitRate
         {
             get;
             set;
-        }
+        }*/
+
+        /*public int? VideoRotate
+        {
+            get;
+            set;
+        }*/
+
+        /*public int? VideoNbFrame
+        {
+            get;
+            set;
+        }*/
 
         public string VideoPixelFormat
-        {
-            get;
-            set;
-        }
-
-        public int? VideoRotate
-        {
-            get;
-            set;
-        }
-
-        public int? VideoNbFrame
         {
             get;
             set;
@@ -294,12 +294,12 @@ namespace Uploader.Core.Models
             return (VideoDuration??0) > 0 
             && (VideoWidth??0) > 0 
             && (VideoHeight??0) > 0 
-            && (VideoBitRate??0) > 0
-            && (VideoNbFrame??0) > 0
+            //&& (VideoBitRate??0) > 0
+            //&& (VideoNbFrame??0) > 0
+            //&& !string.IsNullOrWhiteSpace(VideoFrameRate)
             && !string.IsNullOrWhiteSpace(VideoCodec)
             && !string.IsNullOrWhiteSpace(VideoPixelFormat)
-            && !string.IsNullOrWhiteSpace(AudioCodec)
-            && !string.IsNullOrWhiteSpace(VideoFrameRate);
+            && !string.IsNullOrWhiteSpace(AudioCodec);
         }
 
         public bool HasReachMaxVideoDurationForEncoding()
