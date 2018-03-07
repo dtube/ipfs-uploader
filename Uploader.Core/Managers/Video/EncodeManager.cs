@@ -67,6 +67,9 @@ namespace Uploader.Core.Managers.Video
                 }
                 else
                 {
+                    if(fileItem.VideoCodec.ToLower() == "vp8" || fileItem.VideoCodec.ToLower() == "vp9")
+                        fileItem.SetTempFilePath(fileItem.TempFilePath.Replace(".mp4", ".mkv"));
+
                     // encoding audio de la source
                     string arguments = $"-y -i {Path.GetFileName(fileItem.SourceFilePath)} -vcodec copy -acodec aac -strict -2 {Path.GetFileName(fileItem.TempFilePath)}";
                     var ffmpegProcessManager = new FfmpegProcessManager(fileItem, fileItem.AudioCpuEncodeProcess);

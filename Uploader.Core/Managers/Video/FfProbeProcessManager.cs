@@ -38,7 +38,7 @@ namespace Uploader.Core.Managers.Video
 
         private void Fill(string output)
         {
-            if (string.IsNullOrWhiteSpace(output))
+            if (string.IsNullOrWhiteSpace(output) || output.EndsWith("=N/A"))
                 return;
 
             if(!_fileItem.VideoDuration.HasValue && output.StartsWith("duration="))
