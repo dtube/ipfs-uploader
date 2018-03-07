@@ -24,6 +24,13 @@ namespace Uploader.Web.Controllers
         }
 
         [HttpGet]
+        [Route("/getErrors")]
+        public IActionResult GetErrors()
+        {
+            return Ok(ProgressManager.GetErrors());
+        }
+
+        [HttpGet]
         [Route("/getProgressByToken/{token}")]
         public IActionResult GetProgressByToken(Guid token)
         {

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -32,6 +33,17 @@ namespace Uploader.Core.Managers.Front
                 FileContainer thisFileContainer;
                 progresses.TryRemove(toDelete.ProgressToken, out thisFileContainer);
             }
+        }
+
+        public static dynamic GetErrors()
+        {
+            return new
+            {
+                list = progresses.Values
+                    .Where(f => f.Error())
+                    .Select(c => GetResult(c))
+                    .ToList()
+            };
         }
 
         public static dynamic GetStats(bool details)
@@ -107,14 +119,24 @@ namespace Uploader.Core.Managers.Front
 
         private static dynamic GetStatByStep(ProcessStep step, List<FileItem> listVideoEncoded, List<FileItem> listSpriteCreated, List<FileItem> listIpfsAdded)
         {
-            return new
+            try
             {
-                audioCpuEncodeLast24h = GetAudioCpuEncodeStats(listVideoEncoded.Where(f => f.AudioCpuEncodeProcess != null && f.AudioCpuEncodeProcess.CurrentStep == step).ToList()),
-                videoGpuEncodeLast24h = GetVideoGpuEncodeStats(listVideoEncoded.Where(f => f.VideoGpuEncodeProcess != null && f.VideoGpuEncodeProcess.CurrentStep == step).ToList()),
-                audioVideoCpuEncodeLast24h = GetAudioVideoCpuEncodeStats(listVideoEncoded.Where(f => f.AudioVideoCpuEncodeProcess != null && f.AudioVideoCpuEncodeProcess.CurrentStep == step).ToList()),
-                spriteCreationLast24h = GetSpriteEncodeStats(listSpriteCreated.Where(f => f.SpriteEncodeProcess != null && f.SpriteEncodeProcess.CurrentStep == step).ToList()),
-                ipfsAddLast24h = GetIpfsStats(listIpfsAdded.Where(f => f.IpfsProcess != null && f.IpfsProcess.CurrentStep == step).ToList())
-            };
+                return new
+                {
+                    audioCpuEncodeLast24h = GetAudioCpuEncodeStats(listVideoEncoded.FindAll(f => f.AudioCpuEncodeProcess != null && f.AudioCpuEncodeProcess.CurrentStep == step)),
+                    videoGpuEncodeLast24h = GetVideoGpuEncodeStats(listVideoEncoded.FindAll(f => f.VideoGpuEncodeProcess != null && f.VideoGpuEncodeProcess.CurrentStep == step)),
+                    audioVideoCpuEncodeLast24h = GetAudioVideoCpuEncodeStats(listVideoEncoded.FindAll(f => f.AudioVideoCpuEncodeProcess != null && f.AudioVideoCpuEncodeProcess.CurrentStep == step)),
+                    spriteCreationLast24h = GetSpriteEncodeStats(listSpriteCreated.FindAll(f => f.SpriteEncodeProcess != null && f.SpriteEncodeProcess.CurrentStep == step)),
+                    ipfsAddLast24h = GetIpfsStats(listIpfsAdded.FindAll(f => f.IpfsProcess != null && f.IpfsProcess.CurrentStep == step))
+                };
+            }
+            catch(Exception ex)
+            {
+                return new
+                {
+                    exception = ex.ToString()
+                };
+            }
         }
 
         private static dynamic GetAudioCpuEncodeStats(List<FileItem> fileItems)
@@ -354,6 +376,8 @@ namespace Uploader.Core.Managers.Front
                     return new
                     {
                         finished = fileContainer.Finished(),
+                        originFileName = Path.GetFileName(fileContainer.OriginFilePath),
+                        exceptionDetail = fileContainer.ExceptionDetail,
                         sourceAudioCpuEncoding = AudioCpuEncodeResultJson(fileContainer.SourceFileItem),
                         sourceVideoGpuEncoding = VideoGpuEncodeResultJson(fileContainer.SourceFileItem),
                         ipfsAddSourceVideo = IpfsResultJson(fileContainer.SourceFileItem),

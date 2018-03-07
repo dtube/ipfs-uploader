@@ -353,5 +353,13 @@ namespace Uploader.Core.Models
 
             return GetAllProcess().All(p => p.Finished());
         }
+
+        public bool Error()
+        {
+            if(!GetAllProcess().Any())
+                return false;
+
+            return GetAllProcess().Any(p => p.CurrentStep == ProcessStep.Error);
+        }
     }
 }

@@ -24,6 +24,8 @@ namespace Uploader.Core.Models
 
         public string OriginFilePath { get; }
 
+        public string ExceptionDetail { get; set; }
+
         public static FileContainer NewVideoContainer(string originFilePath)
         {
             FileContainer fileContainer = new FileContainer(TypeContainer.Video, originFilePath);
@@ -173,17 +175,29 @@ namespace Uploader.Core.Models
             if(!Finished())
                 return;
 
-            foreach (var item in GetAllFile())
+            foreach (FileItem item in GetAllFile())
             {
+                if(Error())
+                    foreach (string filePath in item.FilesToDelete.Where(f => f == OriginFilePath).ToList())
+                    {
+                        item.FilesToDelete.Remove(filePath);
+                    }
+
                 TempFileManager.SafeDeleteTempFiles(item.FilesToDelete.ToArray());
             }
 
-            TempFileManager.SafeDeleteTempFile(OriginFilePath);
+            if(!Error())
+                TempFileManager.SafeDeleteTempFile(OriginFilePath);
         }
 
         public bool Finished()
         {
             return GetAllFile().All(f => f.Finished());
+        }
+
+        public bool Error()
+        {
+            return GetAllFile().Any(f => f.Error());
         }
 
         public DateTime LastActivityDateTime => Tools.Max(CreationDate, GetAllFile().Max(f => f.LastActivityDateTime));

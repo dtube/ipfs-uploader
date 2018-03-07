@@ -223,6 +223,7 @@ namespace Uploader.Core.Models
             EndProcess = DateTime.UtcNow;
             CurrentStep = ProcessStep.Error;
 
+            FileItem.FileContainer.ExceptionDetail = exception.ToString();
             FileItem.FileContainer.CancelAll(shortMessage);
         }
         
