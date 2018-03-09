@@ -161,29 +161,29 @@ namespace Uploader.Core.Models
             private set;
         }
 
-        /*public string VideoFrameRate
+        public string VideoFrameRate
         {
             get;
             set;
-        }*/
+        }
 
-        /*public int? VideoBitRate
+        public int? VideoBitRate
         {
             get;
             set;
-        }*/
+        }
 
-        /*public int? VideoRotate
+        public int? VideoRotate
         {
             get;
             set;
-        }*/
+        }
 
-        /*public int? VideoNbFrame
+        public int? VideoNbFrame
         {
             get;
             set;
-        }*/
+        }
 
         public string VideoPixelFormat
         {

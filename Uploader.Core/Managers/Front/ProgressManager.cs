@@ -41,7 +41,7 @@ namespace Uploader.Core.Managers.Front
             {
                 list = progresses.Values
                     .Where(f => f.Error())
-                    .Select(c => GetResult(c))
+                    .Select(c => GetResult(c, true))
                     .ToList()
             };
         }
@@ -295,21 +295,21 @@ namespace Uploader.Core.Managers.Front
         {
             if(!infos.Any())
                 return null;
-            return new { nb = infos.Count, min = infos.Min(), average = Math.Round(infos.Average(), 2), max = infos.Max() };
+            return new { min = infos.Min(), average = Math.Round(infos.Average(), 2), max = infos.Max() };
         }
 
         private static dynamic GetTimeInfo(List<long> infos)
         {
             if(!infos.Any())
                 return null;
-            return new { nb = infos.Count, min = Time(infos.Min()), average = Time((long)infos.Average()), max = Time(infos.Max()) };
+            return new { min = Time(infos.Min()), average = Time((long)infos.Average()), max = Time(infos.Max()) };
         }
 
         private static dynamic GetFileSizeInfo(List<long> infos)
         {
             if(!infos.Any())
                 return null;
-            return new { nb = infos.Count, min = Filesize(infos.Min()), average = Filesize((long)infos.Average()), max = Filesize(infos.Max()) };
+            return new { min = Filesize(infos.Min()), average = Filesize((long)infos.Average()), max = Filesize(infos.Max()) };
         }
 
         private static string Filesize(long octet)
@@ -368,7 +368,7 @@ namespace Uploader.Core.Managers.Front
             return GetResult(fileContainer);
         }
 
-        private static dynamic GetResult(FileContainer fileContainer)
+        private static dynamic GetResult(FileContainer fileContainer, bool error = false)
         {
             switch (fileContainer.TypeContainer)
             {
@@ -377,22 +377,23 @@ namespace Uploader.Core.Managers.Front
                     {
                         finished = fileContainer.Finished(),
                         originFileName = Path.GetFileName(fileContainer.OriginFilePath),
-                        exceptionDetail = fileContainer.ExceptionDetail,
-                        sourceAudioCpuEncoding = AudioCpuEncodeResultJson(fileContainer.SourceFileItem),
-                        sourceVideoGpuEncoding = VideoGpuEncodeResultJson(fileContainer.SourceFileItem),
-                        ipfsAddSourceVideo = IpfsResultJson(fileContainer.SourceFileItem),
+                        exceptionDetail = error ? fileContainer.ExceptionDetail : null,
+                        sourceInfo = error ? SourceInfo(fileContainer.SourceFileItem) : null,
+                        sourceAudioCpuEncoding = AudioCpuEncodeResultJson(fileContainer.SourceFileItem, error),
+                        sourceVideoGpuEncoding = VideoGpuEncodeResultJson(fileContainer.SourceFileItem, error),
+                        ipfsAddSourceVideo = IpfsResultJson(fileContainer.SourceFileItem, error),
                         sprite = fileContainer.SpriteVideoFileItem == null ? null :
                             new
                             {
-                                spriteCreation = SpriteResultJson(fileContainer.SpriteVideoFileItem),
-                                ipfsAddSprite = IpfsResultJson(fileContainer.SpriteVideoFileItem)
+                                spriteCreation = SpriteResultJson(fileContainer.SpriteVideoFileItem, error),
+                                ipfsAddSprite = IpfsResultJson(fileContainer.SpriteVideoFileItem, error)
                             },
                         encodedVideos = !fileContainer.EncodedFileItems.Any() ? null :
                             fileContainer.EncodedFileItems.Select(e =>
                                     new
                                     {
-                                        encode = AudioVideoCpuEncodeResultJson(e),
-                                        ipfsAddEncodeVideo = IpfsResultJson(e)
+                                        encode = AudioVideoCpuEncodeResultJson(e, error),
+                                        ipfsAddEncodeVideo = IpfsResultJson(e, error)
                                     })
                                 .ToArray()
                     };
@@ -400,14 +401,14 @@ namespace Uploader.Core.Managers.Front
                 case TypeContainer.Overlay:
                     return new
                     {
-                        ipfsAddSource = IpfsResultJson(fileContainer.SourceFileItem),
-                        ipfsAddOverlay = IpfsResultJson(fileContainer.OverlayFileItem)
+                        ipfsAddSource = IpfsResultJson(fileContainer.SourceFileItem, error),
+                        ipfsAddOverlay = IpfsResultJson(fileContainer.OverlayFileItem, error)
                     };
 
                 case TypeContainer.Subtitle:
                     return new
                     {
-                        ipfsAddSource = IpfsResultJson(fileContainer.SubtitleFileItem)
+                        ipfsAddSource = IpfsResultJson(fileContainer.SubtitleFileItem, error)
                     };
             }
 
@@ -415,9 +416,33 @@ namespace Uploader.Core.Managers.Front
             throw new InvalidOperationException("type container non géré");
         }
 
-        private static dynamic IpfsResultJson(FileItem fileItem)
+        private static dynamic SourceInfo(FileItem sourceFileItem)
+        {
+            if (sourceFileItem == null || sourceFileItem.InfoSourceProcess == null)
+                return null;
+
+            return new
+            {
+                sourceFileItem.FileSize,
+                sourceFileItem.VideoCodec,
+                sourceFileItem.VideoDuration,
+                sourceFileItem.VideoWidth,
+                sourceFileItem.VideoHeight,
+                sourceFileItem.VideoPixelFormat,
+                sourceFileItem.VideoFrameRate,
+                sourceFileItem.VideoBitRate,
+                sourceFileItem.VideoNbFrame,
+                sourceFileItem.VideoRotate,
+                sourceFileItem.AudioCodec,
+                sourceFileItem.InfoSourceProcess.ErrorMessage
+            };
+        }
+
+        private static dynamic IpfsResultJson(FileItem fileItem, bool error)
         {
             if (fileItem == null || fileItem.IpfsProcess == null)
+                return null;
+            if(error && fileItem.IpfsProcess.CurrentStep != ProcessStep.Error)
                 return null;
 
             return new
@@ -433,9 +458,11 @@ namespace Uploader.Core.Managers.Front
             };
         }
 
-        private static dynamic SpriteResultJson(FileItem fileItem)
+        private static dynamic SpriteResultJson(FileItem fileItem, bool error)
         {
             if (fileItem == null || fileItem.SpriteEncodeProcess == null)
+                return null;
+            if(error && fileItem.SpriteEncodeProcess.CurrentStep != ProcessStep.Error)
                 return null;
 
             return new
@@ -449,9 +476,11 @@ namespace Uploader.Core.Managers.Front
             };
         }
 
-        private static dynamic AudioCpuEncodeResultJson(FileItem fileItem)
+        private static dynamic AudioCpuEncodeResultJson(FileItem fileItem, bool error)
         {
             if (fileItem == null || fileItem.AudioCpuEncodeProcess == null)
+                return null;
+            if(error && fileItem.AudioCpuEncodeProcess.CurrentStep != ProcessStep.Error)
                 return null;
 
             return new
@@ -465,9 +494,11 @@ namespace Uploader.Core.Managers.Front
             };
         }
 
-        private static dynamic AudioVideoCpuEncodeResultJson(FileItem fileItem)
+        private static dynamic AudioVideoCpuEncodeResultJson(FileItem fileItem, bool error)
         {
             if (fileItem == null || fileItem.AudioVideoCpuEncodeProcess == null)
+                return null;
+            if(error && fileItem.AudioVideoCpuEncodeProcess.CurrentStep != ProcessStep.Error)
                 return null;
 
             return new
@@ -481,9 +512,11 @@ namespace Uploader.Core.Managers.Front
             };
         }
 
-        private static dynamic VideoGpuEncodeResultJson(FileItem fileItem)
+        private static dynamic VideoGpuEncodeResultJson(FileItem fileItem, bool error)
         {
             if (fileItem == null || fileItem.VideoGpuEncodeProcess == null)
+                return null;
+            if(error && fileItem.VideoGpuEncodeProcess.CurrentStep != ProcessStep.Error)
                 return null;
 
             return new

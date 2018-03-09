@@ -65,7 +65,7 @@ namespace Uploader.Core.Managers.Video
             {
                 _fileItem.AudioCodec = output.Split('=')[1];
             }
-            /*else if(!_fileItem.VideoBitRate.HasValue && output.StartsWith("bit_rate="))
+            else if(!_fileItem.VideoBitRate.HasValue && output.StartsWith("bit_rate="))
             {
                 _fileItem.VideoBitRate = Convert.ToInt32(output.Split('=')[1]);
             }
@@ -80,7 +80,7 @@ namespace Uploader.Core.Managers.Video
             else if(_fileItem.VideoRotate == null && output.StartsWith("TAG:rotate="))
             {
                 _fileItem.VideoRotate = Convert.ToInt32(output.Split('=')[1]);
-            }*/
+            }
         }
     }
 }
