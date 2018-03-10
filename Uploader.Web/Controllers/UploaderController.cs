@@ -43,18 +43,18 @@ namespace Uploader.Web.Controllers
         [DisableFormValueModelBinding]
         [DisableRequestSizeLimit]
         [Route("/uploadImage")]
-        public async Task<IActionResult> OverlayImage()
+        public async Task<IActionResult> UploadImage()
         {
             try
             {
                 return Ok(new
                 {
-                    success = true, token = OverlayManager.ComputeOverlay(await GetFileToTemp())
+                    success = true, token = ImageManager.ComputeImage(await GetFileToTemp())
                 });
             }
             catch (Exception ex)
             {
-                LogManager.AddOverlayMessage(LogLevel.Critical, "Exception non gérée", "Exception", ex);
+                LogManager.AddImageMessage(LogLevel.Critical, "Exception non gérée", "Exception", ex);
                 return BadRequest(new
                 {
                     errorMessage = ex.Message

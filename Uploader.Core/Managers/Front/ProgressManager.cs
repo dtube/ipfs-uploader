@@ -398,10 +398,10 @@ namespace Uploader.Core.Managers.Front
                                 .ToArray()
                     };
 
-                case TypeContainer.Overlay:
+                case TypeContainer.Image:
                     return new
                     {
-                        ipfsAddSource = IpfsResultJson(fileContainer.SourceFileItem, error),
+                        ipfsAddSource = IpfsResultJson(fileContainer.SnapFileItem, error),
                         ipfsAddOverlay = IpfsResultJson(fileContainer.OverlayFileItem, error)
                     };
 

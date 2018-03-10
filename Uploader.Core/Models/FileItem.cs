@@ -42,21 +42,27 @@ namespace Uploader.Core.Models
         public static FileItem NewSourceImageFileItem(FileContainer fileContainer)
         {
             FileItem fileItem = new FileItem(fileContainer, fileContainer.OriginFilePath, TypeFile.SourceImage);
-            fileItem.IpfsProcess = new ProcessItem(fileItem, LogManager.OverlayLogger);
+            return fileItem;
+        }
+
+        public static FileItem NewSnapImageFileItem(FileContainer fileContainer)
+        {
+            FileItem fileItem = new FileItem(fileContainer, fileContainer.SourceFileItem.SourceFilePath, TypeFile.SnapImage);
+            fileItem.IpfsProcess = new ProcessItem(fileItem, LogManager.ImageLogger);
             return fileItem;
         }
 
         public static FileItem NewOverlayImageFileItem(FileContainer fileContainer)
         {
             FileItem fileItem = new FileItem(fileContainer, fileContainer.SourceFileItem.SourceFilePath, TypeFile.OverlayImage);
-            fileItem.IpfsProcess = new ProcessItem(fileItem, LogManager.OverlayLogger);
+            fileItem.IpfsProcess = new ProcessItem(fileItem, LogManager.ImageLogger);
             return fileItem;
         }
 
         public static FileItem NewSubtitleFileItem(FileContainer fileContainer)
         {
             FileItem fileItem = new FileItem(fileContainer, null, TypeFile.SubtitleText);
-            fileItem.IpfsProcess = new ProcessItem(fileItem, LogManager.OverlayLogger);
+            fileItem.IpfsProcess = new ProcessItem(fileItem, LogManager.SubtitleLogger);
             return fileItem;
         }
 
@@ -78,6 +84,7 @@ namespace Uploader.Core.Models
                     break;
 
                 case TypeFile.SourceImage:
+                case TypeFile.SnapImage:
                 case TypeFile.OverlayImage:
                     SetTempFilePath(Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".png"));
                 break;

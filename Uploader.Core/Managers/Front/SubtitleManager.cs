@@ -29,8 +29,9 @@ namespace Uploader.Core.Managers.Front
             }
             catch(Exception ex)
             {
+                LogManager.AddSubtitleMessage(LogLevel.Critical, "Exception non gérée", "Exception", ex);                
+                fileContainer.CancelAll("Exception non gérée");
                 fileContainer.CleanFilesIfEnd();
-                LogManager.AddSubtitleMessage(LogLevel.Critical, "Exception non gérée", "Exception", ex);
                 return fileContainer.ProgressToken;
             }
 

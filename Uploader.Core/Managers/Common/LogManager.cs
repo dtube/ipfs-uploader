@@ -13,7 +13,7 @@ namespace Uploader.Core.Managers.Common
             GeneralLogger = loggerFactory.CreateLogger("general");
             FfmpegLogger = loggerFactory.CreateLogger("ffmpeg");
             SpriteLogger = loggerFactory.CreateLogger("sprite");
-            OverlayLogger = loggerFactory.CreateLogger("overlay");
+            ImageLogger = loggerFactory.CreateLogger("image");
             SubtitleLogger = loggerFactory.CreateLogger("subtitle");
             IpfsLogger = loggerFactory.CreateLogger("ipfs");
         }
@@ -22,7 +22,7 @@ namespace Uploader.Core.Managers.Common
         public static ILogger FfmpegLogger { get; private set; }
         public static ILogger SpriteLogger { get; private set; }
         public static ILogger IpfsLogger { get; private set; }
-        public static ILogger OverlayLogger { get; private set; }
+        public static ILogger ImageLogger { get; private set; }
         public static ILogger SubtitleLogger { get; private set; }
 
         public static void AddGeneralMessage(LogLevel logLevel, string message, string typeMessage, Exception exception = null)
@@ -45,9 +45,9 @@ namespace Uploader.Core.Managers.Common
             Log(SpriteLogger, logLevel, message, typeMessage, exception);
         }
 
-        public static void AddOverlayMessage(LogLevel logLevel, string message, string typeMessage, Exception exception = null)
+        public static void AddImageMessage(LogLevel logLevel, string message, string typeMessage, Exception exception = null)
         {
-            Log(OverlayLogger, logLevel, message, typeMessage, exception);
+            Log(ImageLogger, logLevel, message, typeMessage, exception);
         }
 
         public static void AddSubtitleMessage(LogLevel logLevel, string message, string typeMessage, Exception exception = null)

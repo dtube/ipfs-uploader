@@ -51,11 +51,12 @@ namespace Uploader.Core.Models
             EncodedFileItems = list;
         }
 
-        public static FileContainer NewOverlayContainer(string originFilePath)
+        public static FileContainer NewImageContainer(string originFilePath)
         {
-            FileContainer fileContainer = new FileContainer(TypeContainer.Overlay, originFilePath);
+            FileContainer fileContainer = new FileContainer(TypeContainer.Image, originFilePath);
 
             fileContainer.SourceFileItem = FileItem.NewSourceImageFileItem(fileContainer);
+            fileContainer.SnapFileItem = FileItem.NewSnapImageFileItem(fileContainer);
             fileContainer.OverlayFileItem = FileItem.NewOverlayImageFileItem(fileContainer);
 
             ProgressManager.RegisterProgress(fileContainer);
@@ -126,6 +127,12 @@ namespace Uploader.Core.Models
             private set;
         }
 
+        public FileItem SnapFileItem
+        {
+            get;
+            private set;
+        }
+
         public FileItem OverlayFileItem
         {
             get;
@@ -154,6 +161,9 @@ namespace Uploader.Core.Models
             if(EncodedFileItems != null)
                 foreach (FileItem fileItem in EncodedFileItems)
                     yield return fileItem;
+
+            if(SnapFileItem != null)
+                yield return SnapFileItem;
 
             if(OverlayFileItem != null)
                 yield return OverlayFileItem;
