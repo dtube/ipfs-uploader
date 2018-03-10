@@ -177,13 +177,7 @@ namespace Uploader.Core.Models
 
             foreach (FileItem item in GetAllFile())
             {
-                if(Error())
-                    foreach (string filePath in item.FilesToDelete.Where(f => f == OriginFilePath).ToList())
-                    {
-                        item.FilesToDelete.Remove(filePath);
-                    }
-
-                TempFileManager.SafeDeleteTempFiles(item.FilesToDelete.ToArray());
+                TempFileManager.SafeDeleteTempFiles(item.FilesToDelete);
             }
 
             if(!Error())

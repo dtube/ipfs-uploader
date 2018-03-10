@@ -14,7 +14,6 @@ namespace Uploader.Core.Managers.Front
         public static async Task<Guid> ComputeSubtitle(string text)
         {
             FileContainer fileContainer = FileContainer.NewSubtitleContainer();
-            string outputfilePath = Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".vtt");
 
             if (!IsValidVTT(text))
             {
@@ -24,13 +23,13 @@ namespace Uploader.Core.Managers.Front
 
             try
             {
-                await File.WriteAllTextAsync(outputfilePath, text);
-                fileContainer.SubtitleFileItem.SetOutputFilePath(outputfilePath);
+                await File.WriteAllTextAsync(fileContainer.SubtitleFileItem.TempFilePath, text);
+                fileContainer.SubtitleFileItem.ReplaceOutputPathWithTempPath();
                 IpfsDaemon.Instance.Queue(fileContainer.SubtitleFileItem);
             }
             catch(Exception ex)
             {
-                TempFileManager.SafeDeleteTempFile(outputfilePath);
+                fileContainer.CleanFilesIfEnd();
                 LogManager.AddSubtitleMessage(LogLevel.Critical, "Exception non gérée", "Exception", ex);
                 return fileContainer.ProgressToken;
             }

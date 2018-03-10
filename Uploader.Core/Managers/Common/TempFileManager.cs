@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 
 namespace Uploader.Core.Managers.Common
@@ -31,7 +32,7 @@ namespace Uploader.Core.Managers.Common
             {}
         }
 
-        public static void SafeDeleteTempFiles(string[] filesPath)
+        public static void SafeDeleteTempFiles(IList<string> filesPath)
         {
             if(filesPath == null)
                 return;

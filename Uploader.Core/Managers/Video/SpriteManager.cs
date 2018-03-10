@@ -42,14 +42,14 @@ namespace Uploader.Core.Managers.Video
                 string arguments = $"-y -i {Path.GetFileName(fileItem.SourceFilePath)} -r {frameRate} -vf {sizeImageMax} -f image2 {GetPattern(fileItem.TempFilePath)}";
                 var ffmpegProcessManager = new FfmpegProcessManager(fileItem, fileItem.SpriteEncodeProcess);
                 ffmpegProcessManager.StartProcess(arguments, VideoSettings.Instance.EncodeGetImagesTimeout);
-                string[] files = GetListImageFrom(fileItem.TempFilePath); // récupération des images
+                IList<string> files = GetListImageFrom(fileItem.TempFilePath); // récupération des images
 
-                LogManager.AddSpriteMessage(LogLevel.Information, (files.Length - 1) + " images", "Start Combine images");
+                LogManager.AddSpriteMessage(LogLevel.Information, (files.Count - 1) + " images", "Start Combine images");
 
 
                 // garder que les 100 dernières images pour éliminer les premières (1 ou 2 en réalité)
-                int skip = files.Length > VideoSettings.Instance.NbSpriteImages
-                    ? files.Length - VideoSettings.Instance.NbSpriteImages
+                int skip = files.Count > VideoSettings.Instance.NbSpriteImages
+                    ? files.Count - VideoSettings.Instance.NbSpriteImages
                     : 0;
                 var list = new StringBuilder();
                 foreach (string imagePath in files.Skip(skip))
@@ -64,18 +64,14 @@ namespace Uploader.Core.Managers.Video
                 var process = new ProcessManager(Path.Combine(GeneralSettings.Instance.ImageMagickPath, "montage"), arguments, LogManager.SpriteLogger);
                 bool successSprite = process.Launch(5);
                 TempFileManager.SafeDeleteTempFiles(files); // suppression des images
-                if(successSprite)
-                {
-                    fileItem.SetOutputFilePath(fileItem.TempFilePath);
-                    LogManager.AddSpriteMessage(LogLevel.Information, "OutputFileName " + Path.GetFileName(fileItem.OutputFilePath) + " / FileSize " + fileItem.FileSize, "End Sprite");
-                }
-                else
+                if (!successSprite)
                 {
                     fileItem.SpriteEncodeProcess.SetErrorMessage("Error while combine images", "Error creation sprite while combine images");
-                    TempFileManager.SafeDeleteTempFile(fileItem.TempFilePath);
                     return false;
                 }
 
+                fileItem.ReplaceOutputPathWithTempPath();
+                LogManager.AddSpriteMessage(LogLevel.Information, "OutputFileName " + Path.GetFileName(fileItem.OutputFilePath) + " / FileSize " + fileItem.FileSize, "End Sprite");
                 fileItem.SpriteEncodeProcess.EndProcessDateTime();
                 return true;
             }
@@ -83,7 +79,7 @@ namespace Uploader.Core.Managers.Video
             {
                 string message = "Video Duration " + sourceFile.VideoDuration + " / FileSize " + fileItem.FileSize + " / Progress " + fileItem.SpriteEncodeProcess.Progress;
                 fileItem.SpriteEncodeProcess.SetErrorMessage("Exception non gérée", message, ex);
-                string[] files = GetListImageFrom(fileItem.TempFilePath); // récupération des images
+                IList<string> files = GetListImageFrom(fileItem.TempFilePath); // récupération des images
                 TempFileManager.SafeDeleteTempFiles(files); // suppression des images
                 return false;
             }
@@ -94,16 +90,16 @@ namespace Uploader.Core.Managers.Video
             return Path.GetFileNameWithoutExtension(filePath) + "-%03d.jpeg";
         }
 
-        private static string[] GetListImageFrom(string filePath)
+        private static IList<string> GetListImageFrom(string filePath)
         {
             if(string.IsNullOrWhiteSpace(filePath))
-                return new string[0];
+                return new List<string>();
 
             string directoryName = Path.GetDirectoryName(filePath);
             if(directoryName == null)
-                return new string[0];
+                return new List<string>();
 
-            return Directory.EnumerateFiles(directoryName, Path.GetFileNameWithoutExtension(filePath) + "-*.jpeg").OrderBy(s => s).ToArray();
+            return Directory.EnumerateFiles(directoryName, Path.GetFileNameWithoutExtension(filePath) + "-*.jpeg").OrderBy(s => s).ToList();
         }
     }
 }

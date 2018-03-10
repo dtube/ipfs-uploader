@@ -81,6 +81,10 @@ namespace Uploader.Core.Models
                 case TypeFile.OverlayImage:
                     SetTempFilePath(Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".png"));
                 break;
+
+                case TypeFile.SubtitleText:
+                    SetTempFilePath(Path.ChangeExtension(TempFileManager.GetNewTempFilePath(), ".vtt"));
+                    break;
             }
         }
 
@@ -117,10 +121,24 @@ namespace Uploader.Core.Models
         public void SetOutputFilePath(string path)
         {
             _outputFilePath = path;
-            FilesToDelete.Add(path);
+            SafeAddFileToDelete(path);
 
             if (OutputFilePath != null && File.Exists(OutputFilePath))
                 FileSize = new FileInfo(OutputFilePath).Length;
+        }
+
+        private void SafeAddFileToDelete(string path)
+        {
+            if(string.IsNullOrWhiteSpace(path))
+                return;
+
+            if(!FilesToDelete.Contains(path) && path != FileContainer.OriginFilePath)
+                FilesToDelete.Add(path);
+        }
+
+        public void ReplaceOutputPathWithTempPath()
+        {
+            SetOutputFilePath(TempFilePath);
         }
 
         public string SourceFilePath { get { return _sourceFilePath; } }
@@ -129,7 +147,7 @@ namespace Uploader.Core.Models
         public void SetSourceFilePath(string path)
         {
             _sourceFilePath = path;
-            FilesToDelete.Add(path);
+            SafeAddFileToDelete(path);
         }
 
         public string TempFilePath { get { return _tempFilePath; } }
@@ -138,7 +156,7 @@ namespace Uploader.Core.Models
         public void SetTempFilePath(string path)
         {
             _tempFilePath = path;
-            FilesToDelete.Add(path);
+            SafeAddFileToDelete(path);
         }
 
         public string VideoAacTempFilePath { get { return _videoAacTempFilePath; } }
@@ -147,7 +165,7 @@ namespace Uploader.Core.Models
         public void SetVideoAacTempFilePath(string path)
         {
             _videoAacTempFilePath = path;
-            FilesToDelete.Add(path);
+            SafeAddFileToDelete(path);
         }
 
         public FileContainer FileContainer

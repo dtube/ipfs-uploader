@@ -38,7 +38,7 @@ namespace Uploader.Core.Managers.Video
                 var ffmpegProcessManager = new FfmpegProcessManager(fileItem, fileItem.AudioVideoCpuEncodeProcess);
                 ffmpegProcessManager.StartProcess(arguments, VideoSettings.Instance.EncodeTimeout);
 
-                fileItem.SetOutputFilePath(fileItem.TempFilePath);
+                fileItem.ReplaceOutputPathWithTempPath();
                 LogManager.AddEncodingMessage(LogLevel.Information, "OutputFileName " + Path.GetFileName(fileItem.OutputFilePath) + " / FileSize " + fileItem.FileSize + " / Format " + fileItem.VideoSize, "End AudioVideoCpuEncoding");
                 fileItem.AudioVideoCpuEncodeProcess.EndProcessDateTime();
 
@@ -48,7 +48,6 @@ namespace Uploader.Core.Managers.Video
             {
                 string message = "Exception AudioVideoCpuEncoding : Video Duration " + fileItem.VideoDuration + " / FileSize " + fileItem.FileSize + " / Progress " + fileItem.AudioVideoCpuEncodeProcess.Progress;
                 fileItem.AudioVideoCpuEncodeProcess.SetErrorMessage("Exception non gérée", message, ex);
-                TempFileManager.SafeDeleteTempFile(fileItem.TempFilePath);
                 return false;
             }
         }
@@ -86,7 +85,6 @@ namespace Uploader.Core.Managers.Video
             {
                 string message = "Exception AudioCpuEncoding : Video Duration " + fileItem.VideoDuration + " / FileSize " + fileItem.FileSize + " / Progress " + fileItem.AudioCpuEncodeProcess.Progress;
                 fileItem.AudioCpuEncodeProcess.SetErrorMessage("Exception non gérée", message, ex);
-                TempFileManager.SafeDeleteTempFile(fileItem.TempFilePath);
                 return false;
             }
         }
@@ -119,11 +117,10 @@ namespace Uploader.Core.Managers.Video
 
                 foreach (var item in fileItem.FileContainer.EncodedFileItems)
                 {
-                    item.SetOutputFilePath(item.TempFilePath);
+                    item.ReplaceOutputPathWithTempPath();
                     LogManager.AddEncodingMessage(LogLevel.Information, "OutputFileName " + Path.GetFileName(item.OutputFilePath) + " / FileSize " + item.FileSize + " / Format " + item.VideoSize, "End VideoGpuEncoding");
                 }
                 fileItem.VideoGpuEncodeProcess.EndProcessDateTime();
-                TempFileManager.SafeDeleteTempFile(fileItem.VideoAacTempFilePath);
 
                 return true;
             }
@@ -131,11 +128,6 @@ namespace Uploader.Core.Managers.Video
             {
                 string message = "Exception VideoGpuEncoding : Video Duration " + fileItem.VideoDuration + " / FileSize " + fileItem.FileSize + " / Progress " + fileItem.VideoGpuEncodeProcess.Progress;
                 fileItem.VideoGpuEncodeProcess.SetErrorMessage("Exception non gérée", message, ex);
-                foreach (FileItem item in fileItem.FileContainer.EncodedFileItems)
-                {
-                    TempFileManager.SafeDeleteTempFile(item.TempFilePath);
-                }
-                TempFileManager.SafeDeleteTempFile(fileItem.VideoAacTempFilePath);
                 return false;
             }
         }
