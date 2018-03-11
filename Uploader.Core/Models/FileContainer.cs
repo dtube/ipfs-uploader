@@ -190,7 +190,7 @@ namespace Uploader.Core.Models
                 TempFileManager.SafeDeleteTempFiles(item.FilesToDelete);
             }
 
-            if(!Error())
+            if(!Error() || SourceFileItem?.IpfsProcess.CurrentStep == ProcessStep.Success)
                 TempFileManager.SafeDeleteTempFile(OriginFilePath);
         }
 

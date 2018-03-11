@@ -40,7 +40,7 @@ namespace Uploader.Core.Managers.Front
             return new
             {
                 list = progresses.Values
-                    .Where(f => f.Error())
+                    .Where(c => c.Error())
                     .Select(c => GetResult(c, true))
                     .ToList()
             };
@@ -123,11 +123,11 @@ namespace Uploader.Core.Managers.Front
             {
                 return new
                 {
-                    audioCpuEncodeLast24h = GetAudioCpuEncodeStats(listVideoEncoded.FindAll(f => f.AudioCpuEncodeProcess != null && f.AudioCpuEncodeProcess.CurrentStep == step)),
-                    videoGpuEncodeLast24h = GetVideoGpuEncodeStats(listVideoEncoded.FindAll(f => f.VideoGpuEncodeProcess != null && f.VideoGpuEncodeProcess.CurrentStep == step)),
-                    audioVideoCpuEncodeLast24h = GetAudioVideoCpuEncodeStats(listVideoEncoded.FindAll(f => f.AudioVideoCpuEncodeProcess != null && f.AudioVideoCpuEncodeProcess.CurrentStep == step)),
-                    spriteCreationLast24h = GetSpriteEncodeStats(listSpriteCreated.FindAll(f => f.SpriteEncodeProcess != null && f.SpriteEncodeProcess.CurrentStep == step)),
-                    ipfsAddLast24h = GetIpfsStats(listIpfsAdded.FindAll(f => f.IpfsProcess != null && f.IpfsProcess.CurrentStep == step))
+                    audioCpuEncodeLast24h = GetProcessStats(listVideoEncoded.FindAll(f => f.AudioCpuEncodeProcess != null && f.AudioCpuEncodeProcess.CurrentStep == step).Select(f => f.AudioCpuEncodeProcess).ToList()),
+                    videoGpuEncodeLast24h = GetProcessStats(listVideoEncoded.FindAll(f => f.VideoGpuEncodeProcess != null && f.VideoGpuEncodeProcess.CurrentStep == step).Select(f => f.VideoGpuEncodeProcess).ToList()),
+                    audioVideoCpuEncodeLast24h = GetProcessStats(listVideoEncoded.FindAll(f => f.AudioVideoCpuEncodeProcess != null && f.AudioVideoCpuEncodeProcess.CurrentStep == step).Select(f => f.AudioVideoCpuEncodeProcess).ToList()),
+                    spriteCreationLast24h = GetProcessStats(listSpriteCreated.FindAll(f => f.SpriteEncodeProcess != null && f.SpriteEncodeProcess.CurrentStep == step).Select(f => f.SpriteEncodeProcess).ToList()),
+                    ipfsAddLast24h = GetProcessStats(listIpfsAdded.FindAll(f => f.IpfsProcess != null && f.IpfsProcess.CurrentStep == step).Select(f => f.IpfsProcess).ToList())
                 };
             }
             catch(Exception ex)
@@ -139,157 +139,56 @@ namespace Uploader.Core.Managers.Front
             }
         }
 
-        private static dynamic GetAudioCpuEncodeStats(List<FileItem> fileItems)
+        private static dynamic GetProcessStats(List<ProcessItem> processItems)
         {
+            if(processItems == null || !processItems.Any())
+                return null;
+
             return new
                 {
-                    nb = fileItems.Count,
-                    waitingInQueue = GetInfo(fileItems
-                        .Where(f => f.AudioCpuEncodeProcess.OriginWaitingPositionInQueue > 0)
-                        .Select(f => (long)f.AudioCpuEncodeProcess.OriginWaitingPositionInQueue)
+                    nb = processItems.Count,
+                    waitingInQueue = GetInfo(processItems
+                        .Where(p => p.OriginWaitingPositionInQueue > 0)
+                        .Select(p => (long)p.OriginWaitingPositionInQueue)
                         .ToList()),
-                    sourceDuration = GetTimeInfo(fileItems
-                        .Where(f => f.FileContainer.SourceFileItem.VideoDuration.HasValue)
-                        .Select(f => (long)f.FileContainer.SourceFileItem.VideoDuration.Value)
+                    fileSize = GetFileSizeInfo(processItems
+                        .Where(p => p.FileItem.FileSize.HasValue)
+                        .Select(p => p.FileItem.FileSize.Value)
                         .ToList()),
-                    sourceFileSize = GetFileSizeInfo(fileItems
-                        .Where(f => f.FileContainer.SourceFileItem.FileSize.HasValue)
-                        .Select(f => (long)f.FileContainer.SourceFileItem.FileSize.Value)
-                        .ToList()),                        
-                    fileSize = GetFileSizeInfo(fileItems
-                        .Where(f => f.FileSize.HasValue)
-                        .Select(f => f.FileSize.Value)
+                    waitingTime = GetTimeInfo(processItems
+                        .Where(p => p.WaitingTime.HasValue)
+                        .Select(p => p.WaitingTime.Value)
                         .ToList()),
-                    waitingTime = GetTimeInfo(fileItems
-                        .Where(f => f.AudioCpuEncodeProcess.WaitingTime.HasValue)
-                        .Select(f => f.AudioCpuEncodeProcess.WaitingTime.Value)
-                        .ToList()),
-                    processTime = GetTimeInfo(fileItems
-                        .Where(f => f.AudioCpuEncodeProcess.ProcessTime.HasValue)
-                        .Select(f => f.AudioCpuEncodeProcess.ProcessTime.Value)
+                    processTime = GetTimeInfo(processItems
+                        .Where(p => p.ProcessTime.HasValue)
+                        .Select(p => p.ProcessTime.Value)
                         .ToList())
                 };
         }
 
-        private static dynamic GetVideoGpuEncodeStats(List<FileItem> fileItems)
+        private static dynamic GetProcessWithSourceStats(List<ProcessItem> processItems)
         {
+            var stats = GetProcessStats(processItems);
+            if(stats == null)
+                return null;
+
             return new
                 {
-                    nb = fileItems.Count,
-                    waitingInQueue = GetInfo(fileItems
-                        .Where(f => f.VideoGpuEncodeProcess.OriginWaitingPositionInQueue > 0)
-                        .Select(f => (long)f.VideoGpuEncodeProcess.OriginWaitingPositionInQueue)
+                    nb = stats.nb,
+                    waitingInQueue = stats.waitingInQueue,
+                    sourceDuration = GetTimeInfo(processItems
+                        .Where(p => p.FileItem.FileContainer.SourceFileItem.VideoDuration.HasValue)
+                        .Select(p => (long)p.FileItem.FileContainer.SourceFileItem.VideoDuration.Value)
                         .ToList()),
-                    sourceDuration = GetTimeInfo(fileItems
-                        .Where(f => f.FileContainer.SourceFileItem.VideoDuration.HasValue)
-                        .Select(f => (long)f.FileContainer.SourceFileItem.VideoDuration.Value)
-                        .ToList()),
-                    sourceFileSize = GetFileSizeInfo(fileItems
-                        .Where(f => f.FileContainer.SourceFileItem.FileSize.HasValue)
-                        .Select(f => (long)f.FileContainer.SourceFileItem.FileSize.Value)
-                        .ToList()),                        
-                    fileSize = GetFileSizeInfo(fileItems
-                        .Where(f => f.FileSize.HasValue)
-                        .Select(f => f.FileSize.Value)
-                        .ToList()),
-                    waitingTime = GetTimeInfo(fileItems
-                        .Where(f => f.VideoGpuEncodeProcess.WaitingTime.HasValue)
-                        .Select(f => f.VideoGpuEncodeProcess.WaitingTime.Value)
-                        .ToList()),
-                    processTime = GetTimeInfo(fileItems
-                        .Where(f => f.VideoGpuEncodeProcess.ProcessTime.HasValue)
-                        .Select(f => f.VideoGpuEncodeProcess.ProcessTime.Value)
-                        .ToList())
+                    sourceFileSize = GetFileSizeInfo(processItems
+                        .Where(p => p.FileItem.FileContainer.SourceFileItem.FileSize.HasValue)
+                        .Select(p => (long)p.FileItem.FileContainer.SourceFileItem.FileSize.Value)
+                        .ToList()),                    
+                    fileSize = stats.fileSize,
+                    waitingTime = stats.waitingTime,
+                    processTime = stats.processTime
                 };
         }
-
-        private static dynamic GetAudioVideoCpuEncodeStats(List<FileItem> fileItems)
-        {
-            return new
-                {
-                    nb = fileItems.Count,
-                    waitingInQueue = GetInfo(fileItems
-                        .Where(f => f.AudioVideoCpuEncodeProcess.OriginWaitingPositionInQueue > 0)
-                        .Select(f => (long)f.AudioVideoCpuEncodeProcess.OriginWaitingPositionInQueue)
-                        .ToList()),
-                    sourceDuration = GetTimeInfo(fileItems
-                        .Where(f => f.FileContainer.SourceFileItem.VideoDuration.HasValue)
-                        .Select(f => (long)f.FileContainer.SourceFileItem.VideoDuration.Value)
-                        .ToList()),
-                    sourceFileSize = GetFileSizeInfo(fileItems
-                        .Where(f => f.FileContainer.SourceFileItem.FileSize.HasValue)
-                        .Select(f => (long)f.FileContainer.SourceFileItem.FileSize.Value)
-                        .ToList()),                        
-                    fileSize = GetFileSizeInfo(fileItems
-                        .Where(f => f.FileSize.HasValue)
-                        .Select(f => f.FileSize.Value)
-                        .ToList()),
-                    waitingTime = GetTimeInfo(fileItems
-                        .Where(f => f.AudioVideoCpuEncodeProcess.WaitingTime.HasValue)
-                        .Select(f => f.AudioVideoCpuEncodeProcess.WaitingTime.Value)
-                        .ToList()),
-                    processTime = GetTimeInfo(fileItems
-                        .Where(f => f.AudioVideoCpuEncodeProcess.ProcessTime.HasValue)
-                        .Select(f => f.AudioVideoCpuEncodeProcess.ProcessTime.Value)
-                        .ToList())
-                };
-        }
-
-        private static dynamic GetSpriteEncodeStats(List<FileItem> fileItems)
-        {
-            return new
-                {
-                    nb = fileItems.Count,
-                    waitingInQueue = GetInfo(fileItems
-                        .Where(f => f.SpriteEncodeProcess.OriginWaitingPositionInQueue > 0)
-                        .Select(f => (long)f.SpriteEncodeProcess.OriginWaitingPositionInQueue)
-                        .ToList()),
-                    sourceDuration = GetTimeInfo(fileItems
-                        .Where(f => f.FileContainer.SourceFileItem.VideoDuration.HasValue)
-                        .Select(f => (long)f.FileContainer.SourceFileItem.VideoDuration.Value)
-                        .ToList()),
-                    sourceFileSize = GetFileSizeInfo(fileItems
-                        .Where(f => f.FileContainer.SourceFileItem.FileSize.HasValue)
-                        .Select(f => (long)f.FileContainer.SourceFileItem.FileSize.Value)
-                        .ToList()),                        
-                    fileSize = GetFileSizeInfo(fileItems
-                        .Where(f => f.FileSize.HasValue)
-                        .Select(f => f.FileSize.Value)
-                        .ToList()),
-                    waitingTime = GetTimeInfo(fileItems
-                        .Where(f => f.SpriteEncodeProcess.WaitingTime.HasValue)
-                        .Select(f => f.SpriteEncodeProcess.WaitingTime.Value)
-                        .ToList()),
-                    processTime = GetTimeInfo(fileItems
-                        .Where(f => f.SpriteEncodeProcess.ProcessTime.HasValue)
-                        .Select(f => f.SpriteEncodeProcess.ProcessTime.Value)
-                        .ToList())
-                };
-        }
-
-        private static dynamic GetIpfsStats(List<FileItem> fileItems)
-        {
-            return new
-                {
-                    nb = fileItems.Count,
-                    waitingInQueue = GetInfo(fileItems
-                        .Where(f => f.IpfsProcess.OriginWaitingPositionInQueue > 0)
-                        .Select(f => (long)f.IpfsProcess.OriginWaitingPositionInQueue)
-                        .ToList()),
-                    fileSize = GetFileSizeInfo(fileItems
-                        .Where(f => f.FileSize.HasValue)
-                        .Select(f => f.FileSize.Value)
-                        .ToList()),
-                    waitingTime = GetTimeInfo(fileItems
-                        .Where(f => f.IpfsProcess.WaitingTime.HasValue)
-                        .Select(f => f.IpfsProcess.WaitingTime.Value)
-                        .ToList()),
-                    processTime = GetTimeInfo(fileItems
-                        .Where(f => f.IpfsProcess.ProcessTime.HasValue)
-                        .Select(f => f.IpfsProcess.ProcessTime.Value)
-                        .ToList())
-                };
-        }        
 
         private static dynamic GetInfo(List<long> infos)
         {
@@ -376,9 +275,7 @@ namespace Uploader.Core.Managers.Front
                     return new
                     {
                         finished = fileContainer.Finished(),
-                        originFileName = Path.GetFileName(fileContainer.OriginFilePath),
-                        exceptionDetail = error ? fileContainer.ExceptionDetail : null,
-                        sourceInfo = error ? SourceInfo(fileContainer.SourceFileItem) : null,
+                        debugInfo = error ? DebugInfo(fileContainer) : null,
                         sourceAudioCpuEncoding = AudioCpuEncodeResultJson(fileContainer.SourceFileItem, error),
                         sourceVideoGpuEncoding = VideoGpuEncodeResultJson(fileContainer.SourceFileItem, error),
                         ipfsAddSourceVideo = IpfsResultJson(fileContainer.SourceFileItem, error),
@@ -416,6 +313,18 @@ namespace Uploader.Core.Managers.Front
             throw new InvalidOperationException("type container non géré");
         }
 
+        private static dynamic DebugInfo(FileContainer fileContainer)
+        {
+            string hash = fileContainer?.SourceFileItem.IpfsHash;
+            return new
+            {
+                originFileName = Path.GetFileName(fileContainer.OriginFilePath),
+                ipfsUrl = hash == null ? null : "https://ipfs.io/ipfs/" + hash,
+                exceptionDetail = fileContainer.ExceptionDetail,
+                sourceInfo = SourceInfo(fileContainer.SourceFileItem)
+            };
+        }
+
         private static dynamic SourceInfo(FileItem sourceFileItem)
         {
             if (sourceFileItem == null || sourceFileItem.InfoSourceProcess == null)
@@ -440,93 +349,59 @@ namespace Uploader.Core.Managers.Front
 
         private static dynamic IpfsResultJson(FileItem fileItem, bool error)
         {
-            if (fileItem == null || fileItem.IpfsProcess == null)
-                return null;
-            if(error && fileItem.IpfsProcess.CurrentStep != ProcessStep.Error)
+            var result = ProcessResultJson(fileItem?.IpfsProcess, error, IpfsDaemon.Instance.CurrentPositionInQueue);
+            if(result == null)
                 return null;
 
             return new
             {
-                progress = fileItem.IpfsProcess.Progress,
-                encodeSize = fileItem.VideoSize.VideoSizeString(),
+                progress = result.progress,
+                encodeSize = result.encodeSize,
+                lastTimeProgress = result.lastTimeProgress,
+                errorMessage = result.errorMessage,
+                step = result.step,
+                positionInQueue = result.positionInQueue,
+
                 hash = fileItem.IpfsHash,
-                lastTimeProgress = fileItem.IpfsProcess.LastTimeProgressChanged,
-                errorMessage = fileItem.IpfsProcess.ErrorMessage,
-                step = fileItem.IpfsProcess.CurrentStep.ToString(),
-                positionInQueue = Position(fileItem.IpfsProcess, IpfsDaemon.Instance.CurrentPositionInQueue),
                 fileSize = fileItem.FileSize
             };
         }
 
         private static dynamic SpriteResultJson(FileItem fileItem, bool error)
         {
-            if (fileItem == null || fileItem.SpriteEncodeProcess == null)
-                return null;
-            if(error && fileItem.SpriteEncodeProcess.CurrentStep != ProcessStep.Error)
-                return null;
-
-            return new
-            {
-                progress = fileItem.SpriteEncodeProcess.Progress,
-                encodeSize = fileItem.VideoSize.VideoSizeString(),
-                lastTimeProgress = fileItem.SpriteEncodeProcess.LastTimeProgressChanged,
-                errorMessage = fileItem.SpriteEncodeProcess.ErrorMessage,
-                step = fileItem.SpriteEncodeProcess.CurrentStep.ToString(),
-                positionInQueue = Position(fileItem.SpriteEncodeProcess, SpriteDaemon.Instance.CurrentPositionInQueue)
-            };
+            return ProcessResultJson(fileItem?.SpriteEncodeProcess, error, SpriteDaemon.Instance.CurrentPositionInQueue);
         }
 
         private static dynamic AudioCpuEncodeResultJson(FileItem fileItem, bool error)
         {
-            if (fileItem == null || fileItem.AudioCpuEncodeProcess == null)
-                return null;
-            if(error && fileItem.AudioCpuEncodeProcess.CurrentStep != ProcessStep.Error)
-                return null;
-
-            return new
-            {
-                progress = fileItem.AudioCpuEncodeProcess.Progress,
-                encodeSize = fileItem.VideoSize.VideoSizeString(),
-                lastTimeProgress = fileItem.AudioCpuEncodeProcess.LastTimeProgressChanged,
-                errorMessage = fileItem.AudioCpuEncodeProcess.ErrorMessage,
-                step = fileItem.AudioCpuEncodeProcess.CurrentStep.ToString(),
-                positionInQueue = Position(fileItem.AudioCpuEncodeProcess, AudioCpuEncodeDaemon.Instance.CurrentPositionInQueue)
-            };
+            return ProcessResultJson(fileItem?.AudioCpuEncodeProcess, error, AudioCpuEncodeDaemon.Instance.CurrentPositionInQueue);
         }
 
         private static dynamic AudioVideoCpuEncodeResultJson(FileItem fileItem, bool error)
         {
-            if (fileItem == null || fileItem.AudioVideoCpuEncodeProcess == null)
-                return null;
-            if(error && fileItem.AudioVideoCpuEncodeProcess.CurrentStep != ProcessStep.Error)
-                return null;
-
-            return new
-            {
-                progress = fileItem.AudioVideoCpuEncodeProcess.Progress,
-                encodeSize = fileItem.VideoSize.VideoSizeString(),
-                lastTimeProgress = fileItem.AudioVideoCpuEncodeProcess.LastTimeProgressChanged,
-                errorMessage = fileItem.AudioVideoCpuEncodeProcess.ErrorMessage,
-                step = fileItem.AudioVideoCpuEncodeProcess.CurrentStep.ToString(),
-                positionInQueue = Position(fileItem.AudioVideoCpuEncodeProcess, AudioVideoCpuEncodeDaemon.Instance.CurrentPositionInQueue)
-            };
+            return ProcessResultJson(fileItem?.AudioVideoCpuEncodeProcess, error, AudioVideoCpuEncodeDaemon.Instance.CurrentPositionInQueue);
         }
 
         private static dynamic VideoGpuEncodeResultJson(FileItem fileItem, bool error)
         {
-            if (fileItem == null || fileItem.VideoGpuEncodeProcess == null)
+            return ProcessResultJson(fileItem?.VideoGpuEncodeProcess, error, VideoGpuEncodeDaemon.Instance.CurrentPositionInQueue);
+        }
+
+        private static dynamic ProcessResultJson(ProcessItem processItem, bool error, int daemonCurrentPositionInQUeue)
+        {
+            if (processItem == null)
                 return null;
-            if(error && fileItem.VideoGpuEncodeProcess.CurrentStep != ProcessStep.Error)
+            if(error && processItem.CurrentStep != ProcessStep.Error)
                 return null;
 
             return new
             {
-                progress = fileItem.VideoGpuEncodeProcess.Progress,
-                encodeSize = fileItem.VideoSize.VideoSizeString(),
-                lastTimeProgress = fileItem.VideoGpuEncodeProcess.LastTimeProgressChanged,
-                errorMessage = fileItem.VideoGpuEncodeProcess.ErrorMessage,
-                step = fileItem.VideoGpuEncodeProcess.CurrentStep.ToString(),
-                positionInQueue = Position(fileItem.VideoGpuEncodeProcess, VideoGpuEncodeDaemon.Instance.CurrentPositionInQueue)
+                progress = processItem.Progress,
+                encodeSize = processItem.FileItem.VideoSize.VideoSizeString(),
+                lastTimeProgress = processItem.LastTimeProgressChanged,
+                errorMessage = processItem.ErrorMessage,
+                step = processItem.CurrentStep.ToString(),
+                positionInQueue = Position(processItem, daemonCurrentPositionInQUeue)
             };
         }
 

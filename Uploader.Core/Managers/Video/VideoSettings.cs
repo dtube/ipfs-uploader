@@ -31,9 +31,6 @@ namespace Uploader.Core.Managers.Video
         /// </summary>
         public int MaxVideoDurationForEncoding { get; set; } // 30 minutes max pour encoder une vidéo
 
-        /// <summary>
-        /// 
-        /// </summary>
         public int NbSpriteImages { get; set; }
 
         /// <summary>
@@ -44,7 +41,6 @@ namespace Uploader.Core.Managers.Video
         /// <summary>
         /// encoding audio puis encoding video 1:N formats
         /// </summary>
-        /// <returns></returns>
         public bool GpuEncodeMode { get; set; }
 
         /// <summary>
@@ -71,5 +67,10 @@ namespace Uploader.Core.Managers.Video
         /// 
         /// </summary>
         public string AuthorizedQuality { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public string NVidiaCard { get; set; }
     }
 }

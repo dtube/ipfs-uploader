@@ -98,7 +98,9 @@ namespace Uploader.Core.Managers.Video
 
                 // encoding video 1:N formats
                 string arguments = $"-y -hwaccel cuvid -vcodec h264_cuvid -vsync 0 -i {Path.GetFileName(fileItem.VideoAacTempFilePath)}";
-                //string arguments = $"-y -i {Path.GetFileName(fileItem.VideoAacTempFilePath)}";
+                if(VideoSettings.Instance.NVidiaCard != "QuadroP5000")
+                    arguments = arguments.Replace(" -hwaccel cuvid -vcodec h264_cuvid -vsync 0 ", " ");
+
                 FileItem sourceFile = fileItem.FileContainer.SourceFileItem;
                 foreach (FileItem item in fileItem.FileContainer.EncodedFileItems)
                 {
@@ -109,7 +111,8 @@ namespace Uploader.Core.Managers.Video
                         arguments += " -pixel_format yuv420p";
 
                     arguments += $" -vf scale_npp={size} -b:v {maxRate} -maxrate {maxRate} -bufsize {maxRate} -vcodec h264_nvenc -acodec copy {Path.GetFileName(item.TempFilePath)}";
-                    //arguments += $" -vf scale={size} -b:v {maxRate} -maxrate {maxRate} -bufsize {maxRate} -vcodec h264_nvenc -acodec copy {Path.GetFileName(item.TempFilePath)}";
+                    if(VideoSettings.Instance.NVidiaCard != "QuadroP5000")
+                        arguments = arguments.Replace("scale_npp=", "scale=");
                 }
 
                 var ffmpegProcessManager = new FfmpegProcessManager(fileItem, fileItem.VideoGpuEncodeProcess);
