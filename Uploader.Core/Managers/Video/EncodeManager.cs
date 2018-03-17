@@ -23,6 +23,13 @@ namespace Uploader.Core.Managers.Video
                 if(sourceFile.VideoPixelFormat != "yuv420p")
                     arguments += " -pixel_format yuv420p";
 
+                // si rotation 90 ou 270, inverser la largeur et la hauteur de la video
+                if(sourceFile.VideoRotate.HasValue && (sourceFile.VideoRotate.Value == 90 || sourceFile.VideoRotate.Value == 270))
+                {
+                    string[] sizes = size.Split(':');
+                    size = $"{sizes[1]}:{sizes[0]}";
+                }
+
                 arguments += $" -vf scale={size}";
 
                 if(sourceFile.VideoCodec != "h264")
@@ -109,6 +116,13 @@ namespace Uploader.Core.Managers.Video
 
                     if(sourceFile.VideoPixelFormat != "yuv420p")
                         arguments += " -pixel_format yuv420p";
+
+                    // si rotation 90 ou 270, inverser la largeur et la hauteur de la video
+                    if(sourceFile.VideoRotate.HasValue && (sourceFile.VideoRotate.Value == 90 || sourceFile.VideoRotate.Value == 270))
+                    {
+                        string[] sizes = size.Split(':');
+                        size = $"{sizes[1]}:{sizes[0]}";
+                    }
 
                     arguments += $" -vf scale_npp={size} -b:v {maxRate} -maxrate {maxRate} -bufsize {maxRate} -vcodec h264_nvenc -acodec copy {Path.GetFileName(item.TempFilePath)}";
                     if(VideoSettings.Instance.NVidiaCard != "QuadroP5000")
