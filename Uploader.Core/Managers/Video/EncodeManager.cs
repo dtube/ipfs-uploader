@@ -69,7 +69,7 @@ namespace Uploader.Core.Managers.Video
                 if(fileItem.FileContainer.SourceFileItem.AudioCodec == "aac")
                 {
                     fileItem.AudioCpuEncodeProcess.StartProcessDateTime();
-                    File.Copy(fileItem.SourceFilePath, fileItem.TempFilePath);
+                    fileItem.SetTempFilePath(fileItem.SourceFilePath);
                 }
                 else
                 {
