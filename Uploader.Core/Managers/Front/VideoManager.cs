@@ -41,14 +41,7 @@ namespace Uploader.Core.Managers.Front
                 {
                     if(sourceFile.VideoHeight <= videoSize.MinSourceHeightForEncoding)
                         formats.Remove(videoSize);
-                }            
-
-                // si pas de vidéo à encoder, encoder dans la plus petite qualité
-                if(!formats.Any())
-                    formats.Add(authorizedFormats.OrderBy(a => a.QualityOrder).First());
-
-                // ajouter les formats à encoder
-                fileContainer.AddEncodedVideo(formats);
+                } 
 
                 // si sprite demandé
                 if (sprite??false)
@@ -56,20 +49,28 @@ namespace Uploader.Core.Managers.Front
                     fileContainer.AddSprite();
                 }
 
-                if (VideoSettings.Instance.GpuEncodeMode)
-                {
-                    sourceFile.AddGpuEncodeProcess();
-                    // encoding audio de la source puis ça sera encoding videos Gpu
-                    AudioCpuEncodeDaemon.Instance.Queue(sourceFile, "waiting audio encoding...");
-                }
-                else
-                {
-                    // si encoding est demandé, et gpuMode -> encodingAudio
-                    foreach (FileItem file in fileContainer.EncodedFileItems)
+                if(formats.Any()) {
+                    // ajouter les formats à encoder
+                    fileContainer.AddEncodedVideo(formats);
+
+                    if (VideoSettings.Instance.GpuEncodeMode)
                     {
-                        file.AddCpuEncodeProcess();
-                        AudioVideoCpuEncodeDaemon.Instance.Queue(file, "Waiting encode...");
+                        sourceFile.AddGpuEncodeProcess();
+                        // encoding audio de la source puis ça sera encoding videos Gpu
+                        AudioCpuEncodeDaemon.Instance.Queue(sourceFile, "waiting audio encoding...");
                     }
+                    else
+                    {
+                        // si encoding est demandé, et gpuMode -> encodingAudio
+                        foreach (FileItem file in fileContainer.EncodedFileItems)
+                        {
+                            file.AddCpuEncodeProcess();
+                            AudioVideoCpuEncodeDaemon.Instance.Queue(file, "Waiting encode...");
+                        }
+                    }
+                } else {
+                    fileContainer.SpriteVideoFileItem.SetSourceFilePath(sourceFile.OutputFilePath);
+                    SpriteDaemon.Instance.Queue(fileContainer.SpriteVideoFileItem, "Waiting sprite creation...");
                 }
             }
 
