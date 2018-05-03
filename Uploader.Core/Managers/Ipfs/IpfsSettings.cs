@@ -26,5 +26,11 @@ namespace Uploader.Core.Managers.Ipfs
         /// la durée max fixé dans VideoSettings.MaxVideoDurationForEncoding
         /// </summary>
         public bool AddVideoSource { get; set; }
+
+        /// <summary>
+        /// si true, on utilise l'option --only-hash de ipfs
+        /// ET on ne supprime pas le fichier normal du disque
+        /// </summary>
+        public bool OnlyHash {get; set;}
     }
 }

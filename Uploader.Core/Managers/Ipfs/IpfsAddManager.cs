@@ -25,7 +25,10 @@ namespace Uploader.Core.Managers.Ipfs
                 // Send to ipfs and return hash from ipfs
                 var processStartInfo = new ProcessStartInfo();
                 processStartInfo.FileName = "ipfs";
-                processStartInfo.Arguments = $"add {Path.GetFileName(currentFileItem.OutputFilePath)}";
+                if (IpfsSettings.Instance.OnlyHash)
+                    processStartInfo.Arguments = $"add --only-hash {Path.GetFileName(currentFileItem.OutputFilePath)}";
+                else
+                    processStartInfo.Arguments = $"add {Path.GetFileName(currentFileItem.OutputFilePath)}";
 
                 if(IpfsSettings.Instance.VideoAndSpriteTrickleDag)                
                     if(currentFileItem.TypeFile == TypeFile.SourceVideo || 

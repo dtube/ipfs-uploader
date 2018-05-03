@@ -5,6 +5,7 @@ using System.Linq;
 
 using Uploader.Core.Managers.Common;
 using Uploader.Core.Managers.Front;
+using Uploader.Core.Managers.Ipfs;
 
 namespace Uploader.Core.Models
 {
@@ -185,13 +186,16 @@ namespace Uploader.Core.Models
             if(!Finished())
                 return;
 
+            if (Error())
+                TempFileManager.SafeCopyError(OriginFilePath, SourceFileItem.IpfsHash);
+
             foreach (FileItem item in GetAllFile())
             {
-                TempFileManager.SafeDeleteTempFiles(item.FilesToDelete);
+                TempFileManager.SafeDeleteTempFiles(item.FilesToDelete, item.IpfsHash);
             }
 
-            if(!Error() || SourceFileItem?.IpfsProcess.CurrentStep == ProcessStep.Success)
-                TempFileManager.SafeDeleteTempFile(OriginFilePath);
+            if(SourceFileItem?.IpfsProcess.CurrentStep == ProcessStep.Success)
+                TempFileManager.SafeDeleteTempFile(OriginFilePath, SourceFileItem.IpfsHash);
         }
 
         public bool Finished()

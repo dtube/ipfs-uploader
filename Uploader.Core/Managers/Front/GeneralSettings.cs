@@ -19,6 +19,12 @@ namespace Uploader.Core.Managers.Front
 
         public string ImageMagickPath { get; set; }
 
+        public string TempFilePath { get; set; }
+
+        public string FinalFilePath { get; set; }
+
+        public string ErrorFilePath { get; set; }
+
         public string Version { get; set; }
     }
 }

@@ -1,0 +1,255 @@
+2018-03-17 14:11:09,709 [19] INFO  - [Launch command] ffprobe -v error -of default=nw=1 -show_entries stream_tags=rotate:format=size,duration:stream=index,codec_name,pix_fmt,height,width,duration,nb_frames,avg_frame_rate,bit_rate 04ch223h.32j
+2018-03-17 14:11:09,874 [19] INFO  - [Info source] SourceVideoDuration 192 / SourceVideoFileSize 
+2018-03-17 14:11:10,284 [6] INFO  - [Start AudioCpuEncoding] SourceFilePath 04ch223h.32j
+2018-03-17 14:11:10,291 [6] INFO  - [End AudioCpuEncoding] OutputFileName 44t0gqsi.mp4 / FileSize 11571947 / Format 
+2018-03-17 14:11:11,284 [13] INFO  - [Start VideoGpuEncoding] SourceFilePath 44t0gqsi.mp4 -> 1:N formats
+2018-03-17 14:11:11,286 [13] INFO  - [Launch command] ffmpeg -y -i 44t0gqsi.mp4 -vf scale=426:240 -b:v 200k -maxrate 200k -bufsize 200k -vcodec h264_nvenc -acodec copy 4qywzcrh.mp4 -vf scale=854:480 -b:v 1000k -maxrate 1000k -bufsize 1000k -vcodec h264_nvenc -acodec copy 3fr0tltw.mp4 -vf scale=1280:720 -b:v 2000k -maxrate 2000k -bufsize 2000k -vcodec h264_nvenc -acodec copy ah44hvjm.mp4
+2018-03-17 14:11:12,886 [13] FATAL - [Exception] Exception VideoGpuEncoding : Video Duration 192 / FileSize 11571947 / Progress 0.00%
+2018-03-17 14:11:31,285 [20] INFO  - [Launch command] ffprobe -v error -of default=nw=1 -show_entries stream_tags=rotate:format=size,duration:stream=index,codec_name,pix_fmt,height,width,duration,nb_frames,avg_frame_rate,bit_rate lop3cu0d.ihs
+2018-03-17 14:11:31,330 [20] INFO  - [Info source] SourceVideoDuration 192 / SourceVideoFileSize 
+2018-03-17 14:11:32,299 [6] INFO  - [Start AudioCpuEncoding] SourceFilePath lop3cu0d.ihs
+2018-03-17 14:11:32,304 [6] INFO  - [End AudioCpuEncoding] OutputFileName zkio1hla.mp4 / FileSize 11571947 / Format 
+2018-03-17 14:11:32,895 [13] INFO  - [Start VideoGpuEncoding] SourceFilePath zkio1hla.mp4 -> 1:N formats
+2018-03-17 14:11:32,895 [13] INFO  - [Launch command] ffmpeg -y -i zkio1hla.mp4 -vf scale=426:240 -b:v 200k -maxrate 200k -bufsize 200k -vcodec h264_nvenc -acodec copy 1wedgdmz.mp4 -vf scale=854:480 -b:v 1000k -maxrate 1000k -bufsize 1000k -vcodec h264_nvenc -acodec copy hofumgg5.mp4 -vf scale=1280:720 -b:v 2000k -maxrate 2000k -bufsize 2000k -vcodec h264_nvenc -acodec copy orhkdky2.mp4
+2018-03-17 14:11:33,547 [13] FATAL - [Exception] Exception VideoGpuEncoding : Video Duration 192 / FileSize 11571947 / Progress 0.00%
+2018-03-17 14:18:45,757 [17] INFO  - [Launch command] ffprobe -v error -of default=nw=1 -show_entries stream_tags=rotate:format=size,duration:stream=index,codec_name,pix_fmt,height,width,duration,nb_frames,avg_frame_rate,bit_rate rrkpxwdl.bep
+2018-03-17 14:18:45,835 [17] INFO  - [Info source] SourceVideoDuration 192 / SourceVideoFileSize 
+2018-03-17 14:18:46,589 [3] INFO  - [Start AudioCpuEncoding] SourceFilePath rrkpxwdl.bep
+2018-03-17 14:18:46,624 [3] INFO  - [End AudioCpuEncoding] OutputFileName qwlvahu3.mp4 / FileSize 11571947 / Format 
+2018-03-17 14:18:58,769 [4] INFO  - [Start VideoGpuEncoding] SourceFilePath qwlvahu3.mp4 -> 1:N formats
+2018-03-17 14:18:58,793 [4] INFO  - [Launch command] ffmpeg -y -i qwlvahu3.mp4 -vf scale=426:240 -b:v 200k -maxrate 200k -bufsize 200k -vcodec h264_nvenc -acodec copy mhlunwn5.mp4 -vf scale=854:480 -b:v 1000k -maxrate 1000k -bufsize 1000k -vcodec h264_nvenc -acodec copy kp0ivuz0.mp4 -vf scale=1280:720 -b:v 2000k -maxrate 2000k -bufsize 2000k -vcodec h264_nvenc -acodec copy knil1uud.mp4
+2018-03-17 14:19:08,598 [4] FATAL - [Exception] Exception VideoGpuEncoding : Video Duration 192 / FileSize 11571947 / Progress 0.00%
+2018-03-17 14:19:50,940 [20] INFO  - [Launch command] ffprobe -v error -of default=nw=1 -show_entries stream_tags=rotate:format=size,duration:stream=index,codec_name,pix_fmt,height,width,duration,nb_frames,avg_frame_rate,bit_rate mxylgjhe.swi
+2018-03-17 14:19:51,023 [20] INFO  - [Info source] SourceVideoDuration 192 / SourceVideoFileSize 
+2018-03-17 14:19:51,899 [3] INFO  - [Start AudioCpuEncoding] SourceFilePath mxylgjhe.swi
+2018-03-17 14:19:51,908 [3] INFO  - [End AudioCpuEncoding] OutputFileName w2wazzno.mp4 / FileSize 11571947 / Format 
+2018-03-17 14:19:51,968 [4] INFO  - [Start VideoGpuEncoding] SourceFilePath w2wazzno.mp4 -> 1:N formats
+2018-03-17 14:19:51,969 [4] INFO  - [Launch command] ffmpeg -y -i w2wazzno.mp4 -vf scale=426:240 -b:v 200k -maxrate 200k -bufsize 200k -vcodec h264_nvenc -acodec copy rmjsi1wm.mp4 -vf scale=854:480 -b:v 1000k -maxrate 1000k -bufsize 1000k -vcodec h264_nvenc -acodec copy dsfq0tsg.mp4 -vf scale=1280:720 -b:v 2000k -maxrate 2000k -bufsize 2000k -vcodec h264_nvenc -acodec copy xp3bczuh.mp4
+2018-03-17 14:19:52,835 [4] FATAL - [Exception] Exception VideoGpuEncoding : Video Duration 192 / FileSize 11571947 / Progress 0.00%
+2018-03-17 14:27:03,461 [17] INFO  - [Launch command] ffprobe -v error -of default=nw=1 -show_entries stream_tags=rotate:format=size,duration:stream=index,codec_name,pix_fmt,height,width,duration,nb_frames,avg_frame_rate,bit_rate yt2yv11s.blc
+2018-03-17 14:27:03,844 [17] INFO  - [Info source] SourceVideoDuration 192 / SourceVideoFileSize 
+2018-03-17 14:27:04,438 [13] INFO  - [Start AudioCpuEncoding] SourceFilePath yt2yv11s.blc
+2018-03-17 14:27:04,446 [13] INFO  - [End AudioCpuEncoding] OutputFileName l0n3n3vo.mp4 / FileSize 11571947 / Format 
+2018-03-17 14:27:05,440 [4] INFO  - [Start VideoGpuEncoding] SourceFilePath l0n3n3vo.mp4 -> 1:N formats
+2018-03-17 14:27:05,444 [4] INFO  - [Launch command] ffmpeg -y -i l0n3n3vo.mp4 -vf scale=426:240 -b:v 200k -maxrate 200k -bufsize 200k -vcodec h264_nvenc -acodec copy slvyxx4s.mp4 -vf scale=854:480 -b:v 1000k -maxrate 1000k -bufsize 1000k -vcodec h264_nvenc -acodec copy 3viqvo0a.mp4 -vf scale=1280:720 -b:v 2000k -maxrate 2000k -bufsize 2000k -vcodec h264_nvenc -acodec copy hy1wxtzr.mp4
+2018-03-17 14:27:06,505 [4] FATAL - [Exception] Exception VideoGpuEncoding : Video Duration 192 / FileSize 11571947 / Progress 0.00%
+2018-03-17 18:57:52,081 [3] INFO  - [Launch command] ffprobe -v error -of default=nw=1 -show_entries stream_tags=rotate:format=size,duration:stream=index,codec_name,pix_fmt,height,width,duration,nb_frames,avg_frame_rate,bit_rate p1m2apgq.upg
+2018-03-17 18:57:52,153 [3] INFO  - [Info source] SourceVideoDuration 192 / SourceVideoFileSize 
+2018-03-17 18:57:53,003 [17] INFO  - [Start AudioCpuEncoding] SourceFilePath p1m2apgq.upg
+2018-03-17 18:57:53,004 [17] INFO  - [End AudioCpuEncoding] OutputFileName p1m2apgq.upg / FileSize 11571947 / Format 
+2018-03-17 18:57:54,007 [4] INFO  - [Start VideoGpuEncoding] SourceFilePath p1m2apgq.upg -> 1:N formats
+2018-03-17 18:57:54,013 [4] INFO  - [Launch command] ffmpeg -y -i p1m2apgq.upg -vf scale=426:240 -b:v 200k -maxrate 200k -bufsize 200k -vcodec h264_nvenc -acodec copy 23tf0mwk.mp4 -vf scale=854:480 -b:v 1000k -maxrate 1000k -bufsize 1000k -vcodec h264_nvenc -acodec copy 14uyx1y4.mp4 -vf scale=1280:720 -b:v 2000k -maxrate 2000k -bufsize 2000k -vcodec h264_nvenc -acodec copy cjmv5vow.mp4
+2018-03-17 18:57:54,951 [4] FATAL - [Exception] Exception VideoGpuEncoding : Video Duration 192 / FileSize 11571947 / Progress 0.00%
+2018-03-17 19:10:32,717 [3] INFO  - [Launch command] ffprobe -v error -of default=nw=1 -show_entries stream_tags=rotate:format=size,duration:stream=index,codec_name,pix_fmt,height,width,duration,nb_frames,avg_frame_rate,bit_rate b2icyf2a.zgl
+2018-03-17 19:10:32,779 [3] INFO  - [Info source] SourceVideoDuration 192 / SourceVideoFileSize 
+2018-03-17 19:10:33,539 [13] INFO  - [Start AudioCpuEncoding] SourceFilePath b2icyf2a.zgl
+2018-03-17 19:10:33,541 [13] INFO  - [Launch command] ffmpeg -y -i b2icyf2a.zgl -vcodec copy -acodec aac -strict -2 mhjw51ql.mp4
+2018-03-17 19:10:38,453 [13] INFO  - [End AudioCpuEncoding] OutputFileName mhjw51ql.mp4 / FileSize 11571947 / Format 
+2018-03-17 19:10:38,540 [4] INFO  - [Start VideoGpuEncoding] SourceFilePath mhjw51ql.mp4 -> 1:N formats
+2018-03-17 19:10:38,541 [4] INFO  - [Launch command] ffmpeg -y -i mhjw51ql.mp4 -vf scale=426:240 -b:v 200k -maxrate 200k -bufsize 200k -vcodec h264_nvenc -acodec copy xycfu12w.mp4 -vf scale=854:480 -b:v 1000k -maxrate 1000k -bufsize 1000k -vcodec h264_nvenc -acodec copy aopmn2tg.mp4 -vf scale=1280:720 -b:v 2000k -maxrate 2000k -bufsize 2000k -vcodec h264_nvenc -acodec copy autqdhzu.mp4
+2018-03-17 19:10:39,504 [4] FATAL - [Exception] Exception VideoGpuEncoding : Video Duration 192 / FileSize 11571947 / Progress 0.00%
+2018-03-17 19:12:43,616 [16] INFO  - [Launch command] ffprobe -v error -of default=nw=1 -show_entries stream_tags=rotate:format=size,duration:stream=index,codec_name,pix_fmt,height,width,duration,nb_frames,avg_frame_rate,bit_rate kstfouu3.mti
+2018-03-17 19:12:43,730 [16] INFO  - [Info source] SourceVideoDuration 192 / SourceVideoFileSize 
+2018-03-17 19:12:44,397 [3] INFO  - [Start AudioCpuEncoding] SourceFilePath kstfouu3.mti
+2018-03-17 19:12:44,398 [3] INFO  - [End AudioCpuEncoding] OutputFileName kstfouu3.mti / FileSize 11571947 / Format 
+2018-03-17 19:12:45,400 [13] INFO  - [Start VideoGpuEncoding] SourceFilePath kstfouu3.mti -> 1:N formats
+2018-03-17 19:12:45,404 [13] INFO  - [Launch command] ffmpeg -y -i kstfouu3.mti -vf scale=426:240 -b:v 200k -maxrate 200k -bufsize 200k -vcodec h264_nvenc -acodec copy eb1gipcn.mp4 -vf scale=854:480 -b:v 1000k -maxrate 1000k -bufsize 1000k -vcodec h264_nvenc -acodec copy cfkmzixz.mp4 -vf scale=1280:720 -b:v 2000k -maxrate 2000k -bufsize 2000k -vcodec h264_nvenc -acodec copy mucyvvbr.mp4
+2018-03-17 19:12:46,381 [13] FATAL - [Exception] Exception VideoGpuEncoding : Video Duration 192 / FileSize 11571947 / Progress 0.00%
+2018-03-17 19:13:21,665 [18] INFO  - [Launch command] ffprobe -v error -of default=nw=1 -show_entries stream_tags=rotate:format=size,duration:stream=index,codec_name,pix_fmt,height,width,duration,nb_frames,avg_frame_rate,bit_rate 1gsj5qdd.1xp
+2018-03-17 19:13:21,709 [18] INFO  - [Info source] SourceVideoDuration 192 / SourceVideoFileSize 
+2018-03-17 19:13:22,420 [3] INFO  - [Start AudioCpuEncoding] SourceFilePath 1gsj5qdd.1xp
+2018-03-17 19:13:22,420 [3] INFO  - [End AudioCpuEncoding] OutputFileName 1gsj5qdd.1xp / FileSize 11571947 / Format 
+2018-03-17 19:13:23,386 [13] INFO  - [Start VideoGpuEncoding] SourceFilePath 1gsj5qdd.1xp -> 1:N formats
+2018-03-17 19:16:57,013 [17] INFO  - [Launch command] ffprobe -v error -of default=nw=1 -show_entries stream_tags=rotate:format=size,duration:stream=index,codec_name,pix_fmt,height,width,duration,nb_frames,avg_frame_rate,bit_rate r5hvwwgh.a1f
+2018-03-17 19:16:57,087 [17] INFO  - [Info source] SourceVideoDuration 192 / SourceVideoFileSize 
+2018-03-17 19:16:57,916 [13] INFO  - [Start AudioCpuEncoding] SourceFilePath r5hvwwgh.a1f
+2018-03-17 19:16:57,918 [13] INFO  - [End AudioCpuEncoding] OutputFileName r5hvwwgh.a1f / FileSize 11571947 / Format 
+2018-03-17 19:16:58,915 [3] INFO  - [Start VideoGpuEncoding] SourceFilePath r5hvwwgh.a1f -> 1:N formats
+2018-03-17 19:17:14,234 [3] INFO  - [Launch command] ffmpeg -y -i r5hvwwgh.a1f -vf scale=426:240 -b:v 200k -maxrate 200k -bufsize 200k -vcodec h264_nvenc -acodec copy vrjyh50y.mp4 -vf scale=854:480 -b:v 1000k -maxrate 1000k -bufsize 1000k -vcodec h264_nvenc -acodec copy 0riskkc1.mp4 -vf scale=1280:720 -b:v 2000k -maxrate 2000k -bufsize 2000k -vcodec h264_nvenc -acodec copy 21cmrhfh.mp4
+2018-03-17 19:17:15,744 [3] FATAL - [Exception] Exception VideoGpuEncoding : Video Duration 192 / FileSize 11571947 / Progress 0.00%
+2018-03-17 19:17:36,973 [17] INFO  - [Launch command] ffprobe -v error -of default=nw=1 -show_entries stream_tags=rotate:format=size,duration:stream=index,codec_name,pix_fmt,height,width,duration,nb_frames,avg_frame_rate,bit_rate s0k3w0ud.gxc
+2018-03-17 19:17:37,023 [17] INFO  - [Info source] SourceVideoDuration 192 / SourceVideoFileSize 
+2018-03-17 19:17:37,233 [13] INFO  - [Start AudioCpuEncoding] SourceFilePath s0k3w0ud.gxc
+2018-03-17 19:17:37,233 [13] INFO  - [End AudioCpuEncoding] OutputFileName s0k3w0ud.gxc / FileSize 11571947 / Format 
+2018-03-17 19:17:37,768 [3] INFO  - [Start VideoGpuEncoding] SourceFilePath s0k3w0ud.gxc -> 1:N formats
+2018-03-17 19:17:45,690 [3] INFO  - [Launch command] ffmpeg -y -i s0k3w0ud.gxc -vf scale=426:240 -b:v 200k -maxrate 200k -bufsize 200k -vcodec h264_nvenc -acodec copy 335pf4bl.mp4 -vf scale=854:480 -b:v 1000k -maxrate 1000k -bufsize 1000k -vcodec h264_nvenc -acodec copy gh1i5qoe.mp4 -vf scale=1280:720 -b:v 2000k -maxrate 2000k -bufsize 2000k -vcodec h264_nvenc -acodec copy cknfxdre.mp4
+2018-03-17 19:17:46,800 [3] FATAL - [Exception] Exception VideoGpuEncoding : Video Duration 192 / FileSize 11571947 / Progress 0.00%
+2018-03-17 19:19:07,996 [18] INFO  - [Launch command] ffprobe -v error -of default=nw=1 -show_entries stream_tags=rotate:format=size,duration:stream=index,codec_name,pix_fmt,height,width,duration,nb_frames,avg_frame_rate,bit_rate jxq0bylo.xsp
+2018-03-17 19:19:08,291 [18] INFO  - [Info source] SourceVideoDuration 192 / SourceVideoFileSize 
+2018-03-17 19:19:08,955 [8] INFO  - [Start AudioCpuEncoding] SourceFilePath jxq0bylo.xsp
+2018-03-17 19:19:08,957 [8] INFO  - [End AudioCpuEncoding] OutputFileName jxq0bylo.xsp / FileSize 11571947 / Format 
+2018-03-17 19:19:09,956 [4] INFO  - [Start VideoGpuEncoding] SourceFilePath jxq0bylo.xsp -> 1:N formats
+2018-03-17 19:19:09,960 [4] INFO  - [Launch command] ffmpeg -y -hwaccel cuvid -vcodec h264_cuvid -vsync 0 -i jxq0bylo.xsp -vf scale_npp=426:240 -b:v 200k -maxrate 200k -bufsize 200k -vcodec h264_nvenc -acodec copy aqpj3vvm.mp4 -vf scale_npp=854:480 -b:v 1000k -maxrate 1000k -bufsize 1000k -vcodec h264_nvenc -acodec copy ru2d1yxe.mp4 -vf scale_npp=1280:720 -b:v 2000k -maxrate 2000k -bufsize 2000k -vcodec h264_nvenc -acodec copy eujmcgmd.mp4
+2018-03-17 19:19:11,213 [4] FATAL - [Exception] Exception VideoGpuEncoding : Video Duration 192 / FileSize 11571947 / Progress 0.00%
+2018-03-17 20:12:23,806 [16] INFO  - [Launch command] ffprobe -v error -of default=nw=1 -show_entries stream_tags=rotate:format=size,duration:stream=index,codec_name,pix_fmt,height,width,duration,nb_frames,avg_frame_rate,bit_rate faqjxtds.wle
+2018-03-17 20:12:23,867 [16] INFO  - [Info source] SourceVideoDuration 192 / SourceVideoFileSize 
+2018-03-17 20:12:24,435 [3] INFO  - [Start AudioCpuEncoding] SourceFilePath faqjxtds.wle
+2018-03-17 20:12:24,437 [3] INFO  - [End AudioCpuEncoding] OutputFileName faqjxtds.wle / FileSize 11571947 / Format 
+2018-03-17 20:12:25,436 [14] INFO  - [Start VideoGpuEncoding] SourceFilePath faqjxtds.wle -> 1:N formats
+2018-03-17 20:13:41,890 [14] INFO  - [Launch command] ffmpeg -y -hwaccel cuvid -vcodec h264_cuvid -vsync 0 -i faqjxtds.wle -vf scale_npp=426:240 -b:v 200k -maxrate 200k -bufsize 200k -vcodec h264_nvenc -acodec copy yldc0dfl.mp4
+2018-03-17 20:13:46,631 [14] FATAL - [Exception] Exception VideoGpuEncoding : Video Duration 192 / FileSize 11571947 / Progress 0.00%
+2018-03-17 21:35:05,923 [19] INFO  - [Launch command] ffprobe -v error -of default=nw=1 -show_entries stream_tags=rotate:format=size,duration:stream=index,codec_name,pix_fmt,height,width,duration,nb_frames,avg_frame_rate,bit_rate 2d3audcg.s0z
+2018-03-17 21:35:06,207 [19] INFO  - [Info source] SourceVideoDuration 192 / SourceVideoFileSize 
+2018-03-17 21:35:06,695 [4] INFO  - [Start AudioCpuEncoding] SourceFilePath 2d3audcg.s0z
+2018-03-17 21:35:06,696 [4] INFO  - [End AudioCpuEncoding] OutputFileName 2d3audcg.s0z / FileSize 11571947 / Format 
+2018-03-17 21:35:07,698 [13] INFO  - [Start VideoGpuEncoding] SourceFilePath 2d3audcg.s0z -> 1:N formats
+2018-03-17 21:35:28,078 [13] INFO  - [Launch command] ffmpeg -y -hwaccel cuvid -vcodec h264_cuvid -vsync 0 -i 2d3audcg.s0z -vf scale_npp=426:240 -b:v 200k -maxrate 200k -bufsize 200k -vcodec h264_nvenc -acodec copy x2ng3p34.mp4
+2018-03-17 21:35:31,117 [13] FATAL - [Exception] Exception VideoGpuEncoding : Video Duration 192 / FileSize 11571947 / Progress 0.00%
+2018-03-17 21:35:40,478 [21] INFO  - [Launch command] ffprobe -v error -of default=nw=1 -show_entries stream_tags=rotate:format=size,duration:stream=index,codec_name,pix_fmt,height,width,duration,nb_frames,avg_frame_rate,bit_rate ysasv2cy.1mf
+2018-03-17 21:35:40,528 [21] INFO  - [Info source] SourceVideoDuration 126 / SourceVideoFileSize 
+2018-03-17 21:35:41,090 [4] INFO  - [Start AudioCpuEncoding] SourceFilePath ysasv2cy.1mf
+2018-03-17 21:35:41,090 [4] INFO  - [End AudioCpuEncoding] OutputFileName ysasv2cy.1mf / FileSize 5112496 / Format 
+2018-03-17 21:35:41,313 [13] INFO  - [Start VideoGpuEncoding] SourceFilePath ysasv2cy.1mf -> 1:N formats
+2018-03-17 21:35:50,403 [13] INFO  - [Launch command] ffmpeg -y -hwaccel cuvid -vcodec h264_cuvid -vsync 0 -i ysasv2cy.1mf -vf scale_npp=320:240 -b:v 200k -maxrate 200k -bufsize 200k -vcodec h264_nvenc -acodec copy zsg5d3mj.mp4
+2018-03-17 21:35:51,221 [13] FATAL - [Exception] Exception VideoGpuEncoding : Video Duration 126 / FileSize 5112496 / Progress 0.00%
+2018-03-17 21:37:07,657 [4] INFO  - [Launch command] ffprobe -v error -of default=nw=1 -show_entries stream_tags=rotate:format=size,duration:stream=index,codec_name,pix_fmt,height,width,duration,nb_frames,avg_frame_rate,bit_rate zy2uzpik.kqc
+2018-03-17 21:37:07,846 [4] INFO  - [Info source] SourceVideoDuration 126 / SourceVideoFileSize 
+2018-03-17 21:37:07,868 [13] INFO  - [Start AudioCpuEncoding] SourceFilePath zy2uzpik.kqc
+2018-03-17 21:37:07,869 [13] INFO  - [End AudioCpuEncoding] OutputFileName zy2uzpik.kqc / FileSize 5112496 / Format 
+2018-03-17 21:37:08,871 [3] INFO  - [Start VideoGpuEncoding] SourceFilePath zy2uzpik.kqc -> 1:N formats
+2018-03-17 21:37:13,533 [3] INFO  - [Launch command] ffmpeg -y -hwaccel cuvid -vcodec h264_cuvid -vsync 0 -i zy2uzpik.kqc -vf scale_npp=320:240 -b:v 200k -maxrate 200k -bufsize 200k -vcodec h264_nvenc -acodec copy he2dvsuc.mp4
+2018-03-17 21:37:14,242 [3] FATAL - [Exception] Exception VideoGpuEncoding : Video Duration 126 / FileSize 5112496 / Progress 0.00%
+2018-03-17 21:37:56,906 [16] INFO  - [Launch command] ffprobe -v error -of default=nw=1 -show_entries stream_tags=rotate:format=size,duration:stream=index,codec_name,pix_fmt,height,width,duration,nb_frames,avg_frame_rate,bit_rate porx3kx0.owr
+2018-03-17 21:37:56,956 [16] INFO  - [Info source] SourceVideoDuration 126 / SourceVideoFileSize 
+2018-03-17 21:37:57,537 [13] INFO  - [Start AudioCpuEncoding] SourceFilePath porx3kx0.owr
+2018-03-17 21:37:57,537 [13] INFO  - [End AudioCpuEncoding] OutputFileName porx3kx0.owr / FileSize 5112496 / Format 
+2018-03-17 21:37:58,248 [3] INFO  - [Start VideoGpuEncoding] SourceFilePath porx3kx0.owr -> 1:N formats
+2018-03-17 21:37:58,248 [3] INFO  - [Launch command] ffmpeg -y -hwaccel cuvid -vcodec h264_cuvid -vsync 0 -i porx3kx0.owr -vf scale_npp=320:240 -b:v 200k -maxrate 200k -bufsize 200k -vcodec h264_nvenc -acodec copy umxwwbag.mp4
+2018-03-17 21:37:58,777 [3] FATAL - [Exception] Exception VideoGpuEncoding : Video Duration 126 / FileSize 5112496 / Progress 0.00%
+2018-03-17 21:38:36,820 [16] INFO  - [Launch command] ffprobe -v error -of default=nw=1 -show_entries stream_tags=rotate:format=size,duration:stream=index,codec_name,pix_fmt,height,width,duration,nb_frames,avg_frame_rate,bit_rate vnecowc4.vz2
+2018-03-17 21:38:36,867 [16] INFO  - [Info source] SourceVideoDuration 192 / SourceVideoFileSize 
+2018-03-17 21:38:37,550 [13] INFO  - [Start AudioCpuEncoding] SourceFilePath vnecowc4.vz2
+2018-03-17 21:38:37,550 [13] INFO  - [End AudioCpuEncoding] OutputFileName vnecowc4.vz2 / FileSize 11571947 / Format 
+2018-03-17 21:38:37,781 [3] INFO  - [Start VideoGpuEncoding] SourceFilePath vnecowc4.vz2 -> 1:N formats
+2018-03-17 21:38:37,782 [3] INFO  - [Launch command] ffmpeg -y -hwaccel cuvid -vcodec h264_cuvid -vsync 0 -i vnecowc4.vz2 -vf scale_npp=426:240 -b:v 200k -maxrate 200k -bufsize 200k -vcodec h264_nvenc -acodec copy 4r2qsnag.mp4
+2018-03-17 21:38:38,292 [3] FATAL - [Exception] Exception VideoGpuEncoding : Video Duration 192 / FileSize 11571947 / Progress 0.00%
+2018-03-17 21:38:46,330 [21] INFO  - [Launch command] ffprobe -v error -of default=nw=1 -show_entries stream_tags=rotate:format=size,duration:stream=index,codec_name,pix_fmt,height,width,duration,nb_frames,avg_frame_rate,bit_rate cwehfhqp.gix
+2018-03-17 21:38:46,395 [21] INFO  - [Info source] SourceVideoDuration 57 / SourceVideoFileSize 
+2018-03-17 21:38:46,551 [13] INFO  - [Start AudioCpuEncoding] SourceFilePath cwehfhqp.gix
+2018-03-17 21:38:46,551 [13] INFO  - [End AudioCpuEncoding] OutputFileName cwehfhqp.gix / FileSize 1807101 / Format 
+2018-03-17 21:38:47,321 [3] INFO  - [Start VideoGpuEncoding] SourceFilePath cwehfhqp.gix -> 1:N formats
+2018-03-17 21:38:47,321 [3] INFO  - [Launch command] ffmpeg -y -hwaccel cuvid -vcodec h264_cuvid -vsync 0 -i cwehfhqp.gix -vf scale_npp=426:240 -b:v 200k -maxrate 200k -bufsize 200k -vcodec h264_nvenc -acodec copy jdsrl55v.mp4
+2018-03-17 21:38:47,838 [3] FATAL - [Exception] Exception VideoGpuEncoding : Video Duration 57 / FileSize 1807101 / Progress 0.00%
+2018-03-17 21:40:51,885 [19] INFO  - [Launch command] ffprobe -v error -of default=nw=1 -show_entries stream_tags=rotate:format=size,duration:stream=index,codec_name,pix_fmt,height,width,duration,nb_frames,avg_frame_rate,bit_rate ed0p0dt5.qd0
+2018-03-17 21:40:52,067 [19] INFO  - [Info source] SourceVideoDuration 57 / SourceVideoFileSize 
+2018-03-17 21:40:53,012 [8] INFO  - [Start AudioCpuEncoding] SourceFilePath ed0p0dt5.qd0
+2018-03-17 21:40:53,013 [8] INFO  - [End AudioCpuEncoding] OutputFileName ed0p0dt5.qd0 / FileSize 1807101 / Format 
+2018-03-17 21:40:54,018 [3] INFO  - [Start VideoGpuEncoding] SourceFilePath ed0p0dt5.qd0 -> 1:N formats
+2018-03-17 21:40:54,022 [3] INFO  - [Launch command] ffmpeg -y -i ed0p0dt5.qd0 -vf scale=426:240 -b:v 200k -maxrate 200k -bufsize 200k -vcodec h264_nvenc -acodec copy 3d5shxxm.mp4
+2018-03-17 21:40:54,695 [3] INFO  - [End VideoGpuEncoding] OutputFileName 3d5shxxm.mp4 / FileSize 1800136 / Format Uploader.Core.Models.VideoSize
+2018-03-17 22:08:46,894 [16] INFO  - [Launch command] ffprobe -v error -of default=nw=1 -show_entries stream_tags=rotate:format=size,duration:stream=index,codec_name,pix_fmt,height,width,duration,nb_frames,avg_frame_rate,bit_rate fxjlpx55.jk0
+2018-03-17 22:08:47,157 [16] INFO  - [Info source] SourceVideoDuration 192 / SourceVideoFileSize 
+2018-03-17 22:08:47,167 [8] INFO  - [Start AudioCpuEncoding] SourceFilePath fxjlpx55.jk0
+2018-03-17 22:08:47,170 [8] INFO  - [End AudioCpuEncoding] OutputFileName fxjlpx55.jk0 / FileSize 11571947 / Format 
+2018-03-17 22:08:47,849 [3] INFO  - [Start VideoGpuEncoding] SourceFilePath fxjlpx55.jk0 -> 1:N formats
+2018-03-17 22:08:47,849 [3] INFO  - [Launch command] ffmpeg -y -i fxjlpx55.jk0 -vf scale=426:240 -b:v 200k -maxrate 200k -bufsize 200k -vcodec h264_nvenc -acodec copy 2hj300vz.mp4
+2018-03-17 22:08:53,526 [3] INFO  - [End VideoGpuEncoding] OutputFileName 2hj300vz.mp4 / FileSize 6344342 / Format Uploader.Core.Models.VideoSize
+2018-05-03 11:40:59,826 [14] INFO  - [Launch command] ffprobe -v error -of default=nw=1 -show_entries stream_tags=rotate:format=size,duration:stream=index,codec_name,pix_fmt,height,width,duration,nb_frames,avg_frame_rate,bit_rate gr5lsmuj.mkv
+2018-05-03 11:40:59,991 [14] INFO  - [Info source] SourceVideoDuration 1777 / SourceVideoFileSize 
+2018-05-03 11:41:01,004 [15] INFO  - [Start AudioCpuEncoding] SourceFilePath gr5lsmuj.mkv
+2018-05-03 11:41:01,006 [15] INFO  - [Launch command] ffmpeg -y -i gr5lsmuj.mkv -vcodec copy -acodec aac -strict -2 lr4cenh5.mp4
+2018-05-03 12:21:19,901 [15] INFO  - [Launch command] ffprobe -v error -of default=nw=1 -show_entries stream_tags=rotate:format=size,duration:stream=index,codec_name,pix_fmt,height,width,duration,nb_frames,avg_frame_rate,bit_rate mysaujjn.mkv
+2018-05-03 12:21:21,495 [15] INFO  - [Info source] SourceVideoDuration 1777 / SourceVideoFileSize 
+2018-05-03 12:21:22,507 [7] INFO  - [Start AudioCpuEncoding] SourceFilePath mysaujjn.mkv
+2018-05-03 12:21:22,509 [7] INFO  - [Launch command] ffmpeg -y -i mysaujjn.mkv -vcodec copy -acodec aac -strict -2 tm4ybuic.mp4
+2018-05-03 12:23:29,843 [7] INFO  - [End AudioCpuEncoding] OutputFileName tm4ybuic.mp4 / FileSize 605914960 / Format 
+2018-05-03 12:23:30,450 [21] INFO  - [Start VideoGpuEncoding] SourceFilePath tm4ybuic.mp4 -> 1:N formats
+2018-05-03 12:23:30,452 [21] INFO  - [Launch command] ffmpeg -y -i tm4ybuic.mp4 -vf scale=426:240 -b:v 200k -maxrate 200k -bufsize 200k -vcodec h264_nvenc -acodec copy y4d3jwux.mp4
+2018-05-03 12:29:15,422 [13] INFO  - [Launch command] ffprobe -v error -of default=nw=1 -show_entries stream_tags=rotate:format=size,duration:stream=index,codec_name,pix_fmt,height,width,duration,nb_frames,avg_frame_rate,bit_rate ecqdjrob.mp4
+2018-05-03 12:29:15,696 [13] INFO  - [Info source] SourceVideoDuration 126 / SourceVideoFileSize 
+2018-05-03 12:29:16,709 [15] INFO  - [Start AudioCpuEncoding] SourceFilePath ecqdjrob.mp4
+2018-05-03 12:29:16,710 [15] INFO  - [End AudioCpuEncoding] OutputFileName ecqdjrob.mp4 / FileSize 5112496 / Format 
+2018-05-03 12:29:17,716 [14] INFO  - [Start VideoGpuEncoding] SourceFilePath ecqdjrob.mp4 -> 1:N formats
+2018-05-03 12:29:17,719 [14] INFO  - [Launch command] ffmpeg -y -i ecqdjrob.mp4 -vf scale=320:240 -b:v 200k -maxrate 200k -bufsize 200k -vcodec h264_nvenc -acodec copy wesls43r.mp4
+2018-05-03 12:29:19,269 [14] INFO  - [End VideoGpuEncoding] OutputFileName wesls43r.mp4 / FileSize 3569391 / Format Uploader.Core.Models.VideoSize
+2018-05-03 12:32:24,227 [14] INFO  - [Launch command] ffprobe -v error -of default=nw=1 -show_entries stream_tags=rotate:format=size,duration:stream=index,codec_name,pix_fmt,height,width,duration,nb_frames,avg_frame_rate,bit_rate qnarspcj.mp4
+2018-05-03 12:32:24,286 [14] INFO  - [Info source] SourceVideoDuration 126 / SourceVideoFileSize 
+2018-05-03 12:32:25,299 [15] INFO  - [Start AudioCpuEncoding] SourceFilePath qnarspcj.mp4
+2018-05-03 12:32:25,300 [15] INFO  - [End AudioCpuEncoding] OutputFileName qnarspcj.mp4 / FileSize 5112496 / Format 
+2018-05-03 12:32:26,307 [6] INFO  - [Start VideoGpuEncoding] SourceFilePath qnarspcj.mp4 -> 1:N formats
+2018-05-03 12:32:26,311 [6] INFO  - [Launch command] ffmpeg -y -i qnarspcj.mp4 -vf scale=320:240 -b:v 200k -maxrate 200k -bufsize 200k -vcodec h264_nvenc -acodec copy erxv5lzt.mp4
+2018-05-03 12:32:27,657 [6] INFO  - [End VideoGpuEncoding] OutputFileName erxv5lzt.mp4 / FileSize 3569391 / Format Uploader.Core.Models.VideoSize
+2018-05-03 12:39:42,914 [15] INFO  - [Launch command] ffprobe -v error -of default=nw=1 -show_entries stream_tags=rotate:format=size,duration:stream=index,codec_name,pix_fmt,height,width,duration,nb_frames,avg_frame_rate,bit_rate kyrq1kbc.mp4
+2018-05-03 12:39:42,974 [15] INFO  - [Info source] SourceVideoDuration 126 / SourceVideoFileSize 
+2018-05-03 12:39:43,987 [16] INFO  - [Start AudioCpuEncoding] SourceFilePath kyrq1kbc.mp4
+2018-05-03 12:39:43,988 [16] INFO  - [End AudioCpuEncoding] OutputFileName kyrq1kbc.mp4 / FileSize 5112496 / Format 
+2018-05-03 12:39:44,994 [13] INFO  - [Start VideoGpuEncoding] SourceFilePath kyrq1kbc.mp4 -> 1:N formats
+2018-05-03 12:39:44,998 [13] INFO  - [Launch command] ffmpeg -y -i kyrq1kbc.mp4 -vf scale=320:240 -b:v 200k -maxrate 200k -bufsize 200k -vcodec h264_nvenc -acodec copy fjfz2twb.mp4
+2018-05-03 12:39:46,348 [13] INFO  - [End VideoGpuEncoding] OutputFileName fjfz2twb.mp4 / FileSize 3569391 / Format Uploader.Core.Models.VideoSize
+2018-05-03 12:41:03,670 [7] INFO  - [Launch command] ffprobe -v error -of default=nw=1 -show_entries stream_tags=rotate:format=size,duration:stream=index,codec_name,pix_fmt,height,width,duration,nb_frames,avg_frame_rate,bit_rate c0ousxmg.mp4
+2018-05-03 12:41:03,732 [7] INFO  - [Info source] SourceVideoDuration 126 / SourceVideoFileSize 
+2018-05-03 12:41:04,743 [14] INFO  - [Start AudioCpuEncoding] SourceFilePath c0ousxmg.mp4
+2018-05-03 12:41:04,744 [14] INFO  - [End AudioCpuEncoding] OutputFileName c0ousxmg.mp4 / FileSize 5112496 / Format 
+2018-05-03 12:41:05,750 [15] INFO  - [Start VideoGpuEncoding] SourceFilePath c0ousxmg.mp4 -> 1:N formats
+2018-05-03 12:41:05,754 [15] INFO  - [Launch command] ffmpeg -y -i c0ousxmg.mp4 -vf scale=320:240 -b:v 200k -maxrate 200k -bufsize 200k -vcodec h264_nvenc -acodec copy m0nmatjh.mp4
+2018-05-03 12:41:07,099 [15] INFO  - [End VideoGpuEncoding] OutputFileName m0nmatjh.mp4 / FileSize 3569391 / Format Uploader.Core.Models.VideoSize
+2018-05-03 12:42:12,666 [7] INFO  - [Launch command] ffprobe -v error -of default=nw=1 -show_entries stream_tags=rotate:format=size,duration:stream=index,codec_name,pix_fmt,height,width,duration,nb_frames,avg_frame_rate,bit_rate z5y3eblx.mp4
+2018-05-03 12:42:12,726 [7] INFO  - [Info source] SourceVideoDuration 126 / SourceVideoFileSize 
+2018-05-03 12:42:13,737 [15] INFO  - [Start AudioCpuEncoding] SourceFilePath z5y3eblx.mp4
+2018-05-03 12:42:13,738 [15] INFO  - [End AudioCpuEncoding] OutputFileName z5y3eblx.mp4 / FileSize 5112496 / Format 
+2018-05-03 12:42:14,745 [7] INFO  - [Start VideoGpuEncoding] SourceFilePath z5y3eblx.mp4 -> 1:N formats
+2018-05-03 12:42:14,748 [7] INFO  - [Launch command] ffmpeg -y -i z5y3eblx.mp4 -vf scale=320:240 -b:v 200k -maxrate 200k -bufsize 200k -vcodec h264_nvenc -acodec copy 13gzliwd.mp4
+2018-05-03 12:42:16,094 [7] INFO  - [End VideoGpuEncoding] OutputFileName 13gzliwd.mp4 / FileSize 3569391 / Format Uploader.Core.Models.VideoSize
+2018-05-03 12:43:22,245 [15] INFO  - [Launch command] ffprobe -v error -of default=nw=1 -show_entries stream_tags=rotate:format=size,duration:stream=index,codec_name,pix_fmt,height,width,duration,nb_frames,avg_frame_rate,bit_rate u5f25l31.mp4
+2018-05-03 12:43:22,306 [15] INFO  - [Info source] SourceVideoDuration 126 / SourceVideoFileSize 
+2018-05-03 12:43:23,317 [6] INFO  - [Start AudioCpuEncoding] SourceFilePath u5f25l31.mp4
+2018-05-03 12:43:23,318 [6] INFO  - [End AudioCpuEncoding] OutputFileName u5f25l31.mp4 / FileSize 5112496 / Format 
+2018-05-03 12:43:24,324 [15] INFO  - [Start VideoGpuEncoding] SourceFilePath u5f25l31.mp4 -> 1:N formats
+2018-05-03 12:43:24,328 [15] INFO  - [Launch command] ffmpeg -y -i u5f25l31.mp4 -vf scale=320:240 -b:v 200k -maxrate 200k -bufsize 200k -vcodec h264_nvenc -acodec copy xzpzffh5.mp4
+2018-05-03 12:43:25,671 [15] INFO  - [End VideoGpuEncoding] OutputFileName xzpzffh5.mp4 / FileSize 3569391 / Format Uploader.Core.Models.VideoSize
+2018-05-03 12:44:13,490 [16] INFO  - [Launch command] ffprobe -v error -of default=nw=1 -show_entries stream_tags=rotate:format=size,duration:stream=index,codec_name,pix_fmt,height,width,duration,nb_frames,avg_frame_rate,bit_rate i0nvznnd.mp4
+2018-05-03 12:44:13,546 [16] INFO  - [Info source] SourceVideoDuration 126 / SourceVideoFileSize 
+2018-05-03 12:44:14,559 [15] INFO  - [Start AudioCpuEncoding] SourceFilePath i0nvznnd.mp4
+2018-05-03 12:44:14,560 [15] INFO  - [End AudioCpuEncoding] OutputFileName i0nvznnd.mp4 / FileSize 5112496 / Format 
+2018-05-03 12:44:15,566 [16] INFO  - [Start VideoGpuEncoding] SourceFilePath i0nvznnd.mp4 -> 1:N formats
+2018-05-03 12:44:15,571 [16] INFO  - [Launch command] ffmpeg -y -i i0nvznnd.mp4 -vf scale=320:240 -b:v 200k -maxrate 200k -bufsize 200k -vcodec h264_nvenc -acodec copy om5ff3mt.mp4
+2018-05-03 12:44:16,919 [16] INFO  - [End VideoGpuEncoding] OutputFileName om5ff3mt.mp4 / FileSize 3569391 / Format Uploader.Core.Models.VideoSize
+2018-05-03 12:57:07,839 [13] INFO  - [Launch command] ffprobe -v error -of default=nw=1 -show_entries stream_tags=rotate:format=size,duration:stream=index,codec_name,pix_fmt,height,width,duration,nb_frames,avg_frame_rate,bit_rate w3nzmyff.mp4
+2018-05-03 12:57:07,899 [13] INFO  - [Info source] SourceVideoDuration 126 / SourceVideoFileSize 
+2018-05-03 12:57:08,909 [6] INFO  - [Start AudioCpuEncoding] SourceFilePath w3nzmyff.mp4
+2018-05-03 12:57:08,910 [6] INFO  - [End AudioCpuEncoding] OutputFileName w3nzmyff.mp4 / FileSize 5112496 / Format 
+2018-05-03 12:57:09,916 [13] INFO  - [Start VideoGpuEncoding] SourceFilePath w3nzmyff.mp4 -> 1:N formats
+2018-05-03 12:57:09,919 [13] INFO  - [Launch command] ffmpeg -y -i w3nzmyff.mp4 -vf scale=320:240 -b:v 200k -maxrate 200k -bufsize 200k -vcodec h264_nvenc -acodec copy 0rmxcemf.mp4
+2018-05-03 12:57:11,266 [13] INFO  - [End VideoGpuEncoding] OutputFileName 0rmxcemf.mp4 / FileSize 3569391 / Format Uploader.Core.Models.VideoSize
+2018-05-03 12:58:06,319 [13] INFO  - [Launch command] ffprobe -v error -of default=nw=1 -show_entries stream_tags=rotate:format=size,duration:stream=index,codec_name,pix_fmt,height,width,duration,nb_frames,avg_frame_rate,bit_rate xp5v04qb.mp4
+2018-05-03 12:58:06,380 [13] INFO  - [Info source] SourceVideoDuration 126 / SourceVideoFileSize 
+2018-05-03 12:58:07,389 [14] INFO  - [Start AudioCpuEncoding] SourceFilePath xp5v04qb.mp4
+2018-05-03 12:58:07,390 [14] INFO  - [End AudioCpuEncoding] OutputFileName xp5v04qb.mp4 / FileSize 5112496 / Format 
+2018-05-03 12:58:08,395 [6] INFO  - [Start VideoGpuEncoding] SourceFilePath xp5v04qb.mp4 -> 1:N formats
+2018-05-03 12:58:08,398 [6] INFO  - [Launch command] ffmpeg -y -i xp5v04qb.mp4 -vf scale=320:240 -b:v 200k -maxrate 200k -bufsize 200k -vcodec h264_nvenc -acodec copy vpzzpicy.mp4
+2018-05-03 12:58:09,740 [6] INFO  - [End VideoGpuEncoding] OutputFileName vpzzpicy.mp4 / FileSize 3569391 / Format Uploader.Core.Models.VideoSize
+2018-05-03 12:58:42,580 [16] INFO  - [Launch command] ffprobe -v error -of default=nw=1 -show_entries stream_tags=rotate:format=size,duration:stream=index,codec_name,pix_fmt,height,width,duration,nb_frames,avg_frame_rate,bit_rate aez1hvqm.mp4
+2018-05-03 12:58:42,626 [16] INFO  - [Info source] SourceVideoDuration 126 / SourceVideoFileSize 
+2018-05-03 12:58:43,398 [14] INFO  - [Start AudioCpuEncoding] SourceFilePath aez1hvqm.mp4
+2018-05-03 12:58:43,398 [14] INFO  - [End AudioCpuEncoding] OutputFileName aez1hvqm.mp4 / FileSize 5112496 / Format 
+2018-05-03 12:58:43,745 [6] INFO  - [Start VideoGpuEncoding] SourceFilePath aez1hvqm.mp4 -> 1:N formats
+2018-05-03 12:58:43,745 [6] INFO  - [Launch command] ffmpeg -y -i aez1hvqm.mp4 -vf scale=320:240 -b:v 200k -maxrate 200k -bufsize 200k -vcodec h264_nvenc -acodec copy uwtg35l5.mp4
+2018-05-03 12:58:45,085 [6] INFO  - [End VideoGpuEncoding] OutputFileName uwtg35l5.mp4 / FileSize 3569391 / Format Uploader.Core.Models.VideoSize
+2018-05-03 13:00:02,211 [15] INFO  - [Launch command] ffprobe -v error -of default=nw=1 -show_entries stream_tags=rotate:format=size,duration:stream=index,codec_name,pix_fmt,height,width,duration,nb_frames,avg_frame_rate,bit_rate nlnkv3dx.mp4
+2018-05-03 13:00:02,304 [15] INFO  - [Info source] SourceVideoDuration 126 / SourceVideoFileSize 
+2018-05-03 13:00:03,316 [7] INFO  - [Start AudioCpuEncoding] SourceFilePath nlnkv3dx.mp4
+2018-05-03 13:00:03,317 [7] INFO  - [End AudioCpuEncoding] OutputFileName nlnkv3dx.mp4 / FileSize 5112496 / Format 
+2018-05-03 13:00:04,323 [15] INFO  - [Start VideoGpuEncoding] SourceFilePath nlnkv3dx.mp4 -> 1:N formats
+2018-05-03 13:00:04,327 [15] INFO  - [Launch command] ffmpeg -y -i nlnkv3dx.mp4 -vf scale=320:240 -b:v 200k -maxrate 200k -bufsize 200k -vcodec h264_nvenc -acodec copy klbstkkc.mp4
+2018-05-03 13:00:05,673 [15] INFO  - [End VideoGpuEncoding] OutputFileName klbstkkc.mp4 / FileSize 3569391 / Format Uploader.Core.Models.VideoSize
+2018-05-03 13:23:21,187 [17] INFO  - [Launch command] ffprobe -v error -of default=nw=1 -show_entries stream_tags=rotate:format=size,duration:stream=index,codec_name,pix_fmt,height,width,duration,nb_frames,avg_frame_rate,bit_rate 31jyyawm.mp4
+2018-05-03 13:23:21,233 [17] INFO  - [Info source] SourceVideoDuration 126 / SourceVideoFileSize 
+2018-05-03 13:23:22,244 [16] INFO  - [Start AudioCpuEncoding] SourceFilePath 31jyyawm.mp4
+2018-05-03 13:23:22,245 [16] INFO  - [End AudioCpuEncoding] OutputFileName 31jyyawm.mp4 / FileSize 5112496 / Format 
+2018-05-03 13:23:23,251 [18] INFO  - [Start VideoGpuEncoding] SourceFilePath 31jyyawm.mp4 -> 1:N formats
+2018-05-03 13:23:23,255 [18] INFO  - [Launch command] ffmpeg -y -i 31jyyawm.mp4 -vf scale=320:240 -b:v 200k -maxrate 200k -bufsize 200k -vcodec h264_nvenc -acodec copy xvagfjbc.mp4
+2018-05-03 13:23:24,598 [18] INFO  - [End VideoGpuEncoding] OutputFileName xvagfjbc.mp4 / FileSize 3569391 / Format Uploader.Core.Models.VideoSize
+2018-05-03 13:25:49,679 [13] INFO  - [Launch command] ffprobe -v error -of default=nw=1 -show_entries stream_tags=rotate:format=size,duration:stream=index,codec_name,pix_fmt,height,width,duration,nb_frames,avg_frame_rate,bit_rate w1vqacd2.mp4
+2018-05-03 13:25:49,740 [13] INFO  - [Info source] SourceVideoDuration 126 / SourceVideoFileSize 
+2018-05-03 13:25:50,752 [15] INFO  - [Start AudioCpuEncoding] SourceFilePath w1vqacd2.mp4
+2018-05-03 13:25:50,752 [15] INFO  - [End AudioCpuEncoding] OutputFileName w1vqacd2.mp4 / FileSize 5112496 / Format 
+2018-05-03 13:25:51,759 [6] INFO  - [Start VideoGpuEncoding] SourceFilePath w1vqacd2.mp4 -> 1:N formats
+2018-05-03 13:25:51,762 [6] INFO  - [Launch command] ffmpeg -y -i w1vqacd2.mp4 -vf scale=320:240 -b:v 200k -maxrate 200k -bufsize 200k -vcodec h264_nvenc -acodec copy k3sex4bj.mp4
+2018-05-03 13:25:53,109 [6] INFO  - [End VideoGpuEncoding] OutputFileName k3sex4bj.mp4 / FileSize 3569391 / Format Uploader.Core.Models.VideoSize
+2018-05-03 13:27:43,387 [15] INFO  - [Launch command] ffprobe -v error -of default=nw=1 -show_entries stream_tags=rotate:format=size,duration:stream=index,codec_name,pix_fmt,height,width,duration,nb_frames,avg_frame_rate,bit_rate tnmqgz34.mp4
+2018-05-03 13:27:43,446 [15] INFO  - [Info source] SourceVideoDuration 126 / SourceVideoFileSize 
+2018-05-03 13:27:44,457 [7] INFO  - [Start AudioCpuEncoding] SourceFilePath tnmqgz34.mp4
+2018-05-03 13:27:44,458 [7] INFO  - [End AudioCpuEncoding] OutputFileName tnmqgz34.mp4 / FileSize 5112496 / Format 
+2018-05-03 13:27:45,464 [13] INFO  - [Start VideoGpuEncoding] SourceFilePath tnmqgz34.mp4 -> 1:N formats
+2018-05-03 13:27:45,468 [13] INFO  - [Launch command] ffmpeg -y -i tnmqgz34.mp4 -vf scale=320:240 -b:v 200k -maxrate 200k -bufsize 200k -vcodec h264_nvenc -acodec copy mpv1q5se.mp4
+2018-05-03 13:27:46,715 [13] INFO  - [End VideoGpuEncoding] OutputFileName mpv1q5se.mp4 / FileSize 3569391 / Format Uploader.Core.Models.VideoSize

@@ -1,0 +1,66 @@
+2018-03-06 15:58:00,028 [18] INFO  - [Start Crop] SourceFileName wkvesmyg.aa1
+2018-03-06 15:58:00,031 [18] INFO  - [Launch command] convert wkvesmyg.aa1 -resize "210x118^" -gravity Center -crop 210x118+0+0 0fu4kt5e.png
+2018-03-06 15:58:00,108 [18] INFO  - [End Crop] OutputFileName 0fu4kt5e.png
+2018-03-06 15:58:00,108 [18] INFO  - [Start Overlay] SourceFileName 0fu4kt5e.png
+2018-03-06 15:58:00,108 [18] INFO  - [Launch command] composite -gravity NorthEast /home/dr/Coding/dtube/ipfs-uploader/Uploader.Web/overlay.png 0fu4kt5e.png 4gkpc5bt.png
+2018-03-06 15:58:00,136 [18] INFO  - [End Overlay] OutputFileName 4gkpc5bt.png
+2018-03-06 15:58:42,435 [15] INFO  - [Start Crop] SourceFileName ouwkc23j.n1b
+2018-03-06 15:58:42,435 [15] INFO  - [Launch command] convert ouwkc23j.n1b -resize "210x118^" -gravity Center -crop 210x118+0+0 vvvg0ifi.png
+2018-03-06 15:58:42,462 [15] INFO  - [End Crop] OutputFileName vvvg0ifi.png
+2018-03-06 15:58:42,462 [15] INFO  - [Start Overlay] SourceFileName vvvg0ifi.png
+2018-03-06 15:58:42,462 [15] INFO  - [Launch command] composite -gravity NorthEast /home/dr/Coding/dtube/ipfs-uploader/Uploader.Web/overlay.png vvvg0ifi.png z0wv2pcd.png
+2018-03-06 15:58:42,486 [15] INFO  - [End Overlay] OutputFileName z0wv2pcd.png
+2018-03-06 15:59:52,685 [19] INFO  - [Start Crop] SourceFileName 3skabp3s.nxr
+2018-03-06 15:59:52,685 [19] INFO  - [Launch command] convert 3skabp3s.nxr -resize "210x118^" -gravity Center -crop 210x118+0+0 glzoa5eg.png
+2018-03-06 15:59:52,726 [19] INFO  - [End Crop] OutputFileName glzoa5eg.png
+2018-03-06 15:59:52,726 [19] INFO  - [Start Overlay] SourceFileName glzoa5eg.png
+2018-03-06 15:59:52,726 [19] INFO  - [Launch command] composite -gravity NorthEast /home/dr/Coding/dtube/ipfs-uploader/Uploader.Web/overlay.png glzoa5eg.png je55stpo.png
+2018-03-06 15:59:52,749 [19] INFO  - [End Overlay] OutputFileName je55stpo.png
+2018-03-06 22:36:44,680 [21] INFO  - [Start Crop] SourceFileName ylgmlaaf.af0
+2018-03-06 22:36:44,681 [21] INFO  - [Launch command] convert ylgmlaaf.af0 -resize "210x118^" -gravity Center -crop 210x118+0+0 u3jicjiz.png
+2018-03-06 22:36:44,823 [21] INFO  - [End Crop] OutputFileName u3jicjiz.png
+2018-03-06 22:36:44,824 [21] INFO  - [Start Overlay] SourceFileName u3jicjiz.png
+2018-03-06 22:36:44,824 [21] INFO  - [Launch command] composite -gravity NorthEast /home/dr/Coding/dtube/ipfs-uploader/Uploader.Web/overlay.png u3jicjiz.png onhy325u.png
+2018-03-06 22:36:44,847 [21] INFO  - [End Overlay] OutputFileName onhy325u.png
+2018-03-06 22:37:26,169 [23] INFO  - [Start Crop] SourceFileName jro5jtig.ufm
+2018-03-06 22:37:26,170 [23] INFO  - [Launch command] convert jro5jtig.ufm -resize "210x118^" -gravity Center -crop 210x118+0+0 a0xcppwq.png
+2018-03-06 22:37:26,317 [23] INFO  - [End Crop] OutputFileName a0xcppwq.png
+2018-03-06 22:37:26,317 [23] INFO  - [Start Overlay] SourceFileName a0xcppwq.png
+2018-03-06 22:37:26,318 [23] INFO  - [Launch command] composite -gravity NorthEast /home/dr/Coding/dtube/ipfs-uploader/Uploader.Web/overlay.png a0xcppwq.png aeczqkn4.png
+2018-03-06 22:37:26,363 [23] INFO  - [End Overlay] OutputFileName aeczqkn4.png
+2018-03-06 22:38:21,858 [18] INFO  - [Start Crop] SourceFileName 3spzgmyh.sar
+2018-03-06 22:38:21,858 [18] INFO  - [Launch command] convert 3spzgmyh.sar -resize "210x118^" -gravity Center -crop 210x118+0+0 1vcl5i0w.png
+2018-03-06 22:38:21,937 [18] INFO  - [End Crop] OutputFileName 1vcl5i0w.png
+2018-03-06 22:38:21,937 [18] INFO  - [Start Overlay] SourceFileName 1vcl5i0w.png
+2018-03-06 22:38:21,937 [18] INFO  - [Launch command] composite -gravity NorthEast /home/dr/Coding/dtube/ipfs-uploader/Uploader.Web/overlay.png 1vcl5i0w.png 0otl0wk2.png
+2018-03-06 22:38:21,962 [18] INFO  - [End Overlay] OutputFileName 0otl0wk2.png
+2018-03-06 22:39:01,315 [21] INFO  - [Start Crop] SourceFileName da1zzib5.p0w
+2018-03-06 22:39:01,316 [21] INFO  - [Launch command] convert da1zzib5.p0w -resize "210x118^" -gravity Center -crop 210x118+0+0 4zgi3lp2.png
+2018-03-06 22:39:01,390 [21] INFO  - [End Crop] OutputFileName 4zgi3lp2.png
+2018-03-06 22:39:01,390 [21] INFO  - [Start Overlay] SourceFileName 4zgi3lp2.png
+2018-03-06 22:39:01,390 [21] INFO  - [Launch command] composite -gravity NorthEast /home/dr/Coding/dtube/ipfs-uploader/Uploader.Web/overlay.png 4zgi3lp2.png koqyilbi.png
+2018-03-06 22:39:01,417 [21] INFO  - [End Overlay] OutputFileName koqyilbi.png
+2018-03-06 23:46:57,246 [18] INFO  - [Start Crop] SourceFileName 4fxlaj3u.qyf
+2018-03-06 23:46:57,246 [18] INFO  - [Launch command] convert 4fxlaj3u.qyf -resize "210x118^" -gravity Center -crop 210x118+0+0 3lbqqzcq.png
+2018-03-06 23:46:57,274 [18] INFO  - [End Crop] OutputFileName 3lbqqzcq.png
+2018-03-06 23:46:57,274 [18] INFO  - [Start Overlay] SourceFileName 3lbqqzcq.png
+2018-03-06 23:46:57,274 [18] INFO  - [Launch command] composite -gravity NorthEast /home/dr/Coding/dtube/ipfs-uploader/Uploader.Web/overlay.png 3lbqqzcq.png ircagecz.png
+2018-03-06 23:46:57,304 [18] INFO  - [End Overlay] OutputFileName ircagecz.png
+2018-03-07 02:33:01,661 [14] INFO  - [Start Crop] SourceFileName bguf04q1.w0q
+2018-03-07 02:33:01,661 [14] INFO  - [Launch command] convert bguf04q1.w0q -resize "210x118^" -gravity Center -crop 210x118+0+0 1os0n040.png
+2018-03-07 02:33:01,689 [14] INFO  - [End Crop] OutputFileName 1os0n040.png
+2018-03-07 02:33:01,689 [14] INFO  - [Start Overlay] SourceFileName 1os0n040.png
+2018-03-07 02:33:01,689 [14] INFO  - [Launch command] composite -gravity NorthEast /home/dr/Coding/dtube/ipfs-uploader/Uploader.Web/overlay.png 1os0n040.png pcbkyvuf.png
+2018-03-07 02:33:01,719 [14] INFO  - [End Overlay] OutputFileName pcbkyvuf.png
+2018-03-07 02:34:07,909 [4] INFO  - [Start Crop] SourceFileName axjoqhsv.xcx
+2018-03-07 02:34:07,909 [4] INFO  - [Launch command] convert axjoqhsv.xcx -resize "210x118^" -gravity Center -crop 210x118+0+0 alny4iwu.png
+2018-03-07 02:34:07,935 [4] INFO  - [End Crop] OutputFileName alny4iwu.png
+2018-03-07 02:34:07,936 [4] INFO  - [Start Overlay] SourceFileName alny4iwu.png
+2018-03-07 02:34:07,936 [4] INFO  - [Launch command] composite -gravity NorthEast /home/dr/Coding/dtube/ipfs-uploader/Uploader.Web/overlay.png alny4iwu.png 5qdrbozr.png
+2018-03-07 02:34:07,959 [4] INFO  - [End Overlay] OutputFileName 5qdrbozr.png
+2018-03-07 02:46:42,717 [23] INFO  - [Start Crop] SourceFileName loh1oblp.kh0
+2018-03-07 02:46:42,717 [23] INFO  - [Launch command] convert loh1oblp.kh0 -resize "210x118^" -gravity Center -crop 210x118+0+0 t40mlaqr.png
+2018-03-07 02:46:42,768 [23] INFO  - [End Crop] OutputFileName t40mlaqr.png
+2018-03-07 02:46:42,768 [23] INFO  - [Start Overlay] SourceFileName t40mlaqr.png
+2018-03-07 02:46:42,768 [23] INFO  - [Launch command] composite -gravity NorthEast /home/dr/Coding/dtube/ipfs-uploader/Uploader.Web/overlay.png t40mlaqr.png ep2pwy3h.png
+2018-03-07 02:46:42,795 [23] INFO  - [End Overlay] OutputFileName ep2pwy3h.png
