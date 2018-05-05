@@ -9,12 +9,18 @@ namespace Uploader.Core.Managers.Common
 {
     public static class TempFileManager
     {
-        private static string _tempDirectoryPath = Path.GetTempPath();
+        private static string _tempDirectoryPath;
 
         public static string GetTempDirectory()
         {
-            if (GeneralSettings.Instance.TempFilePath.Length > 0)
-                return GeneralSettings.Instance.TempFilePath;
+            if(_tempDirectoryPath == null)
+            {
+                if (GeneralSettings.Instance.TempFilePath.Length > 0)
+                    _tempDirectoryPath = GeneralSettings.Instance.TempFilePath;
+                else
+                    _tempDirectoryPath = Path.GetTempPath();
+            }
+
             return _tempDirectoryPath;
         }
 
@@ -29,8 +35,7 @@ namespace Uploader.Core.Managers.Common
                 return;
 
             try
-            {
-                
+            {                
                 // suppression du fichier temporaire, ne pas jeter d'exception en cas d'erreur
                 if (File.Exists(filePath))
                 {

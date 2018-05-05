@@ -47,9 +47,15 @@ namespace Uploader.Core.Managers.Front
                 if (sprite??false)
                 {                
                     fileContainer.AddSprite();
+
+                    // si pas d'encoding à faire, il faut lancer le sprite de suite car sinon il ne sera pas lancé à la fin de l'encoding
+                    if(!formats.Any())
+                        SpriteDaemon.Instance.Queue(fileContainer.SpriteVideoFileItem, "Waiting sprite creation...");
                 }
 
-                if(formats.Any()) {
+                // s'il y a de l'encoding à faire
+                if(formats.Any())
+                {
                     // ajouter les formats à encoder
                     fileContainer.AddEncodedVideo(formats);
 
@@ -68,9 +74,6 @@ namespace Uploader.Core.Managers.Front
                             AudioVideoCpuEncodeDaemon.Instance.Queue(file, "Waiting encode...");
                         }
                     }
-                } else {
-                    fileContainer.SpriteVideoFileItem.SetSourceFilePath(sourceFile.OutputFilePath);
-                    SpriteDaemon.Instance.Queue(fileContainer.SpriteVideoFileItem, "Waiting sprite creation...");
                 }
             }
 

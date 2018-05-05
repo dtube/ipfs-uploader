@@ -186,16 +186,15 @@ namespace Uploader.Core.Models
             if(!Finished())
                 return;
 
-            if (Error())
-                TempFileManager.SafeCopyError(OriginFilePath, SourceFileItem.IpfsHash);
-
             foreach (FileItem item in GetAllFile())
             {
                 TempFileManager.SafeDeleteTempFiles(item.FilesToDelete, item.IpfsHash);
             }
 
-            if(SourceFileItem?.IpfsProcess.CurrentStep == ProcessStep.Success)
-                TempFileManager.SafeDeleteTempFile(OriginFilePath, SourceFileItem.IpfsHash);
+            if (Error())
+                TempFileManager.SafeCopyError(OriginFilePath, SourceFileItem.IpfsHash);
+                
+            TempFileManager.SafeDeleteTempFile(OriginFilePath, SourceFileItem.IpfsHash);
         }
 
         public bool Finished()
