@@ -5,7 +5,7 @@ Confirmed working on Windows 7+ and Linux. Untested on mac.
 
 Dependencies required:
 * either `dotnet-sdk-2.0` for dev
-* or dotnet-runtime for production
+* or `dotnet-runtime` for production
 * `ffmpeg`
 * `ffprobe`
 * `imagemagick`
