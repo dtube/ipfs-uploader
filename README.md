@@ -11,10 +11,8 @@ Dependencies required:
 * `imagemagick`
 * `ipfs` (go-ipfs) with a running deamon
 
-## Building
-`dotnet publish -c Release` will create a /bin/Release/netcoreapp2.0/publish folder
-## Running
-Navigate to the publish folder and `dotnet Uploader.Web.dll`
+## Starting it in dev mode
+Navigate to the `Uploader.Web` directory and just do `dotnet run`
 
 ## Available Calls
 Once your instance is started, it should listen on localhost:5000 by default and serve all these calls.
@@ -80,5 +78,10 @@ The main config file is available as `appsettings.json`.
 * * "AuthorizedQuality": "240p,480p,720p",				Authorized encoding qualities. Any other requested quality will be ignored.
 * * "NVidiaCard":"QuadroP5000"					GPU card model.
 
-## Logging
+## Building and running it in production
+### Building
+`dotnet publish -c Release` will create a /bin/Release/netcoreapp2.0/publish folder
+### Running
+Navigate to the publish folder and `dotnet Uploader.Web.dll`
+### Logging
 Everything gets logged inside the `logs` folder and each process has it's own log file (ffmpeg, ipfs, etc). If you want logs in a different folder, you need to edit the `log4net.config` file.
