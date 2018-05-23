@@ -31,7 +31,7 @@ Once your instance is started, it should listen on localhost:5000 by default and
 * * * videoEncodingFormats: controls which video resolutions are requested for the encoding
 * * * sprite: true/false. Controls whether a sprite file should be generated for this video.
 
-Example: `/uploadVideo?videoEncodingFormats=240p,480p,720p&sprite=true`
+Curl example: ``curl -F "video=@./video.mp4"  http://localhost:5000/uploadVideo?videoEncodingFormats=240p,480p,720p&sprite=true``
 
 * `/uploadImage` 
 * * POST file input `files`. Needs to be an image otherwise it will end up as an error.
